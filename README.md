@@ -18,7 +18,7 @@ Radovan is a meta search engine aggregating 12 open access sources of (mostly ac
 
 [Suggest more](https://pad.riseup.net/p/radovan_sources-keep) to be added.
 
-A live version is available [here](#). Along with [additional information](#).
+A live version is available [here](#) (pending). Along with [additional information](#) (pending).
 
 The results inherit the order in which they are displayed on the original page and are grouped accordingly. This instance of Radovan currently harvests 10 hits per source. This can be changed in the settings section on top of radovan_core_flexi.py.
 
