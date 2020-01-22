@@ -1,0 +1,1813 @@
+# -*- coding: utf-8 -*-
+#python2.7
+
+import urllib
+import urllib2
+#import urllib.error
+import requests
+import json
+from bs4 import BeautifulSoup
+import lxml.html
+import lxml.etree
+from lxml import etree
+import re
+import sys
+import dryscrape
+import time
+
+from robobrowser import RoboBrowser
+from requests import Session
+import xmltodict
+from io import StringIO, BytesIO
+import pprint
+import bibtexparser
+import ast
+
+
+pp = pprint.PrettyPrinter(indent=4)
+
+
+#base urls
+doaj_base = 'http://doaj.org/api/v1/search/articles/'
+doab_base = 'http://www.doabooks.org/doab?func=search&query='
+osf_base = 'https://share.osf.io/api/v2/search/creativeworks/_search'
+memory_base = 'https://library.memoryoftheworld.org/'
+oapen_base = 'http://www.oapen.org/search?'
+openedition_base = 'http://books.openedition.org/'
+#core_base = 'https://mla.hcommons.org/deposits/'
+core_base = 'https://mla.hcommons.org/wp-admin/admin-ajax.php'
+scielo_base = 'http://search.scielo.org/?q='
+opendoar_base = 'http://opendoar.org/api.php'
+monoskop_base = 'https://monoskop.org/log/?cat=17&s='
+
+duckduck_base = ''
+oadoi_base = 'https://api.unpaywall.org/v2/'
+
+
+#libgen_base_articles = "http://gen.lib.rus.ec/scimag/index.php?"
+libgen_base_articles = "http://gen.lib.rus.ec/scimag/?"
+libgen_base_books = "http://gen.lib.rus.ec/json.php?"
+
+#aaaaarg data
+aaaaarg_search_base = 'http://aaaaarg.fail/search?query='
+aaaaarg_makers_base = 'http://aaaaarg.fail/search/makers?query='
+aaaaarg_things_base = 'https://aaaaarg.fail/search/things?query='
+aaaaarg_base = 'http://aaaaarg.fail'
+username = "jurij.smrke@gmail.com"
+password = "libgen.io"
+#change this - get new account
+
+
+sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'http://www.doabooks.org/doab?func=search&query='}, {'full_name': 'OAPEN Online Library and Publication Platform', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'http://www.doabooks.org/doab?func=search&query='}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s='},     {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://gen.lib.rus.ec/json.php?'}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://gen.lib.rus.ec/scimag/index.php?'}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query='}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php'}, {'full_name': 'SciELO - Scientific Electronic Library Online', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q='}, {'full_name': 'Memory of The World', 'url': 'http://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/'}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/'}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search'},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/'}, {'full_name': 'Debug', 'url': '', 'code_name': 'debug_pileup' , 'id': 12, 'books': 1, 'articles': 1, 'query_url': 'none'}]
+
+
+sources_short = {}
+
+for i in sources_dict:
+    sources_short[i['id']] = i['code_name']
+
+#BULK SEARCH SETTINGS
+bibjson_location = "stuff/ch1_nolinks.json"
+output_filename = bibjson_location[:-5]+'_links.json'
+output_filename = "stuff/testing.json"
+
+
+# GENERAL PURPOSE FUNCTION
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+
+
+#FORMATTING LINKS
+
+def url_constructor(source, link):
+    try:
+        link_url = dict({'name': source, 'href': link})
+        #print link_url
+        return link_url
+    except IndexError:
+        #return None
+        pass
+
+
+#if entry already has url
+def url_rewrite(source, entry):
+    if 'url' in entry:
+        try:
+            entry['url'] = url_constructor(source, entry['url'])
+            return entry['url']
+        except IndexError:
+            print "no original links for "+entry['title']
+            #return None
+            pass
+    else:
+        try:
+            entry['url'] = ''
+        except IndexError:
+            pass
+
+#RIS TO DICT
+def rtd(string):
+    indict = {}
+    for i in string:
+        #print i
+        spt = i.split('-')
+        try:
+            one = spt[0].strip()
+        except IndexError:
+            pass
+        if one:
+            try:
+                two = spt[1].strip()
+            except IndexError:
+                two = ''
+        else:
+            pass
+
+        if one and two:
+            indict.setdefault(one,[]).append(two)
+        else:
+            pass
+
+    return indict
+
+def rtd2(string):
+    indict = {}
+
+    lines = string.splitlines()
+
+    for i in lines:
+        spt = i.split('-')
+        try:
+            one = spt[0].strip()
+        except IndexError:
+            pass
+        if one:
+            try:
+                two = spt[1].strip()
+            except IndexError:
+                two = ''
+        else:
+            pass
+
+        if one and two:
+            indict.setdefault(one,[]).append(two)
+        else:
+            pass
+
+    return indict
+
+def get_sources():
+    return sources_dict
+
+
+#ARTICLES
+def doaj(author='', title='', year='', doi='', isbn=''):
+    print "Searching doaj"
+    count = 0
+    #needs doi stripped
+    if doi:
+        query = 'doi:'+doi
+    else:
+        query = author+'%20'+str(year)+'%20'+title
+
+    doaj_url = doaj_base+query
+    request = requests.get(doaj_url)
+    data = request.json()
+    print doaj_url
+
+    for i in data['results']:
+        i['rank'] = count
+        i['type'] = 'article'
+        count += 1
+
+    data_json = json.dumps(data, sort_keys=True, indent=4)
+    #print data_json
+    hits = {'hits': []}
+    hits['hits'] = data
+    return hits
+
+
+    # try:
+    #     if data['total'] == 0:
+    #         return "Not found"
+    #     else:
+    #         return data['results'][0]['bibjson']['link'][0]['url']
+    # except KeyError:
+    #     return "Not found"
+    # except UnboundLocalError:
+    #     pass
+    #     print "something went wrong check doaj"
+
+
+
+#preprints
+#must include header with content type
+#https://api.osf.io/v2/users/?filter[full_name]=Gary+Goldstein
+def osf(author='', title='', year='', doi='', isbn=''):
+    print "Searching osf"
+    count = 0
+
+    if doi:
+        # colon = '%3A'
+        # fwd_slash = '%2F'
+        # doi = doi.replace(':', colon)
+        # doi = doi.replace('/', fwd_slash)
+        #osf_url = osf_base+'?q=http%3A%2F%2Fdx.doi.org%2F10.1534%2FGENETICS.111.134437&type=preprint'
+        query = '?q='+doi+'&type=preprint'
+        #print request
+    else:
+        if len(author)>1:
+            part2 = 'contributors:'+author
+        else:
+            part2 = ''
+
+        if len(title)>1:
+            part3 = 'title:'+title
+        else:
+            part3 = ''
+
+        if len(year)>1:
+            part4 = 'year:'+year
+        else:
+            part4 =''
+
+
+        query = '?size=10&q='+part2+part3+part4
+
+    osf_url = osf_base+query
+    print osf_url
+
+    headers = {'Content-Type': 'application/json'}
+    request = requests.get(osf_url, headers=headers)
+    data = request.json()
+    #need to doublecheck data for first hit, cos search is wide, need to have two values one with + in between one without
+    #print data['status']
+    title2 = title.replace('+', ' ')
+
+    #print "THIS D DATA", json.dumps(data, sort_keys=True, indent=4)
+
+    try:
+        data['status'] != "200"
+        return "Not found"
+    except:
+        #print "OSF DATA"
+        #print data
+        data = data['hits']['hits']
+
+        hits = {'hits': []}
+
+        for i in data:
+            i['_source']['rank'] = count
+            count += 1
+            hits['hits'].append(i['_source'])
+
+        return hits
+    # try:
+    #     if data['hits']['hits'][0]['_source']['title'] == title2:
+    #         #return data
+    #         return data['hits']['hits'][0]['_source']['identifiers']
+    #     else:
+    #         return "Not found"
+    # except KeyError:
+    #     return "Not found"
+    # except UnboundLocalError:
+    #     pass
+    #     print "something went wrong check osf"
+
+    #return data['hits']['hits'][0]['_source']['title']
+
+    #the field identifiers contains multiple urls
+    #the urls are links to pages where there are links to pdfs
+    #additional processing will be required
+
+
+
+def core(author='', title='', year='', doi='', isbn=''):
+    print "searching core"
+    hits = {'hits': []}
+
+
+    def core_scrape(href, count):
+        try:
+            request = urllib.urlopen(href)
+        except IOError:
+            return "Not found"
+
+        data = lxml.html.parse(request)
+
+        try:
+
+            link = data.xpath('//a[@title="Download"]')[0]
+
+            mdata_href = data.xpath('//a[@class="bp-deposits-metadata"]')
+
+            mdata_xml = mdata_href[0].attrib['href']
+            print mdata_xml
+            do = urllib.urlopen(mdata_xml)
+            da = do.read()
+            mdata = xmltodict.parse(da)
+
+
+
+            print link.attrib['href']
+
+            output = {'href': '', 'rank': '', 'name': '' }
+            output['href'] = link.attrib['href']
+            output['rank'] = count
+            output['name'] = 'core'
+
+            for key, value in mdata['mods'].iteritems():
+                output[key] = value
+
+            return output
+
+        except IndexError:
+            #print "heyo"
+            return "Not found"
+
+    title = title.replace('+', ' ')
+    author = author.replace('+', ' ')
+
+    # print doi
+    #
+    # if doi:
+    #     query = '?s='+doi+'&facets=&search_deposits_submit=Search'
+    # elif isbn:
+    #     query = '?s='+isbn+'&facets=&search_deposits_submit=Search'
+    # else:
+    #     query = '?s='+author+title+year+'&facets=&search_deposits_submit=Search'
+    #
+    # #need to use urllib for some reason (not urllib2)
+    #
+    # #doi = '10.17613/M67S6H'
+    # #query= '?s=Anthony+Cerulli&facets=&search_deposits_submit=Search'
+    doi_add = 'http://dx.doi.org/'
+    #
+    # core_url = core_base+query
+    #
+    # print core_url
+    #
+    # try:
+    #     request = urllib.urlopen(core_url)
+    # except urllib.error.HTTPError:
+    #     return "Not found"
+    #
+    # data = request.read()
+
+    s = requests.Session()
+
+    if doi:
+        search_terms = doi
+    elif isbn:
+        search_terms = isbn
+    else:
+        search_terms = author+title+year
+
+    headers = {"accept": "*/*", "accept-encoding": "gzip, deflate, br", "accept-language": "en-GB,en;q=0.9,en-US;q=0.8,es;q=0.7,fr;q=0.6", "content-length": "400", "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "origin": "https://mla.hcommons.org", "referer": "https://mla.hcommons.org/deposits/", "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/68.0.3440.106 Chrome/68.0.3440.106 Safari/537.36"}
+
+    data = {"action": "deposits_filter", "object": "deposit", "filter": "newest", "search_terms": search_terms, "scope": "all", "page": "1"}
+
+    #print data
+
+    r = s.post(core_base,data=data, headers=headers)
+    response = r.text
+
+    #print response
+
+    soup = BeautifulSoup(response)
+    #print soup
+    print "LOOOOOOK!"
+
+    titles = soup.find_all('h4')
+
+    if len(titles)>0:
+        count = 0
+        for elem in titles:
+            if elem:
+                #print 'uau'
+                #print elem
+                for i in elem.find_all('a'):
+                    follow = "https://mla.hcommons.org"+i['href']
+                    print follow
+                    count += 1
+                    entry = core_scrape(follow, count)
+                    hits['hits'].append(entry)
+                    #hresponse.append(entry)
+            else:
+                #print "potato"
+                return "Not found"
+        print hits
+        return hits
+    else:
+        #print "potato too"
+        return "Not found"
+
+
+    #
+    #
+    # if doi:
+    #     #print "wut"
+    #     dois = soup.find_all('a', text=re.compile(doi_add))
+    #     #print len(dois)
+    #     if len(dois)>0:
+    #         for elem in dois:
+    #             #print "wut wut"
+    #             if elem.text == doi_add+doi:
+    #                 #print "I follow ..."
+    #                 follow = elem['href']
+    #                 core_scrape(follow)
+    #             else:
+    #                 return "Not found"
+    #     else:
+    #         #print "yessir!"
+    #         return "Not found"
+    # else:
+    #     #print 'Hir aj em'
+    #     titles = soup.find_all('h4', text=re.compile(title))
+    #     response = []
+    #     if len(titles)>0:
+    #         count = 0
+    #         for elem in titles:
+    #             if elem:
+    #                 #print 'uau'
+    #                 #print elem
+    #                 for i in elem.find_all('a'):
+    #                     follow = "https://mla.hcommons.org"+i['href']
+    #                     print follow
+    #                     count += 1
+    #                     entry = core_scrape(follow, count)
+    #                     response.append(entry)
+    #             else:
+    #                 #print "potato"
+    #                 return "Not found"
+    #         print response
+    #         return response
+    #     else:
+    #         #print "potato too"
+    #         return "Not found"
+
+
+
+def scielo(author='', title='', year='', doi='', isbn=''):
+    print "searching scielo"
+    hits = {'hits': []}
+    count = 0
+
+    if doi:
+        q = doi
+    elif isbn:
+        q = isbn
+    else:
+        q = author+title+year
+
+    query = scielo_base+q+"&lang=es&count=3&from=0&output=ris&sort=&format=summary&fb=&page=1"
+
+
+
+    ris = urllib2.urlopen(query).read()
+    #print ris
+    bris = ris.split("ER  -")
+
+    for i in bris[:-1]:
+        print "NNNEXTS"
+        #print i
+        mdata = rtd2(i)
+        mdata['rank'] = count
+        hits['hits'].append(mdata)
+        count += 1
+
+    return hits
+
+
+
+def libgen_article(author='', title='', year='', doi='', isbn=''):
+
+    hits = {'hits': []}
+    count = 0
+    # bibtex_base = "http://gen.lib.rus.ec/scimag/bibtex.php?doi="
+
+
+    if doi:
+        query = 'q='+doi
+    else:
+        query = 'q='+title+'+'+author
+
+    libgen_url = libgen_base_articles+query
+    print libgen_url
+
+    r = requests.get(libgen_url)
+
+    soup = BeautifulSoup(r.text, 'lxml')
+    rows = soup.select(".catalog > tbody > tr")
+
+    #print "ROWS"
+    #print rows
+
+    for i in rows:
+        item = {}
+
+        # LINKS
+        links = []
+        # main link
+        mlink = i.find_all('a')[0]
+        links.append({mlink.get_text(): mlink.get('href')})
+        sel = i.select("td:nth-of-type(4)")
+        if sel:
+            for i in sel:
+                link = {i.get_text(): i.get('href')}
+                links.append(link)
+        else:
+            pass
+
+        item['hrefs'] = links
+        item['rank'] = count
+
+        # # DOI
+        # doisoup = i.find_all("b", text="DOI:")
+        # # print doisoup
+        # try:
+        #     doi = doisoup[0].parent.next_sibling.text
+        # except:
+        #     return "Not found"
+        # # print doi
+
+        # MDATA
+
+        q = "http://gen.lib.rus.ec"+str(mlink.get('href'))+"/bibtex"
+        print "METADATA QUERY: ", q
+
+        r = requests.get(q)
+
+        soup = BeautifulSoup(r.text, 'lxml')
+        #print soup
+        try:
+            bibtex = soup.select("p")[0].get_text()
+        except:
+            pass
+        if bibtex:
+            bibdict = bibtexparser.loads(bibtex)
+            item = bibdict.entries[0]
+        else:
+            pass
+
+
+        # print "\n\n"
+        # print "THIS IS ITEM"
+        # print "\n\n"
+        # print item
+
+        hits['hits'].append(item)
+        count += 1
+
+    return hits
+
+
+
+def oadoi(author='', title='', year='', doi='', isbn=''):
+    email = "smrkej@coventry.ac.uk"
+
+    if doi:
+        hits = {'hits': []}
+
+        query = doi+'?email='+email
+        query_url = oadoi_base+query
+        print "QUERY URL: ", query_url
+
+        #headers = {'Content-Type': 'application/json'}
+        request = requests.get(query_url)
+        #print(request)
+        data = request.json()
+        print data
+        data['type'] = 'article'
+        hits['hits'].append(data)
+        return hits
+
+    else:
+        return "Not found"
+
+
+
+
+#BOOKS
+
+#doab
+#urllib + bs4/xml.etree
+def doab(author='', title='', year='', doi='', isbn=''):
+    #can search by ISBN
+    #isbn = '9783731501374'
+    print isbn
+    if len(isbn) > 2:
+        query = isbn
+    else:
+        query = author+'+'+title+'+'+year
+        query = query.replace(' ', '+')
+
+    doab_url = doab_base+query
+    print doab_url
+
+    try:
+        request = urllib.urlopen(doab_url)
+
+        #data = lxml.html.parse(request)
+        soup = BeautifulSoup(request.read(), "lxml")
+
+        records = soup.find_all("div", {"class": re.compile('record.*')})
+        #print "here1"
+
+        # parser = etree.HTMLParser()
+        # t = etree.parse(records, parser)
+
+        hits = {'hits': []}
+
+        for i in records:
+            #print i
+            #imag = i.select("div > img")
+            try:
+                gt_imag = i.select('img[src*="cover"]')
+                img_href = gt_imag[0].get('src')
+
+                href = i.select("div:nth-of-type(4) > h1 > a:nth-of-type(3)")
+                link = href[0].get('href')
+
+                get_mdata = i.select('a[href*="referenceManager"]')
+                mlink = get_mdata[0].get('href')
+
+                ris = urllib.urlopen("https://www.doabooks.org"+mlink).readlines()
+                #print ris
+
+                mdata = rtd(ris)
+
+                mdata['href'] = 'http://www.doabooks.org'+link
+                mdata['img_href'] = 'http://www.doabooks.org'+img_href
+
+                hits['hits'].append(mdata)
+
+
+            except IndexError:
+                pass
+
+        return hits
+        #print "here2"
+
+    except IndexError:
+        return "Not found"
+
+
+
+def oapen(author='', title='', year='', doi='', isbn=''):
+    print "Now searching OAPEN ..."
+    author = author.replace(' ', '+')
+    title = title.replace(' ', '+')
+    query = 'creator='+author+'&title='+title+'&year='+year+'&isbn='+isbn+'&smode=advanced'
+
+    oapen_url = oapen_base+query
+    print oapen_url
+
+    try:
+        r = requests.get(oapen_url)
+        soup = BeautifulSoup(r.text, 'lxml')
+        links = soup.select('h3 a')
+        #print links
+        hits = {'hits': []}
+        count = 0
+
+        for i in links:
+            i = i.get('href').split('=')[1]
+            gt_mdata = "http://oapen.org/download?type=export&export=ris&docid="+i
+            r = urllib.urlopen(gt_mdata).readlines()
+            mdata = rtd(r)
+            mdata['rank'] = count
+            slect = 'img[src*="'+i+'"]'
+            gt_imag = soup.select(slect)
+            img_href = gt_imag[0].get('src')
+            mdata['img_href'] = "http://oapen.org"+img_href
+            hits['hits'].append(mdata)
+            count+=1
+
+        return hits
+    except IndexError:
+        return "Not found"
+
+
+
+def monoskop(author='', title='', year='', doi='', isbn=''):
+    #no isbn search
+    print "Now searching Monoskop ..."
+
+    author = author.replace(' ','+')
+    author = author.replace(u'\xa0', '+')
+    title = title.replace(' ', '+')
+    try:
+        title = title.replace('”', '')
+        title = title.replace('“', '')
+    except:
+        pass
+    if isbn:
+        try:
+            prep = isbn.split(' ')
+            query = isbn[0]
+        except e:
+            print e
+            query = isbn[0]
+    else:
+        print author
+        print title
+        query = author+'+'+title
+
+
+    monoskop_url = monoskop_base+query
+    print monoskop_url
+
+    try:
+
+        request = urllib2.Request(monoskop_url, headers={'User-Agent' : "Magic Browser"})
+        con = urllib2.urlopen(request)
+
+        soup = BeautifulSoup(con)
+        items = soup.select(".item")
+
+        hits = {'hits': []}
+        count = 0
+
+        for i in items:
+
+            mdata = {}
+
+            title = i.select('h1')[0].string
+            #print title
+            gt_imag = i.select('img')
+            img_href = gt_imag[0].get('src')
+
+            if img_href.startswith('../'):
+                img_href = 'https://monoskop.org/'+img_href[3:]
+            else:
+                pass
+            #print img_href
+            #pat = re.compile()
+            isbn = re.search('(ISBN)(.*)', str(i))
+            #print isbn.group(1)
+            isbns = []
+            if isbn:
+                for z in isbn.group(2).split(','):
+                    z = z.strip()
+                    z = re.sub('[^0-9]','', z)
+                    isbns.append(z)
+            else:
+                pass
+            #print isbns
+
+            links = i.find_all('a')
+            # for g in links:
+            #     print g.get('href')
+            up = gt_imag[0].parent
+            side = up.next_siblings
+
+            links = []
+            not_links = []
+
+            for x in side:
+                #print x
+                try:
+                    m = x.find_all('a')
+                    if len(m) == 0:
+                        not_links.append(x.text)
+                    else:
+                        for y in m:
+                            qck_dct = {}
+
+                            if y.string.startswith('Comment'):
+                                pass
+                            else:
+                                out = y.get('href')
+                                #print out
+                                if out.startswith('../'):
+                                    out = 'https://monoskop.org/'+out[3:]
+                                else:
+                                    pass
+
+                                qck_dct[y.string] = out
+                                links.append(qck_dct)
+                except:
+                    pass
+
+            #print links
+            #print not_links
+            desc = '\n'.join(not_links)
+            #print desc
+            mdata['rank'] = count
+            mdata['img_href'] = img_href
+            mdata['desc'] = desc
+            mdata['href'] = links
+            mdata['title'] = title
+            mdata['isbn'] = isbns
+            mdata['type'] = 'book'
+
+            count+=1
+
+
+
+            hits['hits'].append(mdata)
+
+        return hits
+
+    except UnboundLocalError:
+        return "Not found"
+
+
+    except IndexError:
+        return "Not found"
+
+
+
+def libgen_book(author='', title='', year='', doi='', isbn=''):
+
+    hits = {'hits': []}
+    count = 0
+
+    #http://libgen.io/json.php?isbn=&fields=*
+    #in dict coverurl= "212000/fdf662c2fb49b262605a47f1c179d179-d.jpg"
+    #COVER URL : http://libgen.io/+"covers/"+coverurl
+    #md5 = "FDF662C2FB49B262605A47F1C179D179"
+    #href = ?
+    # libgen.io/ads.php?md5=&key=
+
+    if isbn:
+        #print "hello isbn"
+        try:
+            hem = isbn.split(' ')
+            isbn = hem[0]
+        except:
+            pass
+        query = "isbn="+isbn+"&fields=*"
+        print query
+        libgen_books_url = libgen_base_books+query
+
+        print "Full query url: ", libgen_books_url
+
+        request = requests.get(libgen_books_url)
+        #print request
+        data = request.json()
+        try:
+            data[0]['type'] = 'book'
+        except:
+            pass
+        #print json.dumps(data)
+        try:
+            hits['hits'].append(data[0])
+        except:
+            return "Not found"
+
+    else:
+        #search all
+        #query = http://libgen.io/search.php?req=queering&open=0&res=25&view=simple&phrase=1&column=def
+        q = author+'+'+title+'+'+year
+        query = "http://gen.lib.rus.ec/search.php?req="+q+"&open=0&res=50&view=simple&phrase=1&column=def"
+
+        r = requests.get(query)
+        soup = BeautifulSoup(r.text, 'lxml')
+        #print soup
+        #'img[src*="'+i+'"]'
+        get_hrefs = soup.select('a[href*="index.php?md5"]')
+        print "HELLO HERE LIBGEN! HELLO!"
+        #print get_hrefs
+        if get_hrefs:
+            for i in get_hrefs:
+                try:
+                    #some hits do not contain ISBNs, they get skipped
+                    s_isbn = i.i.text.split(',')[0]
+                    ery = libgen_base_books+"isbn="+s_isbn+"&fields=*"
+                    brekfest = requests.get(ery)
+                    #print request
+                    data = brekfest.json()
+
+                    #print json.dumps(data)
+                except AttributeError:
+                    pass
+
+                try:
+                    data[0]['rank'] = count
+                    data[0]['type'] = 'book'
+                    data[0]['coverurl'] = "http://libgen.io/"+"covers/"+str(data[0]['coverurl'])
+                except:
+                    pass
+
+                try:
+                    hits['hits'].append(data[0])
+                except IndexError:
+                    print "Warning: Index error!"
+                    pass
+                except KeyError:
+                    print "Warning: Key error!"
+                    pass
+
+                count+=1
+        else:
+            return "Not found"
+
+    return hits
+
+
+
+def memoryoftheworld(author='', title='', year='', doi='', isbn=''):
+
+    hits = {'hits': []}
+    count = 0
+
+    if 'linux' in sys.platform:
+    # start xvfb in case no X is running. Make sure xvfb
+    # is installed, otherwise this won't work!
+        dryscrape.start_xvfb()
+
+    title_prep = title.replace(' ', '+').replace(':','')
+    query = title_prep
+    query2 = '#text='+query+'&property=title'
+    print query2
+
+    #dryscrape
+    session = dryscrape.Session(base_url = memory_base)
+    session.visit(query2)
+    ab = session.wait_for_safe(lambda: session.at_xpath('//*[@id="content"]/div/div[1]/div/h2/a'))
+    #print ab
+    response = session.body()
+    #print response
+    soup = BeautifulSoup(response, 'lxml')
+    #print soup
+
+    covers1 = soup.find_all("div", class_="cover")
+    #print covers1
+
+
+    for i in covers1:
+        output = {}
+        title_inner = i.find_all('a', class_="more_about")
+        author_inner = i.find_all(id='authors')
+        links = i.find_all('span', class_="download")
+
+        linksos = []
+        hreff = links[0].children
+        for i in hreff:
+            try:
+                href = i['href']
+                text = i.text
+                link = dict({'href': href, 'format': text.lower()})
+                linksos.append(link)
+            except:
+                pass
+
+        author_inner = author_inner[0].text.strip()
+        title_inner = title_inner[1].text.strip()
+        # # print author_inner
+        # # print author
+        # # print title_inner
+        # # print title
+        # # print links_pdf
+        # # print links_epub
+        output['author'] = author_inner
+        output['title'] = title_inner
+        output['rank'] = count
+        output['href'] = linksos
+        output['type'] = 'book'
+        hits['hits'].append(output)
+        count += 1
+
+    return hits
+
+    # compare title/author
+    #
+    # if author.lower().strip() in author_inner.lower().strip() and title.lower().strip() in title_inner.lower().strip():
+    #     #get link
+    #     try:
+    #         #return first link only (usually pdf)
+    #         return links[0].a['href']
+    #
+    #         #returning multiple links below
+    #         #linksos = []
+    #         #for g in links:
+    #         #    text = g.a.text
+    #         #    href = g.a['href']
+    #         #
+    #         #   link = dict({'href': href, 'format': text.lower()})
+    #         #    linksos.append(link)
+    #         #return linksos
+    #     except IndexError:
+    #         return "Not found"
+    #     except TypeError:
+    #         return "Not found"
+    # else:
+    #     pass
+
+    return "Not found"
+
+# debug
+def debug_pileup(author='', title='', year='', doi='', isbn=''):
+    hits = {"hits": []}
+    a = {"title": "help", "annote": "what is happening here"}
+    b = {"title": "i need somebody", "annote": "i hope tis something i can understand"}
+    hits['hits'].append(a)
+    hits['hits'].append(b)
+
+    return hits
+
+
+
+#aaarg
+def arglogin():
+    # Browser
+    url = "http://aaaaarg.fail/auth/login"
+    session = Session()
+    br = RoboBrowser(session=session, history=True, parser="lxml")
+    br.open(url)
+    form = br.get_forms()[1]
+    #print(form)
+    #br.find('form', {'name' : 'login_user_form'})
+    #print('field_name = ' + str(form))
+    form['email'].value = username
+    form['password'].value = password
+    br.submit_form(form)
+
+    time.sleep(2)
+    #print(br.parsed)
+    return br
+
+def links2dicts(inhtml):
+    links = []
+    t = inhtml.find_all('a')
+    for x in t:
+        url = x.get('href')
+        text = x.text
+        one = {'desc':text , 'url': url}
+        links.append(one)
+
+    return links
+
+
+def filter_lod(input_list, key, query):
+    term = re.compile(query, re.IGNORECASE)
+    allowed = [e for e in input_list if re.search(term, e[key])]
+    return allowed
+
+
+
+def getlink_arg(soup_material):
+    #output = []
+    output = {'link': []}
+    soup = BeautifulSoup(soup_material, "lxml")
+    # print soup
+    x = soup.find('table', id='fileuploads')
+
+    #print x
+
+    rows = x.find_all('tr')
+
+    #print rows
+    for r in rows:
+
+        tds = r.find_all('td')
+        # t_order = []
+        # for t in tds:
+        #     t_order.append(t)
+
+        # something goes wrong here somewhere
+        if tds:
+            mustr = {'url': None, 'desc': None, 'mimetype': None, 'size': None}
+            urls = links2dicts(tds[0])
+            #print urls[0]['url']
+            mustr['mimetype'] = tds[2].text
+            mustr['size'] = tds[3].text
+            mustr['url'] = aaaaarg_base+urls[0]['url']
+            #print "URLS: ", urls
+
+            output['link'].append(mustr)
+
+
+        # if urls:
+        #     output['link'].append(urls)
+            #print mustr
+
+    #print "LINK OUTPUT: ", output
+    return output
+
+
+
+
+def get_maker_things_arg(soup_material):
+    #pp = pprint.PrettyPrinter(indent=4)
+    out = []
+    soup = BeautifulSoup(soup_material, 'lxml')
+
+    res = soup.find('ul', {'class': 'things'})
+    lns = res.find_all('a')
+    #print "REEEEES", res
+
+    for r in lns:
+        print "PARSING"
+        print r
+        #print r
+
+        try:
+            # thing_url = r.dl.dt.a.get('href')
+            # thing_text = r.dl.dt.a.text
+            thing_url = r.get('href')
+            thing_text = r.text
+            one = {'thing_title': thing_text , 'thing_url': thing_url}
+            out.append(one)
+        except Exception as e:
+            print e
+            pass
+    #print out
+    return out
+
+
+
+    #this will come in handy later when we have to sift through the dict
+    # output = []
+    #
+    # href_output = []
+    #
+    # for i in things:
+    #     #print(i.text)
+    #     if re.search(title, i.text, re.IGNORECASE):
+    #         #print(i)
+    #         output.append(i)
+    #     else:
+    #         print "Not found"
+    #         pass
+    #     #print(found.group(0))
+    #
+    # #print("this is it")
+    # #print(output)
+    #
+    # for i in output:
+    #     href_output.append(i.get('href'))
+    #
+    # try:
+    #     return href_output[0]
+    # except KeyError:
+    #     return "Not found"
+    # except IndexError:
+    #     return "Not found"
+
+
+
+def getmakers_arg(soup_material, author):
+
+    soup = BeautifulSoup(soup_material, "lxml")
+    #print soup
+    makers = soup.find('div', id='things')
+    #print(makers)
+
+    chosen_makers = []
+
+    makers = makers.find_all('li')
+    #print '\nmakers: \n'
+    #print(makers)
+    if makers:
+        for i in makers:
+            if re.search(author, i.a.text, re.IGNORECASE):
+                mt = i.a.text
+                mh = i.a.get('href')
+                out = {'author': mt, 'author_page_url': mh}
+                chosen_makers.append(out)
+            else:
+                pass
+    else:
+        return "Not found"
+
+    if len(chosen_makers)>=1:
+        print "CHOSEN MAKERS",chosen_makers
+        return chosen_makers
+    else:
+        return "Not found"
+
+
+
+def parsearg(soup_material):
+    output = []
+
+
+    soup = BeautifulSoup(soup_material, "lxml")
+    x = soup.find_all('table', id='fileuploads')
+    xoup = x[0]
+
+    hrefs = xoup.find_all('a')
+    for i in hrefs:
+        if str(i.get('href')).startswith('/upload'):
+            full = aaaaarg_base+str(i.get('href'))
+            output.append(full)
+
+        else:
+            pass
+
+    return output
+
+def getthings_things_arg(soup_material, title):
+    out = []
+    soup = BeautifulSoup(soup_material, "lxml")
+    #print soup
+    things = soup.find('div', id='things')
+    #print(makers)
+
+    chosen_makers = []
+
+    things = things.find_all('li')
+
+    for t in things:
+        thing_href = t.find('a').get('href')
+        thing_text = t.find('a').text
+
+        miniout = {'title': thing_text, 'title_page_url': thing_href}
+        out.append(miniout)
+
+    return out
+
+
+def getthing_metadata_arg(soup_material):
+    #if additional metadata
+    soup = BeautifulSoup(soup_material, "lxml")
+
+    try:
+        # metadata field
+        # id = "mdCollapse"
+        meta = soup.find('div', id='mdCollapse')
+    except:
+        pass
+
+    if meta != None:
+        #print "meta: ", meta
+        meta_dict = {}
+        lis = meta.find_all('li')
+        for li in lis:
+            one = {}
+            if li.p:
+                print "LI: ",li
+                if li.p.text.startswith('[') or li.p.text.startswith('{'):
+                    one[li.strong.text] = ast.literal_eval(li.p.text)
+                    meta_dict[li.strong.text] = ast.literal_eval(li.p.text)
+                else:
+                    meta_dict[li.strong.text] = li.p.text
+            else:
+                pass
+
+        #print "META DICT", json.dumps(meta_dict, indent=4, sort_keys=True)
+    else:
+        meta_dict = {}
+        # authors
+        # h5 > ul > a
+        authors = soup.find('h5')
+        #print "authors: ", authors.a.text
+        author_as = authors.find_all('a')
+
+        titl_tmp = {'title': None}
+        get_titl = soup.find('title')
+        meta_dict['title'] = get_titl.text
+
+        if len(author_as) > 1:
+            author_ish = {'author': []}
+            for a in author_as:
+                ap1 = {'name': a.text}
+                author_ish['author'].append(ap1)
+
+            desc = soup.find('p', {'class': 'lead'})
+
+            meta_dict['author'] = author_ish['author']
+            meta_dict['desc'] = desc.text
+        else:
+
+            desc = soup.find('p', {'class': 'lead'})
+
+            meta_dict['desc'] = desc.text
+            meta_dict['author'] = authors.a.text
+
+    # output
+    # print meta_list
+    return meta_dict
+
+
+def check_results_len(soup_material):
+    soup = BeautifulSoup(soup_material, "lxml")
+    #measure if there are any results
+    #find_all('li')
+
+    pass
+
+
+def mecha_aaaaarg(br, author='', title=''):
+
+    hits = {'hits': []}
+
+    print "this is the title "+title
+    print "this is the author "+author
+
+    if len(author) > 2 and len(title) < 2:
+
+        print "author query"
+        query = aaaaarg_makers_base+author
+
+        br.open(query)
+        makers = br.select('html')
+        makers = str(makers[0])
+
+        authorpage = getmakers_arg(makers, author)
+        #print "AUTHORPAGE: ", authorpage
+
+        if authorpage == "Not found":
+            return authorpage
+        else:
+            for a in authorpage:
+                br.open(aaaaarg_base+a['author_page_url'])
+
+                things = br.select('html')
+
+                things = str(things[0])
+
+                #things = maker_page
+
+                thing_links = get_maker_things_arg(things)
+                print thing_links
+
+
+                if thing_links == "Not found":
+                    print "thing links"
+                    return thing_links
+                else:
+                    for t in thing_links:
+                        #we only need br here ...
+                        print t['thing_url']
+                        br.open(aaaaarg_base+t['thing_url'])
+                        time.sleep(3)
+                        files = br.select('html')
+                        files = str(files[0])
+
+                        #files = thing_page
+                        links = getlink_arg(files)
+
+                        mdata = getthing_metadata_arg(files)
+
+                        # combine before appending
+                        mdata['links'] = links['link']
+                        hits['hits'].append(mdata)
+                        print "HERE1"
+
+                    print "HERE2"
+                print "HERE3"
+            # here somewhere the thing breaks
+            print "DONE WITH LOOP"
+
+
+    elif len(title) > 2 and len(author) < 2:
+        #go through things
+        print "title query"
+        pagecount = 1
+        #there's pages to this!!! infinite amount of pages ... "ends" when id=things is very short indeed ... or when it contains no li
+
+        #url = "https://aaaaarg.fail/search/things?query=software&page=27"
+
+        # sm = things_page
+
+        # for loop --- pages
+        while pagecount:
+            query = aaaaarg_things_base+title+"&page="+str(pagecount)
+
+            br.open(query)
+            sm = br.select('html')
+            things = str(sm[0])
+            #print things
+            soup = BeautifulSoup(things)
+            th = soup.find('div', id='things')
+            li = th.find_all('li')
+            if  len(li) < 1:
+                break
+            else:
+                thing_links = getthings_things_arg(things, title)
+
+                for t in thing_links:
+
+                    print t
+                    br.open(aaaaarg_base+t['title_page_url'])
+                    h = br.select('html')
+                    hin = str(h[0])
+
+                    links = getlink_arg(hin)
+
+                    #maybe do this within getlink? huh? meh ...
+                    #fix this!
+                    mdata = getthing_metadata_arg(hin)
+
+                    # combine these two before appending
+                    mdata['links'] = links['link']
+                    hits['hits'].append(mdata)
+
+            pagecount+=1
+
+    elif len(title) > 2 and len(author) > 2:
+        #go through makers
+        print "title&author query"
+        query = aaaaarg_makers_base+author
+        #after that ... check if title matches?
+
+        br.open(query)
+
+        makers = br.select('html')
+        makers = str(makers[0])
+
+        #makers = br
+        #print br
+
+        authorpage = getmakers_arg(makers, author)
+        #print authorpage
+
+        if authorpage == "Not found":
+            return authorpage
+        else:
+            #ignoring this for testing purposes
+            #print authorpage
+            br.open(aaaaarg_base+authorpage['author_page_url'])
+
+            things = br.select('html')
+
+            things = str(things[0])
+
+            #things = maker_page
+
+            thing_links = get_maker_things_arg(things)
+            #print "thingalings: ", thing_links
+
+            # i still need to filter per title no?
+            tlf = filter_lod(thing_links, 'thing_title', title)
+
+
+            for t in tlf:
+
+                br.open(aaaaarg_base+t['thing_url'])
+                ahem = str(br.select('html')[0])
+                #print ahem
+
+                links = getlink_arg(ahem)
+
+                #maybe do this within getlink? huh? meh ...
+                mdata = getthing_metadata_arg(ahem)
+
+                # combine these two before appending
+                mdata['links'] = links['link']
+                hits['hits'].append(mdata)
+
+
+    else:
+        print "Not found11"
+        return "Not found"
+
+    #print "WHAT IS GOING ON?"
+
+    if hits:
+        #print "THIS IS NOT HAPPENING"
+        count = 0
+        for h in hits['hits']:
+            h['rank'] = count
+            count+=1
+        print "hits: ", json.dumps(hits, sort_keys=True, indent=4)
+        return hits
+    else:
+        return "Not found"
+
+
+
+
+
+#SEARCH ENGINES beyond books and articles, just put it in both
+
+def duckduckgo():
+    pass
+
+
+#what does this do?
+def build2(output, name):
+    blam = {}
+
+    if output != "Not found":
+        blam[name] = output
+    else:
+        blam[name] = None
+
+    return blam
+
+
+
+def combined(author='', title='', year='', doi='', isbn='', sources=''):
+
+    results = []
+    print "core flexi sources ", sources
+
+    for i in sources:
+        print sources_short[i]
+
+    for i in sources:
+        if i == 5:
+            print "Logging into AAAAARG now ..."
+            br = arglogin()
+            print "Logged in successfully."
+            output = mecha_aaaaarg(br, author, title)
+            # for i in aaaaarg_output:
+            #     print json.dumps(i, sort_keys=True, indent=4)
+
+            stuff = build2(output, str(sources_short[i]))
+            results.append(stuff)
+                # try:
+                #     build2(i['url'], 'aaaaarg_'+str(i['idd']), results)
+                # except TypeError:
+                #     pass
+                    #
+        else:
+
+            func_name = sources_short[i]
+            #print "sources short:\n"+func_name+"\n"
+            possibles = globals().copy()
+            possibles.update(locals())
+            func = possibles.get(func_name)
+            output = func(author, title, year, doi, isbn)
+            print "Number of hits: ", len(output['hits'])
+            pp.pprint(output)
+
+            stuff = build2(output, str(sources_short[i]))
+            results.append(stuff)
+
+
+    return results
+
+
+
+#CALLING SHIT works
+def search(author='', title='', year='', doi='', isbn='', sources=''):
+
+    output_dict = {'entries': []}
+
+    # this is a problem
+
+    def make_output_dict(results):
+        for i in results:
+            output_dict['entries'].append(i)
+
+        return output_dict
+
+    print sources
+
+    kaigun = [0, 1, 5, 7, 8, 10, 11, 12]
+    festo = [6, 9]
+    themall = [n for n in sources_short]
+
+
+    bks = [n['id'] for n in sources_dict if n['books'] == 1]
+    #print bks
+    articls = [n['id'] for n in sources_dict if n['articles'] == 1]
+    #print articls
+
+    # WHAT DO I DO WITH THIS?
+    # if isbn:
+    #     sources = 'books'
+    # else:
+    #     pass
+    # if doi:
+    #     sources = 'articles'
+    # else:
+    #     pass
+    try:
+        sources = sources.split(' ')
+    except:
+        pass
+
+    if isinstance(sources, list):
+        if is_number(sources[0]):
+            pass
+        else:
+            tmp = []
+            for s in sources:
+                num = [n['id'] for n in sources_dict if n['code_name'] == s]
+                tmp.append(num[0])
+            sources = tmp
+    elif sources == 'all':
+        sources = themall
+    elif sources == 'fast':
+        sources = festo
+    elif sources == 'kaigun':
+        sources = kaigun
+    elif sources == 'books':
+        sources = bks
+    elif sources == 'articles':
+        sources = articls
+    elif sources == None:
+        sources = themall
+    else:
+        pass
+
+
+    print sources
+    #return sources
+
+    rslt = combined(author=author, title=title, year=year, doi=doi, isbn=isbn, sources=sources)
+    #print "RSLT: ", rslt
+    for r in rslt:
+        output_dict['entries'].append(r)
+    # output_dict = make_output_dict(rslt)
+
+
+    #print "THIS IS THE OUTPUT DICT"
+    #print output_dict
+    print "Writing to file ... "+str(output_filename)
+    f = open(output_filename, 'w+')
+    f.write(json.dumps(output_dict, indent=4))
+    f.close()
+    print "Done."
+    return output_dict
+
+
+#SEARCH BASED ON BIBJSON FILE (OR OTHER)
+def bulk_search(bibjson_location):
+    with open(bibjson_location) as json_file:
+        bibjson_content = json.load(json_file)
+
+
+        book_types = ['book', 'chapter', 'book-chapter', 'work']
+        article_types = ['journal-article', 'journalArticle']
+
+        bibjson_reloaded = [x for x in bibjson_content['items'] if x != None]
+
+
+        #split into sub-groups based on type
+
+        books = [x for x in bibjson_reloaded if x['itemType'] in book_types]
+        j_articles = [x for x in bibjson_reloaded if x['itemType'] in article_types]
+        other = [x for x in bibjson_reloaded if x['itemType'] not in book_types and x['itemType'] not in article_types]
+
+        #modest settings for testing
+        books = books[3:6]
+        j_articles = j_articles[3:6]
+
+
+        print 'Number of books: '+str(len(books))
+        print 'Number of articles: '+str(len(j_articles))
+        print 'Number of other references: '+str(len(other))+'\n'
+
+
+        #artilce search either doi or title based
+        #should strip doi
+        #should remove any quotes and : from titles add +, lowercase
+        article_count = 0
+
+        core_counter = 0
+        scielo_counter = 0
+        libgen_article_counter = 0
+        doaj_counter = 0
+        osf_counter = 0
+        oadoi_counter = 0
+        google_article_counter = 0
+
+
+
+        book_count = 0
+
+        doab_counter = 0
+        oapen_counter = 0
+        openedition_counter = 0
+        monoskop_counter = 0
+        libgen_book_counter = 0
+        memory_counter = 0
+        google_book_counter = 0
+        aaaaarg_counter = 0
+
+
+        output_dict = {'entries': []}
+
+        for i in j_articles:
+
+            author = ''
+            title = ''
+            year = ''
+            doi = ''
+            bibref = ''
+
+            #author ... only searches by first author
+
+            if 'creators' in i:
+                name = i['creators'][0]['firstName']+'+'+i['creators'][0]['lastName']
+                name = name.replace(' ', '+')
+                author = name
+            else:
+                pass
+
+            #year = date
+
+            try:
+                year = str(i['date'])
+            except KeyError:
+                pass
+
+
+            try:
+                title = i['title'].encode('utf8')
+                title = title.replace(' ', '+')
+                title = title.replace(',', '')
+            except KeyError:
+                pass
+            #except AttributeError:
+            #    pass
+
+            try:
+                doi = i['DOI']
+            except KeyError:
+                pass
+
+            try:
+                bibref = i['citekey']
+            except KeyError:
+                pass
+
+
+            article_count += 1
+
+            print "now searching: "+str(i['citekey'])+'\n'
+            results_article = search(author, title, year, doi, sources="articles")
+            #print results_article
+            #counters = results_article[1]
+            #print counters
+            #print results_article
+            #print results_article['URL']
+            output_dict['entries'].append(results_article)
+
+
+
+        for i in books:
+            author = ''
+            #author = i['author']
+            #print author
+
+            if 'creators' in i:
+                name = i['creators'][0]['firstName']+'+'+i['creators'][0]['lastName']
+                name = name.replace(' ', '+')
+                author = name
+            else:
+                pass
+
+            #year = date
+
+            try:
+                year = str(i['date'])
+            except KeyError:
+                pass
+
+
+            try:
+                title = i['title'].encode('utf8')
+                title = title.replace(' ', '+')
+                title = title.replace(',', '')
+            except KeyError:
+                pass
+            #except AttributeError:
+            #    pass
+
+            try:
+                isbn = i['ISBN']
+            except KeyError:
+                pass
+
+            try:
+                bibref = i['citekey']
+            except KeyError:
+                pass
+
+
+            book_count += 1
+
+            print "now searching: "+str(i['citekey'])+'\n'
+            results_book = search(author=author, title=title, year=year, isbn=isbn, sources="books")
+            #counters = results_book[1]
+            #print counters
+            #print results_book
+            #print results_book['URL']
+
+            output_dict['entries'].append(results_book)
+
+
+        #keep other
+        for i in other:
+            output_dict['entries'].append(i)
+
+
+        #print book_count
+        #print json.dumps(output_dict, indent=4)
+
+        #write to file
+        print "Writing to file ... "+str(output_filename)
+        f = open(output_filename, 'w+')
+        f.write(json.dumps(output_dict, indent=4))
+        f.close()
+        print "Done."
+
+
+
+# search(author='', title='memory', year='', doi='', isbn='', sources=[1])
+#bulk_search(bibjson_location)

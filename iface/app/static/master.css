@@ -1,0 +1,195 @@
+/* .container {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+} */
+/* .main {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+} */
+
+body {
+    width: 100%;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+
+
+.results .btn {
+    margin-top: 0.5rem;
+}
+
+.results ul {
+    margin-bottom: 3rem;
+}
+
+.results ul li a.text-truncate {
+    overflow: inherit !important;
+    white-space: initial !important;
+    word-wrap: break-word !important;
+
+}
+
+/* if the hyperlinks are too long */
+.text-truncate {
+
+}
+
+
+.topbar {
+    padding: 10px;
+    border-color: black;
+    border-style: dotted;
+}
+
+div.title {
+    /* padding-left: 100px; */
+}
+
+.container {
+    /* margin-left:0 !important;
+    margin-right:0 !important; */
+    /* padding-left: 0px !important; */
+    margin-top: 10px;
+}
+
+.sidebar {
+    padding-left: 0px !important;
+}
+
+div.results {
+    padding-left: 95px;
+    padding-top: 10px;
+}
+
+/* .title h1 {
+    display: inline;
+} */
+
+h1 {
+    text-align: center;
+    color: black;
+    font-family: Courier;
+    padding-top: 20px;
+}
+
+img#radovan1, img#radovan2 {
+    transform: rotate(180deg) scaleX(-1);
+    /* display: inline-block; */
+    max-width:100%;
+
+}
+
+img#radovan2 {
+    float: right;
+}
+
+sup#beta {
+    top: -1.5em;
+    font-size: 1rem;
+}
+
+
+.form-container {
+    border: dotted;
+    padding: 10px;
+}
+
+/* input.text {
+    float: right;
+} */
+
+.content {
+    padding: 10px;
+    padding-left: 0;
+    font-family: Courier;
+}
+
+/* provider choice menu */
+.top-check {
+    text-indent: 15px;
+    margin-bottom: 0px;
+
+}
+
+.sub-check {
+    text-indent: 30px;
+}
+
+div.fields, div.soumission, div.radio {
+    padding-bottom: 10px;
+}
+
+div.textfield {
+    display: flex;
+    justify-content: space-between;
+}
+
+a.provider_link:link, a.provider_link:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+a.provider_link:hover, a.provider_link:active  {
+    text-decoration: underline;
+    color: inherit;
+}
+
+label.check, label.sub-check, p.group {
+    margin-bottom: 0px;
+}
+
+#searchbuttonmain {
+    margin-top: 10px;
+}
+
+
+/* CONTENT PRE RESULTS */
+div.center {
+
+}
+
+/* RESULTS */
+img.coverimg {
+    max-width: 100%;
+}
+
+div.record {
+    padding-bottom: 40px;
+}
+
+
+/* ABOUT */
+div.about h2 {
+    font-size: 1.5rem;
+    font-family: Courier;
+}
+
+div.about h3 {
+    font-size: 1rem;
+    text-decoration: underline;
+}
+
+div.about {
+    font-family: Courier;
+}
+
+div.indent {
+
+}
+
+code {
+
+}
+
+/* extra responsive settings */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 90vw !important;
+  }
+}

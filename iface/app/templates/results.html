@@ -1,0 +1,54 @@
+{% extends "search_page.html" %}
+
+    {% block results %}
+
+        {% for r in return_data %}
+        <div class="row record">
+                {% for prop in r.extra %}
+                <div class="imag col-xl-3 col-lg-3 col-md-3">
+                    <p class="source">[<a href="{{ prop.query }}" target="_blank" title="open query in new tab">{{ prop.source }}</a>]</p>
+                    <img class="coverimg" src="{{ prop.coverurl }}" alt="">
+                </div>
+                {% endfor %}
+
+
+                {% for prop in r.bibjson %}
+                <div class="mdata col-xl-9 col-lg-9 col-md-9">
+                    <h3>{{ prop.title }}</h3>
+                    <div class="authoryear">
+                        <h5>
+                            {% for auth in prop.author %}
+                                {{ auth.name }}{{ ", " if not loop.last }}
+                            {% endfor %}
+                        </h5>
+                        <p>{{ prop.year }}</p>
+                    </div>
+
+                    <div class="identifiers">
+                        {% if prop.identifier %}
+                            {% for i in prop.identifier %}
+                                {% if i.type == "isbn" %}
+                                    ISBN {{ i.id }}
+                                {% elif i.type == 'doi' %}
+                                    DOI {{ i.id }}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="links">
+                        <span>Links </span>
+                        {% for lnk in prop.link %}
+                            <a href="{{ lnk.href }}">{{ lnk.name }}</a><span> {{ " -- " if not loop.last }}</span>
+                        {% endfor %}
+                    </div>
+
+
+                </div>
+                {% endfor %}
+
+        </div>
+
+        {% endfor %}
+
+    {% endblock %}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        {% block head %}
+            <title>about Radovan</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+            <link rel="stylesheet" href="/static/master.css">
+            <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap-4.3.1-dist/css/bootstrap.min.css') }}">
+            <script src="{{ url_for('static', filename='bootstrap-4.3.1-dist/js/bootstrap.min.js') }}"></script>
+            <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        {% endblock %}
+    </head>
+    <body>
+        <div class="container about">
+            <div class="row">
+                <div class="col-xs-12 col-s-12 col-md-10 col-lg-6 col-xl-6 mx-auto">
+                    <h1>/about</h1>
+
+                    <h2>? radovan</h2>
+                    <p>Radovan is a meta search engine aggregating 12 open access sources of (mostly academic) texts.</p>
+                    <p>The results inherit the order in which they are displayed on the original page and are grouped accordingly. This instance of Radovan currently harvests 10 hits per source.</p>
+                    <p>The goal is to preserve as much metadata from the origins as possible. Not all sources provide the same quantity/quality of metadata. On top of that some might get lost during standardization.</p>
+
+                    <h2>? api</h2>
+                    <p>Radovan has a simple api, which returns json. Or - to be more exact - metadata in <a href="http://okfnlabs.org/bibjson/">bibjson</a>.</p>
+
+                    <h3>search single item</h3>
+                    <div class="indent">
+                        <p>endpoint: <br> <code>/radovan/api/v1.0/simple</code></p>
+
+                        <p>parameters: <br> <code>author, title, year, isbn, doi, sources</code></p>
+                        <p>sample query: <br> <code>/radovan/api/v1.0/simple/items?author=haraway&title=cyborg&year=&isbn=&doi=&sources=0+1+2+3</code></p>
+
+                        <p>You can query the api to get a dictionary of current sources and their ids: <br> <code>/radovan/api/v1.0/sources</code></p>
+
+                    </div>
+
+
+                    <h3>bulk search</h3>
+                    <div class="indent">
+                        <p>It is possible to pass a bibjson file to the API and execute a bulk search.</p>
+
+                        <p>endpoint: <br> <code>/radovan/api/v1.0/bulk</code> </p>
+
+                        <p>sample query (with python requests): <br>
+                            <code>
+                                headers = {'Content-type': 'application/json', 'Accept': 'text/plain'} <br>
+                                results = requests.get('/radovan/api/v1.0/bulk', json=bibjson_data, headers=headers)
+                            </code>
+                        </p>
+
+                    </div>
+
+
+                    <h2>? code</h2>
+                    <p>The code is hosted on <a href="#">github</a>.</p>
+                    <p>It's easy to get your own instance up and running with docker-compose. It's licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a>.</p>
+
+                    <h2>? issues</h2>
+                    <p>Radovan is in beta. Issues are to be expected at this point. Report them <a href="#">here</a>.</p>
+                    <p>The queries should take no longer than 10 seconds. If they do something has gone wrong. Some sources are slower than others. Generally aaaaarg and MLA Core create most of the lag.</p>
+
+                    <h2>? more sources</h2>
+                    <p>Suggest more sources to be added <a href="https://pad.riseup.net/p/radovan_sources-keep" target="_blank">here</a>. The more diverse the better.</p>
+
+                    <h2>? privacy</h2>
+                    <p>The server does not log ips, queries or any other identifiers, but it does log errors ie. where the code breaks if/when it breaks.</p>
+
+                    <h2>? attribution</h2>
+                    <p>Radovan is a character from a <a href="http://www.ljudmila.org/stripcore/minimundus/obisk/obisk.htm">comic book</a> created by <a href="https://en.wikipedia.org/wiki/Matja%C5%BE_Schmidt">Matjaž Schmidt</a> in the 1980s. In that story Radovan from planet Beta is a researcher from outer space interested in - out of all things and creatures - Earthlings. If he was appalled by our attitude towards the environment, then he would likely be taken aback by the state of academic publishing. Or maybe not, because he'd lack access.</p>
+                    <p>Fourty years on Radovan's distant cousin Radovan (from planet Meta) comes to Earth in the form of this search engine to help sort out the mess.</p>
+
+                    <p>The project was made possible by Coventry University, in particular the <a href="https://www.coventry.ac.uk/research/areas-of-research/postdigital-cultures/about-us/">Centre for Post-Digital Cultures</a>, where this site is hosted.</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </body>
+</html>
