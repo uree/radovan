@@ -76,7 +76,7 @@ def arglogin(username, password):
 
 
 # BASE
-@app.route('/radovan/api/v1.0')
+@app.route('/v1.0')
 def hello_world():
     hello = "Hello, World! This is Radovan. The API is running at /radovan/api/v1.0/"
     endpoint = ["/simple for single queries", '/bulk for bulk queries']
@@ -86,7 +86,7 @@ def hello_world():
     return jsonify(hlo)
 
 # SEARCH
-@app.route('/radovan/api/v1.0/simple/items')
+@app.route('/v1.0/simple/items')
 def simple():
     try:
         global aaaaarg_browser
@@ -103,7 +103,7 @@ def simple():
     sources_int = [int(n) for n in sources.split()]
     #print(sources_int)
     if len(author)<1 and len(title)<1 and len(year)<1 and len(doi)<1 and len(isbn)<1:
-        return jsonify({'response': 'incorrect query format', 'sample_query': '/radovan/api/v1.0/simple/items?author=foucault&title=society&year=&isbn=&doi=&sources=0+1+2+3'})
+        return jsonify({'response': 'incorrect query format', 'sample_query': '/v1.0/simple/items?author=foucault&title=society&year=&isbn=&doi=&sources=0+1+2+3'})
     else:
         simple_results = search(author, title, year, doi, isbn, sources_int)
         #print("------------------- END CORE FLEXI ---------------------")
@@ -118,7 +118,7 @@ def simple():
 
 
 # BULK SEARCH (input bibjson)
-@app.route('/radovan/api/v1.0/bulk', methods=['GET', 'POST'])
+@app.route('/v1.0/bulk', methods=['GET', 'POST'])
 def bulk():
     error = jsonify({'response': 'incorrect query format'})
 
@@ -211,12 +211,12 @@ def bulk():
 
 
 # RETURN SOURCES
-@app.route('/radovan/api/v1.0/sources')
+@app.route('/v1.0/sources')
 def rsources():
     all = get_sources()
     return jsonify(all)
 
-@app.route('/radovan/api/v1.0/sources/<string:key>/<value>')
+@app.route('/v1.0/sources/<string:key>/<value>')
 def frsources(key, value):
     all = get_sources()
     if is_number(value):
