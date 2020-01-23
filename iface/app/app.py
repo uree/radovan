@@ -30,7 +30,7 @@ def results():
         query = '?author='+r['author']+'&title='+r['title']+'&year='+r['year']+'&isbn='+r['isbn']+'&doi='+r['doi']+'&sources='+sources
         print(query)
 
-        r = requests.get('http://localhost:9003/radovan/api/v1.0/simple/items'+query)
+        r = requests.get('http://localhost:9003/api/v1.0/simple/items'+query)
 
         try:
             return_data = r.json()
@@ -48,7 +48,7 @@ def about():
 #injects variables into all templates
 @app.context_processor
 def inject_providers():
-    r = requests.get('http://localhost:9003/radovan/api/v1.0/sources').json()
+    r = requests.get('http://localhost:9003/api/v1.0/sources').json()
 
     return dict(form_data=r)
 

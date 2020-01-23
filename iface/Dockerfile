@@ -7,9 +7,6 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 ADD . /app
 
-# for dryscrape ... install webkit-server from git
-RUN cd webkit-server && python setup.py install
-
 # Install the dependencies
 RUN pip install -r requirements.txt
 
