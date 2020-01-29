@@ -32,7 +32,7 @@ from multiprocessing import Process, Queue
 import logging
 
 # GENERAL SETTINGS
-logging.basicConfig(filename='logs/radovan_core_log.log', level=logging.DEBUG, format='%(asctime)s:%(levelname)s:%(message)s')
+logging.basicConfig(filename='logs/radovan_core_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
 global_hit_limit = 10
@@ -492,23 +492,26 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
         get_doi = tds[1].a.get('href').split("scimag/")[-1]
         get_title = tds[1].a.get_text()
 
-        journal_data = tds[2].select('p')
-        journal['name'] = journal_data[0].get_text()
-        journal_info = re.findall(r'\d+', journal_data[1].get_text())
+        try:
+            journal_data = tds[2].select('p')
+            journal['name'] = journal_data[0].get_text()
+            journal_info = re.findall(r'\d+', journal_data[1].get_text())
+        except Exception as e:
+            logging.debug("Error extractig journal info @libgen_article: ", e)
 
         try:
             journal['volume'] = journal_info[0]
         except Exception as e:
-            print(e)
+            logging.debug("Error extractig journal info @libgen_article: ", e)
         try:
             journal['issue'] = journal_info[1]
         except Exception as e:
-            print(e)
+            logging.debug("Error extractig journal info @libgen_article: ", e)
 
         try:
             journal['year'] = journal_info[2]
         except Exception as e:
-            print(e)
+            logging.debug("Error extractig journal info @libgen_article: ", e)
 
         links = tds[4].select('a')
 
