@@ -13,7 +13,7 @@ import re
 import sys
 import time
 
-import dryscrape
+#import dryscrape
 from robobrowser import RoboBrowser
 from requests import Session
 import xmltodict
@@ -883,19 +883,22 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
     result_queue.put(build2(hits, 'libgen_book'))
     return hits
 
-
 def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    #print("Searching memoryoftheworld ...")
+    # this is the api version
     logging.info("Searching memoryoftheworld ...")
 
-    url_authors = "#/search/authors/"
-    url_title = "#/search/titles/"
+    url_authors = "https://library.memoryoftheworld.org/search/authors/"
+    url_title = "https://library.memoryoftheworld.org/search/title/"
+    url_isbn = "https://library.memoryoftheworld.org/search/_isbn/"
 
     hits = {'hits': []}
     count = 0
 
     # it is actually less acurate if you remove ':'
-    if len(author)>=2 and len(title)<=2:
+    if len(isbn)>2:
+        isbn_prep = isbn.strip().replace('-', '')
+        query = url_isbn+isbn_prep
+    elif len(author)>=2 and len(title)<=2:
         auth_prep = author.replace(' ', '+')
         query = url_authors+auth_prep
     elif len(title)>=2 and len(author)<=2:
@@ -908,60 +911,43 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
         result_queue.put(build2("Not found", 'memoryoftheworld'))
         return "Not found"
 
+    logging.debug(query)
+    print(query)
+    r = requests.get(query)
+    data = r.json()
+    pp.pprint(data)
 
-    if 'linux' in sys.platform:
-    # start xvfb in case no X is running. Make sure xvfb
-    # is installed, otherwise this won't work!
-        dryscrape.start_xvfb()
-
-    session = dryscrape.Session(base_url = memory_base)
-    session.visit(query)
-
-    try:
-        session.wait_for_safe(lambda: session.at_xpath('/html/body/div/div[3]/div[2]/div[1]/div'))
-    except Exception as e:
-        logging.debug("Extraction error in memoryoftheworld(): ", e)
-        out = build2("Not found", 'memoryoftheworld')
-        result_queue.put(out)
-        return out
-
-    html = session.body()
-    soup = BeautifulSoup(html, 'lxml')
-    covers = soup.find_all("div", class_="card")
-
-    if len(covers) < 1:
+    if len(data['_items']) < 1:
         result_queue.put(build2("Not found", 'memoryoftheworld'))
         return "No results"
     else:
-        for i in covers[:hit_limit]:
+        print("results!")
+        for i in data['_items']:
             output = {}
-            title_inner = i.select('div.card-title > span')[0].text.strip()
-            landing = i.select_one('div.card-title > span > a')
-            print("Landng ", landing)
-            author_inner = i.select('div.card-subtitle > a')[0].text.strip()
-            links = i.find_all('div', class_='card-text')
-            cover_img = i.select('img.card-img')[0]['src']
-
+            url_base = 'https:'+i['library_url']
             linksos = []
-            hreff = links[0].children
-            for i in hreff:
+
+            for f in i['formats']:
                 try:
-                    href = 'http:'+i['href']
-                    text = i.text
+                    href = url_base+f['dir_path']+f['file_name']
+                    text = f['format']
                     link = dict({'href': href, 'format': text.lower()})
                     linksos.append(link)
                 except:
                     pass
 
-            output['author'] = author_inner
-            output['title'] = title_inner
+            output['author'] = [n for n in i['authors']]
+            output['title'] = i['title']
             output['rank'] = count
             output['href'] = linksos
             output['type'] = 'book'
-            output['query'] = memory_base+query
-            output['img_href'] = 'http:'+str(cover_img)
+            output['query'] = query
+            output['img_href'] = url_base+i['cover_url']
             hits['hits'].append(output)
             count += 1
+
+    logging.debug(hits)
+    print(hits)
 
     result_queue.put(build2(hits, 'memoryoftheworld'))
     return hits
@@ -1474,6 +1460,9 @@ def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_
 
     for p in proc:
         p.join()
+
+    pp.pprint(results)
+    logging.debug(results)
 
     return results
 

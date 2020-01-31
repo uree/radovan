@@ -7,10 +7,6 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 ADD . /app
 
-# for dryscrape ... install webkit-server from git and xvfb
-# RUN cd webkit-server && python setup.py install && apt-get update && apt-get install -y xvfb
-RUN  apt-get update && apt-get install -y xvfb qt5-default libqt5webkit5-dev build-essential python-lxml python-pip xvfb
-
 # Install the dependencies
 RUN pip install -r requirements.txt
 
