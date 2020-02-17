@@ -12,6 +12,7 @@ import logging
 app = Flask(__name__)
 app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
 
+
 logging.basicConfig(filename='logs/radovan_iface_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 

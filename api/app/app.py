@@ -113,6 +113,7 @@ def simple():
         #print("------------------- FORMATTING DATA ---------------------")
         nice_output = mein_main(simple_results)
         nice_output_sorted = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
+        #print("nice output sorted")
         pp.pprint(nice_output_sorted)
         return jsonify(nice_output_sorted)
 
@@ -225,7 +226,8 @@ def frsources(key, value):
     return jsonify(ftr)
 
 if __name__ == '__main__':
-    aaaaarg_browser = arglogin(aaaaarg_username, aaaaarg_password)
+    #aaaaarg_browser = arglogin(aaaaarg_username, aaaaarg_password)
+    aaaaarg_browser = None
     if aaaaarg_browser != None:
         logging.info("Login successful.")
     else:

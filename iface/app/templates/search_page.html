@@ -3,9 +3,12 @@
         {% block head %}
             <title>Radovan - a meta search engine</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
-            <link rel="stylesheet" href="/static/master.css">
+            <!-- <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
             <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap-4.3.1-dist/css/bootstrap.min.css') }}">
-            <script src="{{ url_for('static', filename='bootstrap-4.3.1-dist/js/bootstrap.min.js') }}"></script>
+            <script src="{{ url_for('static', filename='bootstrap-4.3.1-dist/js/bootstrap.min.js') }}"></script> -->
+            <link rel="stylesheet" href="static/master.css">
+            <link rel="stylesheet" media="screen" href = "static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+            <script src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
             <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         {% endblock %}
     </head>
@@ -16,7 +19,7 @@
 
                 </div> -->
                 <div class="p-2 flex-fill">
-                    <img id="radovan1" src="/static/img/radovan_superlong2.png" alt="">
+                    <img id="radovan1" src="static/img/radovan_superlong2.png" alt="">
                 </div>
 
                 <div class="title p-2 flex-fill">
@@ -24,7 +27,7 @@
                 </div>
 
                 <div class="p-2 flex-fill">
-                    <img id="radovan2" src="/static/img/radovan_superlong1.png" alt="">
+                    <img id="radovan2" src="static/img/radovan_superlong1.png" alt="">
                 </div>
 
 
@@ -33,7 +36,7 @@
             <div class="content row">
                 <div class="sidebar col-xs-12 col-s-12 col-md-3 col-lg-3 col-xl-3">
                     <div class="form-container">
-                        <form action="/results" method="POST">
+                        <form action="results" method="POST">
                             <div class="fields">
                                 <div class="textfield">
                                     <span>Title: </span><input class="text" type="text" name="title">
@@ -75,9 +78,6 @@
                             </div>
 
                         </form>
-                        <div>
-                            <p style="font-size: 11px">!!! For the sake of speed &#x21af; and accuracy &#9678; it's recommended to search by ISBN or DOI.</p>
-                        </div>
 
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                     {% block results %}
                         <div class="center">
                             <p>Radovan returns a maximum of 10 results per source. Use the [<a href="#">source</a>] link to look for more.</p>
-                            <p>Suggest more sources to be added <a href="https://pad.riseup.net/p/radovan_sources-keep" target="_blank">here</a> and visit the <a href="/about">/about</a> page.</p>
+                            <p>Suggest more sources to be added <a href="https://pad.riseup.net/p/radovan_sources-keep" target="_blank">here</a> and visit the <a href="about">/about</a> page.</p>
                             <p>Warn: Querying aaaaarg.fail currently doesn't work.</p>
                         </div>
                     {% endblock %}

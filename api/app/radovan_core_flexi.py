@@ -2,7 +2,6 @@
 # python 3.6.9
 
 import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 import requests
 import json
 from bs4 import BeautifulSoup, SoupStrainer
@@ -696,7 +695,10 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
 
     author = author.replace(' ','+')
     author = author.replace('\xa0', '+')
+    # apostrophe
+    author = author.replace('\u2019', '')
     title = title.replace(' ', '+')
+    title = title.replace('\u2019', '')
     try:
         title = title.replace('”', '')
         title = title.replace('“', '')
@@ -711,7 +713,12 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
 
     request = urllib.request.Request(monoskop_url, headers={'User-Agent' : "Magic Browser"})
 
-    con = urllib.request.urlopen(request)
+    try:
+        con = urllib.request.urlopen(request)
+    except Exception as e:
+        print("Urllib error in Monoskop ...")
+        print(e)
+        print(monoskop_url)
 
     soup = BeautifulSoup(con)
     items = soup.select(".item")
@@ -829,6 +836,7 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
         request = requests.get(libgen_books_url, headers={'Connection':'close'})
         logging.debug("ISBN based search results")
         data = request.json()
+        pp.pprint(data)
 
         # what happens to cover_url in this case?
         # delagate to update_libgen_json ... extends urls with domain names and classifies them
@@ -912,10 +920,9 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
         return "Not found"
 
     logging.debug(query)
-    print(query)
     r = requests.get(query)
     data = r.json()
-    pp.pprint(data)
+
 
     if len(data['_items']) < 1:
         result_queue.put(build2("Not found", 'memoryoftheworld'))
@@ -947,7 +954,6 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
             count += 1
 
     logging.debug(hits)
-    print(hits)
 
     result_queue.put(build2(hits, 'memoryoftheworld'))
     return hits
@@ -1461,6 +1467,7 @@ def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_
     for p in proc:
         p.join()
 
+    print("New combined results:")
     pp.pprint(results)
     logging.debug(results)
 
@@ -1504,7 +1511,8 @@ def search(author='', title='', year='', doi='', isbn='', sources='', aaaaarg_br
     if aaaaarg_browser == None and 5 in sources:
         sources.remove(5)
 
-    rslt = new_combined(author=author, title=title, year=year, doi=doi, isbn=isbn, sources=sources, hit_limit=10, aaaaarg_browser=aaaaarg_browser)
+    # clean input
+    rslt = new_combined(author=author.strip(), title=title.strip(), year=year.strip(), doi=doi.strip(), isbn=isbn.strip().replace('-',''), sources=sources, hit_limit=10, aaaaarg_browser=aaaaarg_browser)
 
     for r in rslt:
         output_dict['entries'].append(r)
