@@ -3,7 +3,11 @@ def url_constructor(name, type, link):
     names = ['landing_url', 'download_url', 'open_url']
     one_link = {'name': '', 'href': '', 'type': ''}
     try:
-        link_dict = dict({'name': name, 'type': type, 'href': link})
+        if link.startswith('/b/?'):
+            uplink = link.replace('/b/?', '')
+        else:
+            uplink = link
+        link_dict = dict({'name': name, 'type': type, 'href': uplink})
         return link_dict
     except IndexError:
         pass

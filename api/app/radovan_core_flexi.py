@@ -486,6 +486,7 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
         except:
             auth_data = tds[0].get_text()
 
+        # check for impurities
         item['landing_url'] = libgen_home+'/'+tds[1].a.get('href')
 
         get_doi = tds[1].a.get('href').split("scimag/")[-1]
@@ -693,12 +694,17 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     # print("Searching Monoskop ...")
     logging.info("Searching monoskop ...")
 
+    # unicode characters problematic for urrlib
     author = author.replace(' ','+')
     author = author.replace('\xa0', '+')
     # apostrophe
     author = author.replace('\u2019', '')
     title = title.replace(' ', '+')
     title = title.replace('\u2019', '')
+    # en dash _
+    author = author.replace('\u2013', '')
+    title = title.replace('\u2013', '')
+
     try:
         title = title.replace('”', '')
         title = title.replace('“', '')
@@ -719,6 +725,8 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
         print("Urllib error in Monoskop ...")
         print(e)
         print(monoskop_url)
+        result_queue.put(build2("Not found", 'monoskop'))
+        return("Not found")
 
     soup = BeautifulSoup(con)
     items = soup.select(".item")
@@ -836,7 +844,7 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
         request = requests.get(libgen_books_url, headers={'Connection':'close'})
         logging.debug("ISBN based search results")
         data = request.json()
-        pp.pprint(data)
+        #pp.pprint(data)
 
         # what happens to cover_url in this case?
         # delagate to update_libgen_json ... extends urls with domain names and classifies them
