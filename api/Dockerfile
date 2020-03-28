@@ -11,4 +11,4 @@ ADD . /app
 RUN pip install -r requirements.txt
 
 # Run the command to start gunicorn
-CMD ["gunicorn", "app:app", "-b", "0.0.0.0:9003", "-t 90"]
+CMD ["gunicorn", "app:app", "-b", "0.0.0.0:9003", "-t 180"]

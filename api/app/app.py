@@ -14,14 +14,20 @@ from requests import Session
 
 import logging
 
+from keys import *
+
 app = Flask(__name__)
 app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
 
-logging.basicConfig(filename='logs/radovan_api_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+logging.basicConfig(filename='logs/radovan_api_log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
-aaaaarg_username = ""
-aaaaarg_password = ""
+try:
+    aaaaarg_username = yarr_user
+    aaaaarg_password = yarr_pass
+except:
+    aaaaarg_username = None
+    aaaaarg_password = None
 
 def jsonify(dictoner, status=200, indent=4, sort_keys=True):
   response = make_response(dumps(dictoner, indent=indent, sort_keys=sort_keys))
@@ -112,9 +118,16 @@ def simple():
         # TRANSFORM TO BIBJSON
         #print("------------------- FORMATTING DATA ---------------------")
         nice_output = mein_main(simple_results)
+
+        for b in nice_output:
+            try:
+                print(b['extra'][0]['rank'])
+            except Exception as e:
+                print("This one broke rank: ", b['extra'][0]['source'])
+
         nice_output_sorted = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
         #print("nice output sorted")
-        pp.pprint(nice_output_sorted)
+        #pp.pprint(nice_output_sorted)
         return jsonify(nice_output_sorted)
 
 
@@ -139,7 +152,7 @@ def bulk():
         logging.debug("Error generating results: ", e)
         return error
 
-    # this needs to be executed in parallel (quasi)
+    # this should be executed in parallel (quasi), no?
     for ref in data:
         #print("#### NEXT REF ####")
         temp = ref
@@ -226,11 +239,18 @@ def frsources(key, value):
     return jsonify(ftr)
 
 if __name__ == '__main__':
-    #aaaaarg_browser = arglogin(aaaaarg_username, aaaaarg_password)
-    aaaaarg_browser = None
+    # en/dis-able aaaaarg
+    aaaaarg_username = None
+    aaaaarg_password = None
+
+    if aaaaarg_username and aaaaarg_password:
+        aaaaarg_browser = arglogin(aaaaarg_username, aaaaarg_password)
+    else:
+        aaaaarg_browser = None
+
     if aaaaarg_browser != None:
         logging.info("Login successful.")
     else:
         logging.info("Aaaaarg login failed.")
 
-    app.run(host ='0.0.0.0', port = 9003)
+    app.run(host ='0.0.0.0', port = 9003, debug=True)

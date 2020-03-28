@@ -50,6 +50,7 @@ monoskop_base = 'https://monoskop.org/log/?cat=17&s='
 oadoi_base = 'https://api.unpaywall.org/v2/'
 
 libgen_home = "http://libgen.unblocked.name"
+libgen_home= "http://gen.lib.rus.ec"
 libgen_base_articles = libgen_home+"/scimag/?"
 libgen_base_books = libgen_home+"/json.php?"
 
@@ -110,7 +111,7 @@ def url_rewrite(source, entry):
             entry['url'] = url_constructor(source, entry['url'])
             return entry['url']
         except IndexError:
-            print("no original links for "+entry['title'])
+            #print("no original links for "+entry['title'])
             #return None
             pass
     else:
@@ -377,7 +378,7 @@ def core(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
             try:
                 item['year'] = int(meta[1].get_text())
             except Exception as e:
-                print(e)
+                pass
 
             dl = suppchen.select_one('dl')
 
@@ -430,7 +431,7 @@ def core(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
 
 def scielo(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
     logging.info("Searching scielo ...")
-    print("searching scielo")
+    #print("searching scielo")
     hits = {'hits': []}
     count = 0
 
@@ -722,9 +723,9 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     try:
         con = urllib.request.urlopen(request)
     except Exception as e:
-        print("Urllib error in Monoskop ...")
-        print(e)
-        print(monoskop_url)
+        # print("Urllib error in Monoskop ...")
+        # print(e)
+        # print(monoskop_url)
         result_queue.put(build2("Not found", 'monoskop'))
         return("Not found")
 
@@ -735,7 +736,7 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     count = 0
 
     for i in items:
-        print("item")
+        #print("item")
 
         mdata = {}
 
@@ -843,23 +844,34 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
 
         request = requests.get(libgen_books_url, headers={'Connection':'close'})
         logging.debug("ISBN based search results")
-        data = request.json()
-        #pp.pprint(data)
-
-        # what happens to cover_url in this case?
-        # delagate to update_libgen_json ... extends urls with domain names and classifies them
         try:
-            good_links = update_libgen_json(data)
-        except Exception as e:
+            data = request.json()
+        except ValueError as e:
+            logging.error("Value error isbn search libgen book")
             result_queue.put(build2("Not found", 'libgen_book'))
             return "Not found"
 
-        # add rank
-        for n in range(len(good_links)):
-            good_links[n]['rank'] = n
-            good_links[n]['query'] = libgen_books_url
 
-        hits['hits'].append(good_links)
+        if len(data) != 0:
+            # what happens to cover_url in this case?
+            # delagate to update_libgen_json ... extends urls with domain names and classifies them
+            try:
+                good_links = update_libgen_json(data)
+            except Exception as e:
+                good_links = None
+
+
+            # add rank
+            if good_links != None:
+                for n in range(len(good_links)):
+                    good_links[n]['rank'] = n
+                    good_links[n]['query'] = libgen_books_url
+
+                hits['hits'] = good_links
+            else:
+                result_queue.put(build2("Not found", 'libgen_book'))
+                return "Not found"
+
 
     else:
         q = author+'+'+title+'+'+year
@@ -867,6 +879,8 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
 
         r = requests.get(query)
         soup = BeautifulSoup(r.text, 'lxml')
+        #print("libgen_book_soup")
+        #print(soup)
         get_hrefs_init = soup.select('a[href*="index.php?md5"]')
         href_urls = update_libgen_src(libgen_home, get_hrefs_init, 'href')
 
@@ -887,7 +901,11 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
 
                 # extends urls with domain names and classifies them
                 # be careful data needs to be a list (or update_libgen_json needs to be upgraded)
-                good_links = update_libgen_json(record.json())
+                try:
+                    good_links = update_libgen_json(record.json())
+                except Exception as e:
+                    logging.debug(e)
+                    good_links = [{'error': 'libgen record parsing error'}]
 
                 # add to the record
                 good_links[0]['rank'] = count
@@ -895,6 +913,9 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
 
                 count+=1
                 hits['hits'].append(good_links[0])
+
+    #print("libgen_book_hits")
+    #print(hits)
 
     result_queue.put(build2(hits, 'libgen_book'))
     return hits
@@ -936,7 +957,7 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
         result_queue.put(build2("Not found", 'memoryoftheworld'))
         return "No results"
     else:
-        print("results!")
+        #print("results!")
         for i in data['_items']:
             output = {}
             url_base = 'https:'+i['library_url']
@@ -1475,8 +1496,8 @@ def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_
     for p in proc:
         p.join()
 
-    print("New combined results:")
-    pp.pprint(results)
+    #print("New combined results:")
+    #pp.pprint(results)
     logging.debug(results)
 
     return results
@@ -1486,6 +1507,7 @@ def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_
 # main search functoins, runs combined or new_combined
 def search(author='', title='', year='', doi='', isbn='', sources='', aaaaarg_browser=None):
     print("RADOVAN SEARCHING ...")
+    # print("Query parameters: ", locals())
 
     output_dict = {'entries': []}
     global global_hit_limit
