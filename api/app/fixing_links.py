@@ -111,7 +111,6 @@ def update_libgen_json(data):
     current_libgen_home = "http://libgen.unblocked.name"
 
     tmp = []
-    rank = 0
 
     for d in data:
         cover_url = for_cover+d['coverurl']

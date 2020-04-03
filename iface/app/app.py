@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# python 3.7.2
+# python 3.6.9
 
 import requests
 import json

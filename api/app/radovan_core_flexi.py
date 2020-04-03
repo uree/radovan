@@ -29,6 +29,7 @@ from requests_futures.sessions import FuturesSession
 from multiprocessing import Process, Queue
 
 import logging
+from keys import oadoi_email
 
 # GENERAL SETTINGS
 logging.basicConfig(filename='logs/radovan_core_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
@@ -50,7 +51,7 @@ monoskop_base = 'https://monoskop.org/log/?cat=17&s='
 oadoi_base = 'https://api.unpaywall.org/v2/'
 
 libgen_home = "http://libgen.unblocked.name"
-libgen_home= "http://gen.lib.rus.ec"
+libgen_home = "http://gen.lib.rus.ec"
 libgen_base_articles = libgen_home+"/scimag/?"
 libgen_base_books = libgen_home+"/json.php?"
 
@@ -534,7 +535,8 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
 
 # aka unpaywall
 def oadoi(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    email = ""
+    global oadoi_email
+    email = oadoi_email
     # print("Searching oadoi ...")
     logging.info("Searching oadoi ...")
 
