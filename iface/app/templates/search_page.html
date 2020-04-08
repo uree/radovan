@@ -3,9 +3,6 @@
         {% block head %}
             <title>Radovan - a meta search engine</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
-            <!-- <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
-            <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap-4.3.1-dist/css/bootstrap.min.css') }}">
-            <script src="{{ url_for('static', filename='bootstrap-4.3.1-dist/js/bootstrap.min.js') }}"></script> -->
             <link rel="stylesheet" href="static/master.css">
             <link rel="stylesheet" media="screen" href = "static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
             <script src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
@@ -100,8 +97,14 @@
                     })
 
                     $( "#searchbuttonmain" ).click(function() {
-                      $(this).prop("disabled", true);
                       $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading ...')
+                      $.ajax({
+                         type: "POST",
+                         url: '/results',
+                         data: $('form').serialize(),
+                      }).done(function() {
+                          //console.log("success");
+                      });
                     });
 
 
