@@ -18,7 +18,7 @@ Radovan is a meta search engine aggregating 12 open access sources of (mostly ac
 
 [Suggest more](https://pad.riseup.net/p/radovan_sources-keep) to be added.
 
-A live version is available [here](#) (pending). Along with [additional information](#) (pending).
+A live version is available [here](https://yurisearch.coventry.ac.uk/radovan/). Along with [additional information](https://yurisearch.coventry.ac.uk/radovan/about), including on how to use the API.
 
 The results inherit the order in which they are displayed on the original page and are grouped accordingly. This instance of Radovan currently harvests 10 hits per source. This can be changed in the settings section on top of radovan_core_flexi.py.
 
@@ -33,7 +33,7 @@ cd iface
 docker-compose up -d
 ```
 
-This will start the api at port 9003 and the interface at port 9090.
+This will start the API at port 9003 and the interface at port 9090.
 
 To be able to search [aaaaarg](https://aaaaarg.fail/), create a file called keys.py in api/app/ and save your login info as yarr_user and yarr_pass.
 To be able to search [oadoi/unpaywall](https://api.unpaywall.org/v2/), you need to enter your email address in the same file under oadoi_email.
