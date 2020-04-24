@@ -895,26 +895,23 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
         # prepare links for processing
         new_hrefs = [libgen_base_books+"ids"+g.split('md5')[-1]+"&fields=*" for g in get_hrefs]
 
+        for hr in new_hrefs:
+            record = requests.get(hr).json()
 
-        with FuturesSession() as session:
-            results = [session.get(g) for g in new_hrefs]
+            # extends urls with domain names and classifies them
+            # be careful data needs to be a list (or update_libgen_json needs to be upgraded)
+            try:
+                good_links = update_libgen_json(record)
+            except Exception as e:
+                logging.debug(e)
+                good_links = [{'error': 'libgen record parsing error'}]
 
-            for item in as_completed(results):
-                record = item.result()
-                # extends urls with domain names and classifies them
-                # be careful data needs to be a list (or update_libgen_json needs to be upgraded)
-                try:
-                    good_links = update_libgen_json(record.json())
-                except Exception as e:
-                    logging.debug(e)
-                    good_links = [{'error': 'libgen record parsing error'}]
+            # add to the record
+            good_links[0]['rank'] = count
+            good_links[0]['query'] = query
 
-                # add to the record
-                good_links[0]['rank'] = count
-                good_links[0]['query'] = query
-
-                count+=1
-                hits['hits'].append(good_links[0])
+            count+=1
+            hits['hits'].append(good_links[0])
 
     #print("libgen_book_hits")
     #print(hits)
