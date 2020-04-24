@@ -32,7 +32,7 @@ import logging
 from keys import oadoi_email
 
 # GENERAL SETTINGS
-logging.basicConfig(filename='logs/radovan_core_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+logging.basicConfig(filename='logs/radovan_core_log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
 global_hit_limit = 10
@@ -895,12 +895,12 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
         # prepare links for processing
         new_hrefs = [libgen_base_books+"ids"+g.split('md5')[-1]+"&fields=*" for g in get_hrefs]
 
+
         with FuturesSession() as session:
             results = [session.get(g) for g in new_hrefs]
 
             for item in as_completed(results):
                 record = item.result()
-
                 # extends urls with domain names and classifies them
                 # be careful data needs to be a list (or update_libgen_json needs to be upgraded)
                 try:

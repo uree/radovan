@@ -1,3 +1,7 @@
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
+
 #FORMATTING LINKS
 def url_constructor(name, type, link):
     names = ['landing_url', 'download_url', 'open_url']
@@ -105,7 +109,7 @@ def process_bibtex_onpage(q):
     return item
 
 def update_libgen_json(data):
-    #print("updating json")
+    #print("--- updating json ---")
     current_libgen_ip = "http://93.174.95.29/main/"
     for_cover = "http://93.174.95.29/covers/"
     current_libgen_home = "http://libgen.unblocked.name"
@@ -125,6 +129,7 @@ def update_libgen_json(data):
         d['locator'] = mini_locator
         d['landing_url'] = current_libgen_home+'/book/index.php?md5='+d['md5']
         tmp.append(d)
+
 
     return tmp
 
