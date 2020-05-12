@@ -30,7 +30,7 @@ def search():
     return render_template('search_page.html', query="", form_data=sources_d)
 
 
-@app.route('/results?author=<author>', methods=['GET', 'POST'])
+@app.route('/results', methods=['GET', 'POST'])
 def results():
     if request.method == 'POST':
         r = request.form.to_dict()
