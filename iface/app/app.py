@@ -44,18 +44,17 @@ def results():
 
         sources = '+'.join(selection)
 
-        query = '?author='+r['author']+'&title='+r['title']+'&year='+r['year']+'&isbn='+r['isbn']+'&doi='+r['doi']+'&sources='+sources
-        print(query)
+        query = '?author='+r['author']+'&title='+r['title']+'&year='+r['title']+'&isbn='+r['isbn']+'&doi='+r['doi']+'&sources='+sources
 
-        r = requests.get('http://localhost:9003/v1.0/simple/items'+query)
+        radovan = requests.get('http://localhost:9003/v1.0/simple/items'+query)
 
         try:
-            return_data = r.json()
+            return_data = radovan.json()
         except Exception as e:
             logging.debug("Error displaying results: ", e)
             return_data = ''
 
-        return render_template('results.html', return_data=return_data, form_data=sources_d)
+        return render_template('results.html', return_data=return_data, form_data=sources_d, title=r['title'], author=r['author'], year=r['title'], doi=r['doi'], isbn=r['isbn'])
 
 
 @app.route('/about', methods=['GET'])
