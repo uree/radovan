@@ -15,7 +15,7 @@
                 <!-- <div class="buff col-lg-4 col-xl-4">
 
                 </div> -->
-                <div class="p-2 flex-fill">
+                <div class="p-2 flex-fill radovan-top">
                     <img id="radovan1" src="static/img/radovan_superlong2.png" alt="">
                 </div>
 
@@ -23,7 +23,7 @@
                     <h1>Radovan from planet Meta <sup id="beta">[beta]</sup> </h1>
                 </div>
 
-                <div class="p-2 flex-fill">
+                <div class="p-2 flex-fill radovan-bottom">
                     <img id="radovan2" src="static/img/radovan_superlong1.png" alt="">
                 </div>
 
@@ -53,19 +53,20 @@
                             </div>
 
                             <div class="radio">
-                                Sources:
-                                <br>
-                                <input type="checkbox" id="checkAll" checked value=""> Select All
-                                {% if form_data %}
-                                    {% for g in form_data %}
-                                        <p class="top-check">
-                                            <label class="check"><input type="checkbox" checked name="providers" class="" value="{{ g.id }}"> <a class="provider_link" href="{{ g.url }}">{{ g.full_name }}</a></label>
-                                            <br>
-                                        </p>
-                                    {% endfor %}
-                                {% else %}
-                                    <p>No data!</p>
-                                {% endif %}
+                                <p><input type="checkbox" id="checkAll" checked value=""> All sources <button class="btn" type="button" id="expand">&#9661;</button></p>
+
+                                <div id="sources">
+                                    {% if form_data %}
+                                        {% for g in form_data %}
+                                            <p class="top-check">
+                                                <label class="check"><input type="checkbox" checked name="providers" class="" value="{{ g.id }}"> <a class="provider_link" href="{{ g.url }}">{{ g.full_name }}</a></label>
+                                                <br>
+                                            </p>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>No data!</p>
+                                    {% endif %}
+                                </div>
                             </div>
                             <!-- <input type="submit"> -->
                             <div class="soumission">
@@ -107,7 +108,15 @@
                       });
                     });
 
-
+                    $('#expand').click(function() {
+                        $("#sources").toggle(function() {
+                            if ($("#sources").css('display') === 'none') {
+                                $("#expand").html("&#9661;");
+                            } else  {
+                                $("#expand").html("&#9651;");
+                            }
+                        });
+                    });
                 </script>
 
             </div>

@@ -26,6 +26,7 @@
 
                     <div class="identifiers">
                         {% if prop.identifier %}
+                        <p>
                             {% for i in prop.identifier %}
                                 {% if i.type == "isbn" %}
                                     ISBN {{ i.id }}
@@ -33,6 +34,8 @@
                                     DOI {{ i.id }}
                                 {% endif %}
                             {% endfor %}
+                        </p>
+
                         {% endif %}
                     </div>
 
