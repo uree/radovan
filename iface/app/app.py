@@ -16,17 +16,33 @@ app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
 logging.basicConfig(filename='logs/radovan_iface_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
+# get sources and select all
+global sources_d
+r = requests.get('http://localhost:9003/v1.0/sources').json()
+
+for item in r:
+    item.update( {"selected": 1})
+
+sources_d = r
+
 @app.route('/')
 def search():
-    return render_template('search_page.html', query="")
+    return render_template('search_page.html', query="", form_data=sources_d)
 
 
-@app.route('/results', methods=['GET', 'POST'])
+@app.route('/results?author=<author>', methods=['GET', 'POST'])
 def results():
     if request.method == 'POST':
         r = request.form.to_dict()
 
-        sources = '+'.join(request.form.getlist('providers'))
+        selection = request.form.getlist('providers')
+        sel_int = [int(i) for i in selection]
+
+        for item in sources_d:
+            if item['id'] not in sel_int:
+                item.update( {"selected": 0})
+
+        sources = '+'.join(selection)
 
         query = '?author='+r['author']+'&title='+r['title']+'&year='+r['year']+'&isbn='+r['isbn']+'&doi='+r['doi']+'&sources='+sources
         print(query)
@@ -39,19 +55,13 @@ def results():
             logging.debug("Error displaying results: ", e)
             return_data = ''
 
-        return render_template('results.html', return_data=return_data)
+        return render_template('results.html', return_data=return_data, form_data=sources_d)
 
 
 @app.route('/about', methods=['GET'])
 def about():
     return render_template('about.html')
 
-#injects variables into all templates
-@app.context_processor
-def inject_providers():
-    r = requests.get('http://localhost:9003/v1.0/sources').json()
-
-    return dict(form_data=r)
 
 
 if __name__ == "__main__":
