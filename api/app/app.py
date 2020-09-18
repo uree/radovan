@@ -19,7 +19,7 @@ from keys import *
 app = Flask(__name__)
 app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
 
-logging.basicConfig(filename='logs/radovan_api_log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
+logging.basicConfig(filename='logs/radovan_api_log.log', level=logging.info, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
 try:

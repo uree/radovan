@@ -948,9 +948,12 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
         return "Not found"
 
     logging.debug(query)
-    r = requests.get(query)
-    data = r.json()
 
+    try:
+        r = requests.get(query, verify=False) # ssl
+        data = r.json()
+    except requests.exceptions.SSLError:
+        data = {"_items": []}
 
     if len(data['_items']) < 1:
         result_queue.put(build2("Not found", 'memoryoftheworld'))

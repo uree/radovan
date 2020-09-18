@@ -3,6 +3,7 @@
         {% block head %}
             <title>Radovan - a meta search engine</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+            <link rel="icon" type="image/png" href="static/favicon.png">
             <link rel="stylesheet" href="static/master.css">
             <link rel="stylesheet" media="screen" href = "static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
             <script src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
@@ -26,9 +27,6 @@
                 <div class="p-2 flex-fill radovan-bottom">
                     <img id="radovan2" src="static/img/radovan_superlong1.png" alt="">
                 </div>
-
-
-
             </div>
             <div class="content row">
                 <div class="sidebar col-xs-12 col-s-12 col-md-3 col-lg-3 col-xl-3">
@@ -57,9 +55,9 @@
 
                                 <div id="sources">
                                     {% if form_data %}
-                                        {% for g in form_data %}
+                                        {% for f in form_data %}
                                             <p class="top-check">
-                                                <label class="check"><input type="checkbox" {% if g.selected == 1 %}checked{% else %}{% endif %} name="providers" class="" value="{{ g.id }}"> <a class="provider_link" href="{{ g.url }}">{{ g.full_name }}</a></label>
+                                                <label class="check"><input type="checkbox" {% if f.selected == 1 %}checked{% else %}{% endif %} name="providers" class="" value="{{ f.id }}"> <a class="provider_link" href="{{ f.url }}">{{ f.full_name }}</a></label>
                                                 <br>
                                             </p>
                                         {% endfor %}
