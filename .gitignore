@@ -3,3 +3,4 @@ tests/
 __pycache__/
 api/app/keys.py
 lgb.py
+rsync-exclude.txt
