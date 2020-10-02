@@ -21,7 +21,7 @@ global sources_d
 r = requests.get('http://localhost:9003/v1.0/sources').json()
 
 for item in r:
-    item.update( {"selected": 1})
+    item.update({"selected": 1})
 
 sources_d = r
 

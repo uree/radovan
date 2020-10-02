@@ -147,6 +147,12 @@ label.check, label.sub-check, p.group {
 
 #searchbuttonmain {
     margin-top: 10px;
+    width: 100%;
+    height: 40px;
+}
+
+form {
+    margin-bottom: 0;
 }
 
 
