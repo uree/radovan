@@ -49,6 +49,7 @@ scielo_base = 'http://search.scielo.org/?q='
 opendoar_base = 'http://opendoar.org/api.php'
 monoskop_base = 'https://monoskop.org/log/?cat=17&s='
 oadoi_base = 'https://api.unpaywall.org/v2/'
+mediarep_base = 'https://mediarep.org/discover?'
 
 libgen_home = "http://libgen.unblocked.name"
 libgen_home = "http://gen.lib.rus.ec"
@@ -63,7 +64,7 @@ aaaaarg_username = ""
 aaaaarg_password = ""
 
 
-sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'http://www.doabooks.org/doab?func=search&query='}, {'full_name': 'OAPEN', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'http://www.doabooks.org/doab?func=search&query='}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s='},     {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://libgen.unblocked.name/json.php?'}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://libgen.unblocked.name/scimag/index.php?'}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query='}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php'}, {'full_name': 'SciELO', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q='}, {'full_name': 'Memory of The World', 'url': 'http://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/'}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/'}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search'},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/'}]
+sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'http://www.doabooks.org/doab?func=search&query='}, {'full_name': 'OAPEN', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'http://www.doabooks.org/doab?func=search&query='}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s='},     {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://libgen.unblocked.name/json.php?'}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://libgen.unblocked.name/scimag/index.php?'}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query='}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php'}, {'full_name': 'SciELO', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q='}, {'full_name': 'Memory of The World', 'url': 'http://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/'}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/'}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search'},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/'}, {'full_name': 'media/rep/', 'url': 'https://mediarep.org/', 'code_name': 'mediarep' , 'id': 12, 'books': 1, 'articles': 1, 'query_url': 'https://mediarep.org/discover?'}]
 
 sources_short = {}
 
@@ -991,6 +992,86 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
     logging.debug(hits)
 
     result_queue.put(build2(hits, 'memoryoftheworld'))
+    return hits
+
+
+def mediarep(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
+    logging.info("Searching mediarep ...")
+    hits = {'hits': []}
+    count = 0
+
+    query = mediarep_base+ 'filtertype_1=title&filter_relational_operator_1=contains&filter_1='+title+'&filtertype_2=author&filter_relational_operator_2=contains&filter_2='+author+'&query=&scope='
+    print(query)
+
+    r = requests.get(query)
+    response = r.text
+    strain = SoupStrainer(id="aspect_discovery_SimpleSearch_div_search-results")
+    soup = BeautifulSoup(response, 'lxml', parse_only=strain)
+
+    titles = soup.select('a')
+    follou = ["https://mediarep.org"+t.get('href')+'?show=full' for t in titles]
+    print(follou)
+    #localhost:9003/v1.0/simple/items?author=&title=hacking&year=&isbn=&doi=&sources=12
+
+    with FuturesSession() as session:
+        results = [session.get(f) for f in follou]
+
+        for r in as_completed(results[:hit_limit]):
+            item = {}
+            # i can get it ALL from the meta tags
+            strainer = SoupStrainer("meta")
+            suppchen = BeautifulSoup(r.result().text, 'lxml', parse_only=strainer)
+            #print(suppchen)
+            try:
+                item['title'] = suppchen.select_one('meta[name="DC.title"]')['content']
+            except TypeError:
+                pass
+
+            try:
+                item['year'] = suppchen.select_one('meta[name="DCTERMS.issued"]')['content']
+            except TypeError:
+                pass
+
+            try:
+                item['doi'] = suppchen.select_one('meta[name="citation_doi"]')['content']
+            except TypeError:
+                pass
+
+            try:
+                href = suppchen.select_one('meta[name="citation_pdf_url"]')['content']
+                item['href'] = url_constructor('open', 'open_url', href)
+            except TypeError:
+                pass
+
+            try:
+                item['isbn'] = suppchen.select_one('meta[content^="isbn:"]')['content'].replace('isbn:', '')
+            except TypeError:
+                pass
+
+            # plethora of authorita
+            creators = suppchen.select('meta[name="DC.creator"]')
+            editors = suppchen.select('meta[name="DC.editor"]')
+
+            # strained
+            if editors:
+                try:
+                    item['editor'] = [e['content'] for e in editors]
+                except:
+                    pass
+            if creators:
+                try:
+                    item['author'] = [c['content'] for c in creators]
+                except:
+                    pass
+            print(item)
+
+            item['rank'] = count
+            item['query'] = query
+            count+=1
+            hits['hits'].append(item)
+
+    logging.debug(hits)
+    result_queue.put(build2(hits, 'mediarep'))
     return hits
 
 
