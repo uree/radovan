@@ -745,7 +745,12 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
         title = i.select('h1')[0].get_text()
         landing = i.select('h1 a')[0].get('href')
         gt_imag = i.select('img')
-        img_href = gt_imag[0].get('src')
+
+        try:
+            img_href = gt_imag[0].get('src')
+        except IndexError:
+            result_queue.put(build2("Not found", 'monoskop'))
+            return("Not found")
 
         if img_href.startswith('../'):
             img_href = 'https://monoskop.org/'+img_href[3:]
@@ -771,6 +776,7 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
         links = []
         not_links = []
 
+        # this relies on the cover image being found = not great
         for x in side:
             try:
                 m = x.find_all('a')
@@ -813,8 +819,6 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
         mdata['type'] = 'book'
 
         count+=1
-
-
 
         hits['hits'].append(mdata)
 
