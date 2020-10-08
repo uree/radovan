@@ -51,13 +51,19 @@
                             </div>
 
                             <div class="radio">
-                                <p><input type="checkbox" id="checkAll" checked value=""> All sources <button class="btn" type="button" id="expand">&#9661;</button></p>
+                                {% set ns = namespace(all=true) %}
+                                {% for f in form_data %}
+                                    {% if f.selected == 0 %}
+                                        {% set ns.all = false %}
+                                    {% endif %}
+                                {% endfor %}
+                                <p><input type="checkbox" id="checkAll" {% if ns.all %}checked{% endif %} value=""> All sources <button class="btn" type="button" id="expand">&#9661;</button></p>
 
                                 <div id="sources">
                                     {% if form_data %}
                                         {% for f in form_data %}
                                             <p class="top-check">
-                                                <label class="check"><input type="checkbox" {% if f.selected == 1 %}checked{% else %}{% endif %} name="providers" class="" value="{{ f.id }}"> <a class="provider_link" href="{{ f.url }}">{{ f.full_name }}</a></label>
+                                                <label class="check"><input type="checkbox" {% if f.selected == 0 %}{% else %}checked{% endif %} name="providers" class="" value="{{ f.id }}"> <a class="provider_link" href="{{ f.url }}">{{ f.full_name }}</a></label>
                                                 <br>
                                             </p>
                                         {% endfor %}
@@ -89,11 +95,26 @@
             </div>
             <div class="footer">
                 <script type="text/javascript">
+                    // $(document).ready(function(){
+                    //     $("#checkAll").change(function () {
+                    //         $("input:checkbox").prop('checked', $(this).prop("checked"));
+                    //     });
+                    // })
                     $(document).ready(function(){
                         $("#checkAll").change(function () {
                             $("input:checkbox").prop('checked', $(this).prop("checked"));
                         });
+
+                        $(".check").change(function () {
+                            console.log($(".check").length);
+                            console.log($("input[name=providers]:checked").length);
+                          if($(".check").length==$("input[name=providers]:checked").length)
+                            $("#checkAll").prop('checked', true);
+                          else
+                            $("#checkAll").prop('checked', false);
+                        });
                     })
+
 
                     $( "#searchbuttonmain" ).click(function() {
                       $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading ...')

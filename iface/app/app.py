@@ -17,21 +17,31 @@ logging.basicConfig(filename='logs/radovan_iface_log.log', level=logging.INFO, f
 pp = pprint.PrettyPrinter(indent=4)
 
 # get sources and select all
-global sources_d
-r = requests.get('http://localhost:9003/v1.0/sources').json()
-
-for item in r:
-    item.update({"selected": 1})
-
-sources_d = r
+# global sources_d
+# r = requests.get('http://localhost:9003/v1.0/sources').json()
+#
+# for item in r:
+#     item.update({"selected": 1})
+#
+# sources_d = r
 
 @app.route('/')
 def search():
+    sources_d = requests.get('http://localhost:9003/v1.0/sources').json()
+
+    for item in sources_d:
+        item.update({"selected": 1})
+
     return render_template('search_page.html', query="", form_data=sources_d)
 
 
 @app.route('/results', methods=['GET', 'POST'])
 def results():
+    sources_d = requests.get('http://localhost:9003/v1.0/sources').json()
+
+    for item in sources_d:
+        item.update({"selected": 1})
+
     if request.method == 'POST':
         r = request.form.to_dict()
 
