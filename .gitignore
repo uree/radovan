@@ -4,3 +4,4 @@ __pycache__/
 api/app/keys.py
 lgb.py
 rsync-exclude.txt
+sync.sh

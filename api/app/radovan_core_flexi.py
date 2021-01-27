@@ -578,7 +578,13 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
 
     doab_url = doab_base+query
 
-    r = requests.get(doab_url)
+    hits = {'hits': []}
+
+    try:
+        r = requests.get(doab_url)
+    except requests.exceptions.SSLError:
+        result_queue.put(build2(hits, 'doab'))
+        return hits
 
     strain = SoupStrainer(id="result")
     soup = BeautifulSoup(r.text, "lxml", parse_only=strain)
@@ -586,7 +592,6 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
     records = soup.select('div[id*="record"]')
     # print("how long: ", len(records))
 
-    hits = {'hits': []}
 
     for i in records:
         try:

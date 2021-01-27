@@ -106,8 +106,6 @@
                         });
 
                         $(".check").change(function () {
-                            console.log($(".check").length);
-                            console.log($("input[name=providers]:checked").length);
                           if($(".check").length==$("input[name=providers]:checked").length)
                             $("#checkAll").prop('checked', true);
                           else
