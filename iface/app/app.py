@@ -12,7 +12,6 @@ import logging
 app = Flask(__name__)
 app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
 
-
 logging.basicConfig(filename='logs/radovan_iface_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -33,6 +32,49 @@ def search():
         item.update({"selected": 1})
 
     return render_template('search_page.html', query="", form_data=sources_d)
+
+
+@app.route('/search', methods=['GET'])
+def get_search():
+    sources_d = requests.get('http://localhost:9003/v1.0/sources').json()
+
+    source_choice = request.args.get('sources', None)
+    source_choice_int = [int(n) for n in source_choice.split()]
+
+    # update source selection
+    if source_choice_int:
+        for item in sources_d:
+            if item['id'] not in source_choice_int:
+                item['selected'] = 0
+
+    print("sources d")
+    print(sources_d)
+    # ?author=<author>&title=<title>&year=<year>&isbn=<isbn>&doi=<doi>&sources=<sources>
+    # http://localhost:9090/search?author=one&title=two&year=three&isbn=1234567891&doi=doix1234567&sources=0+1+2+3+4
+    author  = request.args.get('author', '')
+    title  = request.args.get('title', '')
+    year = request.args.get('year', '')
+    doi = request.args.get('doi', '')
+    isbn = request.args.get('isbn', '')
+
+    print("--- get search init ---")
+    # print(author, title, year, isbn, doi, sources)
+    # q = {"author": author, "title": title, "year": year, "isbn": isbn, "doi": doi, "sources": sources}
+
+    query = "http://localhost:9003/v1.0/simple/items?"+request.query_string.decode("utf-8")
+    print("query")
+    print(query)
+
+    radovan = requests.get(query)
+
+    try:
+        print(radovan)
+        return_data = radovan.json()
+    except Exception as e:
+        print(e)
+        return_data = {"Message": "No results."}
+
+    return render_template('results.html', return_data=return_data, form_data=sources_d, title=title, author=author, year=year, doi=doi, isbn=isbn)
 
 
 @app.route('/results', methods=['GET', 'POST'])

@@ -13,9 +13,7 @@
     <body>
         <div class="container">
             <div class="topbar row d-flex flex-xl-nowrap flex-lg-nowrap">
-                <!-- <div class="buff col-lg-4 col-xl-4">
 
-                </div> -->
                 <div class="p-2 flex-fill radovan-top">
                     <img id="radovan1" src="static/img/radovan_superlong2.png" alt="">
                 </div>
@@ -31,7 +29,7 @@
             <div class="content row">
                 <div class="sidebar col-xs-12 col-s-12 col-md-3 col-lg-3 col-xl-3">
                     <div class="form-container">
-                        <form action="results" method="POST">
+                        <form action="/search" method="GET">
                             <div class="fields">
                                 <div class="textfield">
                                     <span>Title: </span><input class="text" type="text" name="title" value="{{ title }}">
@@ -63,7 +61,7 @@
                                     {% if form_data %}
                                         {% for f in form_data %}
                                             <p class="top-check">
-                                                <label class="check"><input type="checkbox" {% if f.selected == 0 %}{% else %}checked{% endif %} name="providers" class="" value="{{ f.id }}"> <a class="provider_link" href="{{ f.url }}">{{ f.full_name }}</a></label>
+                                                <label class="check"><input type="checkbox" {% if f.selected == 0 %}{% else %}checked{% endif %} name="sources" class="" value="{{ f.id }}"> <a class="provider_link" href="{{ f.url }}">{{ f.full_name }}</a></label>
                                                 <br>
                                             </p>
                                         {% endfor %}
@@ -72,7 +70,6 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <!-- <input type="submit"> -->
                             <div class="soumission">
                                 <button type="submit" name="" value="Search" class="" id="searchbuttonmain">
                                     Sumbit Query
@@ -95,11 +92,7 @@
             </div>
             <div class="footer">
                 <script type="text/javascript">
-                    // $(document).ready(function(){
-                    //     $("#checkAll").change(function () {
-                    //         $("input:checkbox").prop('checked', $(this).prop("checked"));
-                    //     });
-                    // })
+
                     $(document).ready(function(){
                         $("#checkAll").change(function () {
                             $("input:checkbox").prop('checked', $(this).prop("checked"));
@@ -116,13 +109,6 @@
 
                     $( "#searchbuttonmain" ).click(function() {
                       $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading ...')
-                      $.ajax({
-                         type: "POST",
-                         url: '/results',
-                         data: $('form').serialize(),
-                      }).done(function() {
-                          //console.log("success");
-                      });
                     });
 
                     $('#expand').click(function() {
