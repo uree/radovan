@@ -213,20 +213,6 @@ def get_sources():
     return sources_dict
 
 
-#this gives a name to the output dict
-def build2(output, name):
-    blam = {}
-
-    if output != "Not found":
-        blam[name] = output
-    else:
-        blam[name] = None
-
-    return blam
-
-
-
-
 # SEARCH FUNCTIONS
 
 # ARTICLES
@@ -256,7 +242,7 @@ def doaj(result_queue, author='', title='', year='', doi='', isbn='', hit_limit 
 
     hits = {'hits': []}
     hits['hits'] = data['results']
-    result_queue.put(build2(hits, 'doaj'))
+    result_queue.put({'doaj': hits})
     return hits
 
 
@@ -264,6 +250,8 @@ def osf(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=1
     #print("Searching osf ...")
     logging.info("Searching osf ...")
     count = 0
+
+    hits = {'hits': []}
 
     if doi:
         query = '?q='+doi+'&type=preprint'
@@ -295,15 +283,13 @@ def osf(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=1
 
     title2 = title.replace('+', ' ')
 
-
     try:
         data['status'] != "200"
-        result_queue.put("Not found")
-        return "Not found"
+        result_queue.put({'osf': hits})
+        return {'osf': hits}
     except:
         data = data['hits']['hits']
 
-        hits = {'hits': []}
 
         for i in data:
             i['_source']['rank'] = count
@@ -320,8 +306,8 @@ def osf(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=1
             count += 1
             hits['hits'].append(i['_source'])
 
-        result_queue.put(build2(hits, 'osf'))
-        return hits
+        result_queue.put({'osf': hits})
+        return {'osf': hits}
 
 
 def core(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
@@ -425,8 +411,8 @@ def core(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
             count+=1
             hits['hits'].append(item)
 
-    result_queue.put(build2(hits, 'core'))
-    return hits
+    result_queue.put({'core': hits})
+    return {'core': hits}
 
 
 
@@ -455,8 +441,8 @@ def scielo(result_queue, author='', title='', year='', doi='', isbn='', hit_limi
         hits['hits'].append(mdata)
         count += 1
 
-    result_queue.put(build2(hits, 'scielo'))
-    return hits
+    result_queue.put({'scielo': hits})
+    return {'scielo': hits}
 
 
 
@@ -530,8 +516,8 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
         hits['hits'].append(item)
         count+=1
 
-    result_queue.put(build2(hits, 'libgen_article'))
-    return hits
+    result_queue.put({'libgen_article': hits})
+    return {'libgen_article': hits}
 
 
 # aka unpaywall
@@ -540,10 +526,9 @@ def oadoi(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
     email = oadoi_email
     # print("Searching oadoi ...")
     logging.info("Searching oadoi ...")
+    hits = {'hits': []}
 
     if doi:
-        hits = {'hits': []}
-
         query = doi+'?email='+email
         query_url = oadoi_base+query
 
@@ -553,12 +538,9 @@ def oadoi(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
         data['type'] = 'article'
         data['query'] = oadoi_base
         hits['hits'].append(data)
-        result_queue.put(build2(hits, 'oadoi'))
-        return hits
 
-    else:
-        result_queue.put(build2("Not found", 'oadoi'))
-        return "Not found"
+    result_queue.put({'oadoi': hits})
+    return {'oadoi': hits}
 
 
 #BOOKS
@@ -583,14 +565,13 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
     try:
         r = requests.get(doab_url)
     except requests.exceptions.SSLError:
-        result_queue.put(build2(hits, 'doab'))
-        return hits
+        result_queue.put({'doab': hits})
+        return {'doab': hits}
 
     strain = SoupStrainer(id="result")
     soup = BeautifulSoup(r.text, "lxml", parse_only=strain)
 
     records = soup.select('div[id*="record"]')
-    # print("how long: ", len(records))
 
 
     for i in records:
@@ -640,8 +621,8 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
 
         count+=1
 
-    result_queue.put(build2(hits, 'doab'))
-    return hits
+    result_queue.put({'doab': hits})
+    return {'doab': hits}
 
 
 
@@ -689,12 +670,8 @@ def oapen(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
         hits['hits'].append(mdata)
         count+=1
 
-    try:
-        result_queue.put(build2(hits, 'oapen'))
-        return hits
-    except Exception as e:
-        result_queue.put(build2("Not found", 'oapen'))
-        return "Not found"
+    result_queue.put({'oapen': hits})
+    return {'oapen': hits}
 
 
 
@@ -702,6 +679,9 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     # no isbn search
     # print("Searching Monoskop ...")
     logging.info("Searching monoskop ...")
+
+    hits = {'hits': []}
+    count = 0
 
     # unicode characters problematic for urrlib
     author = author.replace(' ','+')
@@ -731,17 +711,12 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     try:
         con = urllib.request.urlopen(request)
     except Exception as e:
-        # print("Urllib error in Monoskop ...")
-        # print(e)
-        # print(monoskop_url)
-        result_queue.put(build2("Not found", 'monoskop'))
-        return("Not found")
+        result_queue.put({'monoskop': hits})
+        return {'monoskop': hits}
 
     soup = BeautifulSoup(con)
     items = soup.select(".item")
 
-    hits = {'hits': []}
-    count = 0
 
     for i in items:
         #print("item")
@@ -755,8 +730,8 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
         try:
             img_href = gt_imag[0].get('src')
         except IndexError:
-            result_queue.put(build2("Not found", 'monoskop'))
-            return("Not found")
+            result_queue.put({'monoskop': hits})
+            return {'monoskop': hits}
 
         if img_href.startswith('../'):
             img_href = 'https://monoskop.org/'+img_href[3:]
@@ -829,11 +804,8 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
         hits['hits'].append(mdata)
 
 
-    try:
-        result_queue.put(build2(hits, 'monoskop'))
-    except Exception as e:
-        result_queue.put(build2("Not found", 'monoskop'))
-        return("Not found")
+    result_queue.put({'monoskop': hits})
+    return {'monoskop': hits}
 
 
 
@@ -860,8 +832,8 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
             data = request.json()
         except ValueError as e:
             logging.error("Value error isbn search libgen book")
-            result_queue.put(build2("Not found", 'libgen_book'))
-            return "Not found"
+            result_queue.put({'libgen_book': hits})
+            return {'libgen_book': hits}
 
 
         if len(data) != 0:
@@ -881,8 +853,8 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
 
                 hits['hits'] = good_links
             else:
-                result_queue.put(build2("Not found", 'libgen_book'))
-                return "Not found"
+                result_queue.put({'libgen_book': hits})
+                return {'libgen_book': hits}
 
 
     else:
@@ -926,8 +898,8 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
     #print("libgen_book_hits")
     #print(hits)
 
-    result_queue.put(build2(hits, 'libgen_book'))
-    return hits
+    result_queue.put({'libgen_book': hits})
+    return {'libgen_book': hits}
 
 def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
     # this is the api version
@@ -954,8 +926,8 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
         title_prep = title.replace(' ', '+')
         query = url_title+title_prep
     else:
-        result_queue.put(build2("Not found", 'memoryoftheworld'))
-        return "Not found"
+        result_queue.put({'memoryoftheworld': hits})
+        return {'memoryoftheworld': hits}
 
     logging.debug(query)
 
@@ -965,11 +937,8 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
     except requests.exceptions.SSLError:
         data = {"_items": []}
 
-    if len(data['_items']) < 1:
-        result_queue.put(build2("Not found", 'memoryoftheworld'))
-        return "No results"
-    else:
-        #print("results!")
+    if len(data['_items']) > 0:
+
         for i in data['_items']:
             output = {}
             url_base = 'https:'+i['library_url']
@@ -996,8 +965,8 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
 
     logging.debug(hits)
 
-    result_queue.put(build2(hits, 'memoryoftheworld'))
-    return hits
+    result_queue.put({'memoryoftheworld': hits})
+    return {'memoryoftheworld': hits}
 
 
 def mediarep(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
@@ -1006,7 +975,6 @@ def mediarep(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     count = 0
 
     query = mediarep_base+ 'filtertype_1=title&filter_relational_operator_1=contains&filter_1='+title+'&filtertype_2=author&filter_relational_operator_2=contains&filter_2='+author+'&query=&scope='
-    print(query)
 
     r = requests.get(query)
     response = r.text
@@ -1015,7 +983,6 @@ def mediarep(result_queue, author='', title='', year='', doi='', isbn='', hit_li
 
     titles = soup.select('a')
     follou = ["https://mediarep.org"+t.get('href')+'?show=full' for t in titles]
-    print(follou)
     #localhost:9003/v1.0/simple/items?author=&title=hacking&year=&isbn=&doi=&sources=12
 
     with FuturesSession() as session:
@@ -1068,7 +1035,6 @@ def mediarep(result_queue, author='', title='', year='', doi='', isbn='', hit_li
                     item['author'] = [c['content'] for c in creators]
                 except:
                     pass
-            print(item)
 
             item['rank'] = count
             item['query'] = query
@@ -1076,8 +1042,8 @@ def mediarep(result_queue, author='', title='', year='', doi='', isbn='', hit_li
             hits['hits'].append(item)
 
     logging.debug(hits)
-    result_queue.put(build2(hits, 'mediarep'))
-    return hits
+    result_queue.put({'mediarep': hits})
+    return {'mediarep': hits}
 
 
 # start of aaaaarg
@@ -1207,7 +1173,6 @@ def parsearg(soup_material):
         if str(i.get('href')).startswith('/upload'):
             full = aaaaarg_base+str(i.get('href'))
             output.append(full)
-
         else:
             pass
 
@@ -1494,8 +1459,8 @@ def aaaaarg(result_queue, br, author='', title='', hit_limit=10):
 
 
     else:
-        result_queue.put(build2("Not found", 'aaaaarg'))
-        return "Not found"
+        result_queue.put({'aaaaarg': hits})
+        return {'aaaaarg': hits}
 
 
     if hits:
@@ -1503,11 +1468,10 @@ def aaaaarg(result_queue, br, author='', title='', hit_limit=10):
         for h in hits['hits']:
             h['rank'] = count
             count+=1
-        result_queue.put(build2(hits, 'aaaaarg'))
-        return hits
-    else:
-        result_queue.put(build2("Not found", 'aaaaarg'))
-        return "Not found"
+
+    result_queue.put({'aaaaarg': hits})
+    return {'aaaaarg': hits}
+
 
 
 # end of aaaaarg

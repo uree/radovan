@@ -64,7 +64,6 @@ div.title {
 
 div.results {
     padding-left: 95px;
-    padding-top: 10px;
 }
 
 /* .title h1 {
@@ -187,6 +186,12 @@ div.center {
 }
 
 /* RESULTS */
+
+/* number of results */
+div.result_count {
+    padding-bottom: 10px;
+}
+
 img.coverimg {
     max-width: 100%;
 }

@@ -468,10 +468,12 @@ def mein_main(incoming):
             source = list(i.keys())[0]
         except Exception as e:
             return "Error"
+
         global current_source
         current_source = source
 
         hit_count = {'source': source, 'count': len(i[source]['hits'])}
+
         meta['hits_per_source'].append(hit_count)
 
         try:
@@ -645,7 +647,6 @@ def mein_main(incoming):
                         hit = make_a_journal(hit)
                 except KeyError:
                     pass
-
 
                 #print(json.dumps(hit, sort_keys=True, indent=4))
 

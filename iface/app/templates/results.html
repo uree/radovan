@@ -1,9 +1,20 @@
 {% extends "search_page.html" %}
 
     {% block results %}
+        <div class="result_count">
+        {% if return_data['meta']['number_of_hits'] == 0 %}
+            No results.
+        {% else %}
+            total: {{ return_data['meta']['number_of_hits'] }}
+            {% for s in return_data['meta']['hits_per_source'] %}
+                {{ s['source'] }}: {{ s['count'] }}
+            {% endfor %}
+        {% endif %}
 
-        {% for r in return_data %}
-        <div class="row record">
+        </div>
+
+        {% for r in return_data['hits'] %}
+        <div class="row record {{ r.extra[0]['source'] }}">
                 {% for prop in r.extra %}
                 <div class="imag col-xl-3 col-lg-3 col-md-3">
                     <p class="source">[<a href="{{ prop.query }}" target="_blank" title="open query in new tab">{{ prop.source }}</a>]</p>
