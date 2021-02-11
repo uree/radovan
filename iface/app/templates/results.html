@@ -1,14 +1,39 @@
 {% extends "search_page.html" %}
 
     {% block results %}
-        <div class="result_count">
+        <div class="row result_count">
         {% if return_data['meta']['number_of_hits'] == 0 %}
-            No results.
+            Dear h00man or else. No results. Please. Cake instead. Maybe cheese.
+
+            <br>
+
+            <pre>
+                               .
+                              / `.
+                            .'... `-.
+                          .'.. .   ..\
+                         /. . . .   ..`.
+                        /...  ... .    .\
+                       /.. . ........   .\
+                     .'.   ...   ......  .|
+                   .' ... . ..... . ..--'.|
+                 .' ... VK ...  ._.--'   .|
+               .'... . ...  _.-'O   OO O .|
+              /... .___.---'O OO .O. OO O.|
+             /__.--' OO O  .OO O  OO O ...|
+             | OO OO O OO . .O. OO O  ..O.|
+             (O. OO. .O O O O  OO  ..OO O.|
+             ( OO .O. O  O  OO............|
+             (OOO........O_______.-------'
+             |_____.-----'
+            </pre>
+
         {% else %}
-            total: {{ return_data['meta']['number_of_hits'] }}
-            {% for s in return_data['meta']['hits_per_source'] %}
-                {{ s['source'] }}: {{ s['count'] }}
-            {% endfor %}
+            <div class="col-xl-3 col-lg-3 col-md-3"></div>
+            <div class="col-xl-9 col-lg-9 col-md-9">
+                {{ return_data['meta']['number_of_hits'] }} results
+            </div>
+
         {% endif %}
 
         </div>
