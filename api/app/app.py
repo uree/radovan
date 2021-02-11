@@ -6,6 +6,7 @@ from json import dumps
 from radovan_core_flexi import search
 from radovan_core_flexi import get_sources
 from bibjson_methods import mein_main
+from validators import validate_parameters
 import pprint
 import cProfile, pstats, io
 
@@ -82,6 +83,16 @@ def arglogin(username, password):
 
 
 # BASE
+@app.route('/')
+def hello_world_current():
+    hello = "Hello, World! This is Radovan. The API is running at /radovan/api/"
+    version = "The current version is 1.1. For information on the previous version go to /radovan/api/v1.0"
+    endpoint = ["/search/single for single queries", '/search/bulk for bulk queries']
+    parameters = "author, title, year, doi, isbn, sources"
+    sample_query = "/radovan/api/search/single?author=miller&title=&year=2010&isbn=&doi=&sources=2+3"
+    hlo = {'hello': hello, 'version_info': version, 'endpoint': endpoint, 'parameters': parameters, 'sample_query': sample_query}
+    return hlo
+
 @app.route('/v1.0')
 def hello_world():
     hello = "Hello, World! This is Radovan. The API is running at /radovan/api/v1.0/"
@@ -92,6 +103,46 @@ def hello_world():
     return jsonify(hlo)
 
 # SEARCH
+@app.route('/search/single')
+def search_one():
+    try:
+        global aaaaarg_browser
+    except:
+        aaaaarg_browser = None
+
+    arguments = validate_parameters(request.args)
+
+    if arguments['valid_query'] == False:
+        return arguments
+
+    author  = request.args.get('author')
+    title  = request.args.get('title')
+    year = request.args.get('year')
+    doi = request.args.get('doi')
+    isbn = request.args.get('isbn')
+    sources = request.args.get('sources', None)
+    sources_int = [int(n) for n in sources.split()]
+
+    simple_results = search(author, title, year, doi, isbn, sources_int)
+
+    logging.info("---- end core flexi ----")
+
+    nice_output = mein_main(simple_results)
+
+    # what zis?
+    for b in nice_output:
+        try:
+            print(b['extra'][0]['rank'])
+        except Exception as e:
+            print("This one broke rank: ", b['extra'][0]['source'])
+
+    nice_output_sorted = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
+
+    nice_dict = {'hits': nice_output_sorted, 'meta': {'number_of_hits': len(nice_output_sorted)}}
+
+    return nice_dict
+
+
 @app.route('/v1.0/simple/items')
 def simple():
     try:
@@ -132,6 +183,99 @@ def simple():
 
 
 # BULK SEARCH (input bibjson)
+@app.route('/search/bulk')
+def search_bulk():
+    error = jsonify({'response': 'incorrect query format'})
+
+    # set range of sources for query
+    all_sources = get_sources()
+    source_ids = [n['id'] for n in all_sources]
+
+    data = request.json
+
+    # accounting
+    refs_with_hits = 0
+    links_total = 0
+
+    try:
+        results_combined = {'references_with_new_links': None, 'total_references': len(data), 'total_number_links': None, 'bib_and_links': []}
+    except Exception as e:
+        logging.debug("Error generating results: ", e)
+        return error
+
+    # this should be executed in parallel (quasi), no?
+    for ref in data:
+        #print("#### NEXT REF ####")
+        temp = ref
+        try:
+            author = ref['bibjson'][0]['author'][0]['name']
+        except Exception as e:
+            author = ''
+            pass
+
+        try:
+            title = ref['bibjson'][0]['title']
+        except Exception as e:
+            title = ''
+            pass
+
+        try:
+            year = ref['bibjson'][0]['year']
+        except Exception as e:
+            year = ''
+            pass
+
+        try:
+            if ref['bibjson'][0]['identifier'][0]['type'].lower() == 'doi':
+                doi = ref['bibjson'][0]['identifier'][0]['id']
+                #print(doi)
+            else:
+                doi = ''
+        except Exception as e:
+            #print(e)
+            doi = ''
+            pass
+
+        try:
+            if ref['bibjson'][0]['identifier'][0]['type'].lower() == 'isbn':
+                isbn = ref['bibjson'][0]['identifier'][0]['id']
+                #print(isbn)
+            else:
+                isbn = ''
+        except Exception as e:
+            #print(e)
+            isbn = ''
+            pass
+
+        # search
+        simple_results = search(author, title, year, doi, isbn, source_ids)
+
+        # standardize results
+        nice_output = mein_main(simple_results)
+
+        #register that the reference has at least 1 new link
+        if len(nice_output) >= 1:
+            refs_with_hits += 1
+            links_total += len(nice_output)
+
+
+        # rank by rank
+        try:
+            temp['search_results'] = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
+        except Exception as e:
+            logging.debug("Error while sorting results: ", e)
+            pass
+
+        results_combined['bib_and_links'].append(temp)
+
+
+    results_combined['total_number_links'] = links_total
+    results_combined['references_with_new_links'] = refs_with_hits
+
+    return jsonify(results_combined)
+    return "bulk search"
+
+
 @app.route('/v1.0/bulk', methods=['GET', 'POST'])
 def bulk():
     error = jsonify({'response': 'incorrect query format'})
