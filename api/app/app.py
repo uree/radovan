@@ -89,7 +89,7 @@ def hello_world_current():
     version = "The current version is 1.1. For information on the previous version go to /radovan/api/v1.0"
     endpoint = ["/search/single for single queries", '/search/bulk for bulk queries']
     parameters = "author, title, year, doi, isbn, sources"
-    sample_query = "/radovan/api/search/single?author=miller&title=&year=2010&isbn=&doi=&sources=2+3"
+    sample_query = "/radovan/api/search/single?author=miller&title=&year=2010&isbn=&doi=&sources=2+3 or /radovan/api/search/single?author=miller&title=&year=2010&isbn=&doi=&sources=2&sources=3"
     hlo = {'hello': hello, 'version_info': version, 'endpoint': endpoint, 'parameters': parameters, 'sample_query': sample_query}
     return hlo
 
@@ -115,15 +115,17 @@ def search_one():
     if arguments['valid_query'] == False:
         return arguments
 
-    author  = request.args.get('author')
-    title  = request.args.get('title')
-    year = request.args.get('year')
-    doi = request.args.get('doi')
-    isbn = request.args.get('isbn')
-    sources = request.args.get('sources', None)
-    sources_int = [int(n) for n in sources.split()]
+    # accept two source listing formats here
+    rargs = request.args.to_dict(flat=False)
 
-    simple_results = search(author, title, year, doi, isbn, sources_int)
+    try:
+        # &sources=2&sources=3
+        sources_int = [int(n) for n in rargs['sources']]
+    except:
+        # sources=1+2+3+4+5+6+7+8+9+10+11+12
+        sources_int = [int(n) for n in rargs['sources'][0].split()]
+
+    simple_results = search(rargs['author'][0], rargs['title'][0], rargs['year'][0], rargs['doi'][0], rargs['isbn'][0], sources_int)
 
     logging.info("---- end core flexi ----")
 
