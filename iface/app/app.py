@@ -47,7 +47,6 @@ def get_search():
     isbn = request.args.get('isbn', '')
 
     query = "http://localhost:9003/search/single?"+request.query_string.decode("utf-8")
-    print(query)
 
     radovan = requests.get(query)
 

@@ -939,7 +939,7 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
 
     if len(data['_items']) > 0:
 
-        for i in data['_items']:
+        for i in data['_items'][:hit_limit]:
             output = {}
             url_base = 'https:'+i['library_url']
             linksos = []
