@@ -1528,7 +1528,6 @@ def debug_pileup(author='', title='', year='', doi='', isbn=''):
 
 # CONTROLLER FUNCTIONS
 
-# with multiprocessing
 def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_limit=10, aaaaarg_browser=None):
 
     selection = [n['code_name'] for n in sources_dict if n['id'] in sources]

@@ -129,9 +129,9 @@ def search_one():
 
     nice_output = mein_main(simple_results)
 
-    nice_output_sorted = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
+    nice_output_sorted = sorted(nice_output['hits'], key=lambda k: k['extra'][0]['rank'])
 
-    nice_dict = {'hits': nice_output_sorted, 'meta': {'number_of_hits': len(nice_output_sorted)}}
+    nice_dict = {'hits': nice_output_sorted, 'meta': {'number_of_hits': len(nice_output_sorted), 'hits_per_source': nice_output['meta']['hits_per_source']}}
 
     return nice_dict
 
@@ -163,13 +163,8 @@ def simple():
         #print("------------------- FORMATTING DATA ---------------------")
         nice_output = mein_main(simple_results)
 
-        for b in nice_output:
-            try:
-                print(b['extra'][0]['rank'])
-            except Exception as e:
-                print("This one broke rank: ", b['extra'][0]['source'])
 
-        nice_output_sorted = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
+        nice_output_sorted = sorted(nice_output['hits'], key=lambda k: k['extra'][0]['rank'])
         #print("nice output sorted")
         #pp.pprint(nice_output_sorted)
         return jsonify(nice_output_sorted)
@@ -340,14 +335,14 @@ def bulk():
         nice_output = mein_main(simple_results)
 
         #register that the reference has at least 1 new link
-        if len(nice_output) >= 1:
+        if len(nice_output['hits']) >= 1:
             refs_with_hits += 1
             links_total += len(nice_output)
 
 
         # rank by rank
         try:
-            temp['search_results'] = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
+            temp['search_results'] = sorted(nice_output['hits'], key=lambda k: k['extra'][0]['rank'])
         except Exception as e:
             logging.debug("Error while sorting results: ", e)
             pass

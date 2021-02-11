@@ -446,9 +446,10 @@ source ='stuff/arg_output.json'
 
 # CONTROLLER FUNCTION
 def mein_main(incoming):
-    hits = []
+    hits = {'hits': []}
     logging.info("Initiated mein_main ...")
-    hit = {"bibjson": []}
+    hit = {'bibjson': []}
+    meta = {'hits_per_source': []}
 
 
     try:
@@ -459,6 +460,7 @@ def mein_main(incoming):
     except TypeError:
         data = incoming['entries']
 
+    # this is where i could count the hits?
     for i in data:
         new_hits = []
 
@@ -468,6 +470,9 @@ def mein_main(incoming):
             return "Error"
         global current_source
         current_source = source
+
+        hit_count = {'source': source, 'count': len(i[source]['hits'])}
+        meta['hits_per_source'].append(hit_count)
 
         try:
             for x in i[source]['hits']:
@@ -514,7 +519,7 @@ def mein_main(incoming):
 
                 hit['bibjson'].append(i[cleaner])
 
-                hits.append(hit)
+                hits['hits'].append(hit)
                 #count+=1
             else:
                 if isinstance(i, dict):
@@ -644,6 +649,7 @@ def mein_main(incoming):
 
                 #print(json.dumps(hit, sort_keys=True, indent=4))
 
-                hits.append(hit)
+                hits['hits'].append(hit)
 
+    hits['meta'] = meta
     return hits
