@@ -1528,36 +1528,6 @@ def debug_pileup(author='', title='', year='', doi='', isbn=''):
 
 # CONTROLLER FUNCTIONS
 
-# without multiprocessing
-def combined(author='', title='', year='', doi='', isbn='', sources='', hit_limit=10):
-
-    results = []
-    # print("Selected sources ", sources)
-    # for i in sources:
-    #     print(sources_short[i])
-
-    for i in sources:
-        if i == 5:
-            print("Logging into AAAAARG now ...")
-            br = arglogin(aaaaarg_username, aaaaarg_password)
-            print("Logged in successfully.")
-            output = aaaaarg(br, author, title)
-
-            stuff = build2(output, str(sources_short[i]))
-            results.append(stuff)
-        else:
-            func_name = sources_short[i]
-            possibles = globals().copy()
-            possibles.update(locals())
-            func = possibles.get(func_name)
-            output = func(author, title, year, doi, isbn, hit_limit)
-
-            stuff = build2(output, str(sources_short[i]))
-            results.append(stuff)
-
-    return results
-
-
 # with multiprocessing
 def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_limit=10, aaaaarg_browser=None):
 

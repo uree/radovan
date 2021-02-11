@@ -129,13 +129,6 @@ def search_one():
 
     nice_output = mein_main(simple_results)
 
-    # what zis?
-    for b in nice_output:
-        try:
-            print(b['extra'][0]['rank'])
-        except Exception as e:
-            print("This one broke rank: ", b['extra'][0]['source'])
-
     nice_output_sorted = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
 
     nice_dict = {'hits': nice_output_sorted, 'meta': {'number_of_hits': len(nice_output_sorted)}}
