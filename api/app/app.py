@@ -81,7 +81,6 @@ def arglogin(username, password):
     return br
 
 
-
 # BASE
 @app.route('/')
 def hello_world_current():
@@ -117,6 +116,13 @@ def search_one():
 
     # accept two source listing formats here
     rargs = request.args.to_dict(flat=False)
+    
+    try:
+        # &sources=2&sources=3
+        sources_int = [int(n) for n in rargs['sources']]
+    except:
+        # sources=1+2+3+4+5+6+7+8+9+10+11+12
+        sources_int = [int(n) for n in rargs['sources'][0].split()]
 
     simple_results = search(rargs['author'][0], rargs['title'][0], rargs['year'][0], rargs['doi'][0], rargs['isbn'][0], sources_int)
 
@@ -353,7 +359,7 @@ def bulk():
 
 # RETURN SOURCES
 @app.route('/sources')
-def rsources():
+def rsources_two():
     all = get_sources()
     return jsonify(all)
 

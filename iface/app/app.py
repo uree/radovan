@@ -28,7 +28,7 @@ def search():
 
 @app.route('/search', methods=['GET'])
 def get_search():
-    sources_d = requests.get('http://localhost:9003/v1.0/sources').json()
+    sources_d = requests.get('http://localhost:9003/sources').json()
 
     rargs = request.args.to_dict(flat=False)
 

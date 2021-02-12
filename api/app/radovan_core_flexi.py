@@ -1493,6 +1493,7 @@ def debug_pileup(author='', title='', year='', doi='', isbn=''):
 # CONTROLLER FUNCTIONS
 
 def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_limit=10, aaaaarg_browser=None):
+    print("--- new combined init ---")
 
     selection = [n['code_name'] for n in sources_dict if n['id'] in sources]
 
@@ -1532,7 +1533,6 @@ def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_
 # main search functoins, runs combined or new_combined
 def search(author='', title='', year='', doi='', isbn='', sources='', aaaaarg_browser=None):
     print("RADOVAN SEARCHING ...")
-    # print("Query parameters: ", locals())
 
     output_dict = {'entries': []}
     global global_hit_limit
