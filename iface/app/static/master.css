@@ -103,9 +103,10 @@ sup#beta {
     padding: 10px;
 }
 
-/* input.text {
-    float: right;
-} */
+input.text {
+    overflow: hidden;
+    width: 100%;
+}
 
 .content {
     padding: 10px;
@@ -114,8 +115,13 @@ sup#beta {
 }
 
 /* provider choice menu */
+p#allsources {
+    margin-bottom: 0;
+}
+
 .top-check {
-    text-indent: 15px;
+    /* text-indent: 15px; */
+    margin-left: 12px;
     margin-bottom: 0px;
 
 }
@@ -220,19 +226,27 @@ div.about {
     font-family: Courier;
 }
 
-div.indent {
-
-}
-
-code {
-
-}
 
 /* extra responsive settings */
 @media (min-width: 1200px) {
   .container {
     max-width: 90vw !important;
   }
+}
+
+
+@media (max-width: 767px) {
+    div.sidebar, div.content.row {
+        padding-right: 0;
+    }
+
+    div.radio {
+        padding-left: 1px;
+    }
+
+    div.results {
+        padding: 15px 15px 0 15px;
+    }
 }
 
 @media (max-width: 480px) {

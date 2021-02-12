@@ -32,19 +32,19 @@
                         <form action="/search" method="GET">
                             <div class="fields">
                                 <div class="textfield">
-                                    <span>Title: </span><input class="text" type="text" name="title" value="{{ title }}">
+                                    <input class="text" type="text" name="title" placeholder="Title" value="{{ title }}">
                                 </div>
                                 <div class="textfield">
-                                    <span>Author: </span> <input class="text" type="text" name="author" value="{{ author }}">
+                                    <input class="text" type="text" name="author" placeholder="Author" value="{{ author }}">
                                 </div>
                                 <div class="textfield">
-                                    <span>Year: </span> <input class="text" type="text" name="year" value="{{ year }}">
+                                    <input class="text" type="text" name="year" placeholder="Year" value="{{ year }}">
                                 </div>
                                 <div class="textfield">
-                                    <span>DOI: </span> <input class="text" type="text" name="doi" value="{{ doi }}">
+                                    <input class="text" type="text" name="doi" placeholder="DOI" value="{{ doi }}">
                                 </div>
                                 <div class="textfield">
-                                    <span>ISBN: </span> <input class="text" type="text" name="isbn" value="{{ isbn }}">
+                                    <input class="text" type="text" name="isbn" placeholder="ISBN" value="{{ isbn }}">
                                 </div>
                             </div>
 
@@ -55,7 +55,7 @@
                                         {% set ns.all = false %}
                                     {% endif %}
                                 {% endfor %}
-                                <p><input type="checkbox" id="checkAll" {% if ns.all %}checked{% endif %} value=""> All sources <button class="btn" type="button" id="expand">&#9661;</button></p>
+                                <p id="allsources"><input type="checkbox" id="checkAll" {% if ns.all %}checked{% endif %} value=""> All sources <button class="btn" type="button" id="expand">&#9661;</button></p>
 
                                 <div id="sources">
                                     {% if form_data %}
