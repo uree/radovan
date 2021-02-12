@@ -31,6 +31,7 @@ def get_search():
     sources_d = requests.get('http://localhost:9003/sources').json()
 
     rargs = request.args.to_dict(flat=False)
+    print(rargs)
 
     source_choice_int = [int(n) for n in rargs['sources']]
 
