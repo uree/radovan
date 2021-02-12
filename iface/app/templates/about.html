@@ -17,21 +17,21 @@
                     <h1>/about</h1>
 
                     <h2>? radovan</h2>
-                    <p>Radovan is a meta search engine aggregating 12 open access sources of (mostly academic) texts.</p>
+                    <p>Radovan is a meta search engine aggregating 13 open access sources of (mostly academic) texts.</p>
                     <p>The results inherit the order in which they are displayed on the original page and are grouped accordingly. This instance of Radovan currently harvests 10 hits per source.</p>
                     <p>The goal is to preserve as much metadata from the origins as possible. Not all sources provide the same quantity/quality of metadata. On top of that some might get lost during standardization.</p>
 
                     <h2>? api</h2>
-                    <p>Radovan has a simple api, which returns json. Or - to be more exact - metadata in <a href="http://okfnlabs.org/bibjson/">bibjson</a>.</p>
+                    <p>Radovan has a simple api, now at version 2.0, which returns json. Or - to be more exact - metadata in <a href="http://okfnlabs.org/bibjson/">bibjson</a>.</p>
 
                     <h3>search single item</h3>
                     <div class="indent">
-                        <p>endpoint: <br> <code>/radovan_api/v1.0/simple</code></p>
+                        <p>endpoint: <br> <code>/radovan_api/search/single</code></p>
 
                         <p>parameters: <br> <code>author, title, year, isbn, doi, sources</code></p>
-                        <p>sample query: <br> <code>/radovan_api/v1.0/simple/items?author=haraway&title=cyborg&year=&isbn=&doi=&sources=0+1+2+3</code></p>
+                        <p>sample query: <br> <code>/radovan_api/search/single?author=haraway&title=cyborg&year=&isbn=&doi=&sources=0+1+2+3</code></p>
 
-                        <p>You can query the api to get a dictionary of current sources and their ids: <br> <code>/radovan_api/v1.0/sources</code></p>
+                        <p>You can query the api to get a dictionary of current sources and their ids: <br> <code>/radovan_api/sources</code></p>
 
                     </div>
 
@@ -40,15 +40,20 @@
                     <div class="indent">
                         <p>It is possible to pass a bibjson file to the API and execute a bulk search.</p>
 
-                        <p>endpoint: <br> <code>/radovan_api/v1.0/bulk</code> </p>
+                        <p>endpoint: <br> <code>/radovan_api/search/bulk</code> </p>
 
                         <p>sample query (with python requests): <br>
                             <code>
                                 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'} <br>
-                                results = requests.get('/radovan/api/v1.0/bulk', json=bibjson_data, headers=headers)
+                                results = requests.get('/radovan_api/search/bulk', json=bibjson_data, headers=headers)
                             </code>
                         </p>
 
+                    </div>
+
+                    <h3>v 1.0</h3>
+                    <div class="indent">
+                        <p>The initial version of the API (1.0) is available at <code>radovan_api/v1.0/simple/items</code> and <code>radovan_api/v1.0/bulk</code> respectively.</p>
                     </div>
 
 
