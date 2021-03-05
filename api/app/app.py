@@ -116,7 +116,7 @@ def search_one():
 
     # accept two source listing formats here
     rargs = request.args.to_dict(flat=False)
-    
+
     try:
         # &sources=2&sources=3
         sources_int = [int(n) for n in rargs['sources']]

@@ -12,9 +12,9 @@ import logging
 
 
 # SETTINGS
-bibjson_aliases = {'abstract': ['abstract', 'AB'], 'address': ['address'], 'annote': ['annote', 'descr', 'desc', 'N2'], 'booktitle': ['booktitle'], 'chapter': ['chapter'], 'crossref': ['crossref'], 'edition': ['edition'], 'howpublished': ['howpublished'], 'institution': ['institution'], 'key': ['key'], 'month': ['month'], 'note': ['note'], 'number': ['number'], 'organization': ['organization'], 'pages': ['pages', 'page'], 'publisher': ['publisher', 'PB', 'publishers'], 'school': ['school'], 'series': ['series'], 'title': ['title', 'TI', 'titleInfo', 'Title'], 'type': ['type', 'TY', 'genre', 'ENTRYTYPE'], 'volume': ['volume', 'VL'], 'year': ['year', 'PY', 'Year', 'publish_date'], 'author': ['author', 'AU', 'contributors', 'name', 'z_authors', 'Authors'], 'editor': ['editor'], 'identifier': ['doi', 'identifier', 'identifierwodash', 'md5', 'issn', 'isbn', 'ID', 'SN', 'DO', 'issne', 'issnp', 'identifiers', 'journal_issns', 'ISBN-13', 'olid', 'isbn-10'], 'link': ['locator', 'url', 'href', 'L1', 'UR', 'url_for_pdf', 'url_for_landing_page', 'best_oa_location', 'links', 'link'], 'subject': ['subject', 'KW', 'subjects'], 'journal': ['journal']}
+bibjson_aliases = {'abstract': ['abstract', 'AB', 'dc.description.abstract'], 'address': ['address'], 'annote': ['annote', 'descr', 'desc', 'N2'], 'booktitle': ['booktitle'], 'chapter': ['chapter'], 'crossref': ['crossref'], 'edition': ['edition'], 'howpublished': ['howpublished'], 'institution': ['institution'], 'key': ['key'], 'month': ['month'], 'note': ['note'], 'number': ['number'], 'organization': ['organization'], 'pages': ['pages', 'page'], 'publisher': ['publisher', 'PB', 'publishers', 'publisher.name'], 'school': ['school'], 'series': ['series'], 'title': ['title', 'TI', 'titleInfo', 'Title', 'dc.title'], 'type': ['type', 'TY', 'genre', 'ENTRYTYPE', 'dc.type'], 'volume': ['volume', 'VL'], 'year': ['year', 'PY', 'Year', 'publish_date', 'dc.date.issued'], 'author': ['author', 'AU', 'contributors', 'name', 'z_authors', 'Authors', 'dc.contributor.author'], 'editor': ['editor'], 'identifier': ['doi', 'identifier', 'identifierwodash', 'md5', 'issn', 'isbn', 'ID', 'SN', 'DO', 'issne', 'issnp', 'identifiers', 'journal_issns', 'ISBN-13', 'olid', 'isbn-10', 'oapen.identifier.doi'], 'link': ['locator', 'url', 'href', 'L1', 'UR', 'url_for_pdf', 'url_for_landing_page', 'best_oa_location', 'links', 'link'], 'subject': ['subject', 'KW', 'subjects', 'dc.subject.other'], 'journal': ['journal']}
 
-extra_aliases = {'coverurl': ['coverurl', 'img_href'], 'language': ['language', 'LA', 'languages'], 'pagesinfile': ['pagesinfile'], 'tags': ['tags'], 'filetype': ['extension'], 'source': ['source'], 'rank': ['rank'], 'place_published': ['CY'], 'issue': ['IS', 'issue'], 'startpage': ['SP'], 'lastpage': ['EP'], 'md5': ['md5'], 'landing_url': ['landing_url'], 'query': ['query']}
+extra_aliases = {'coverurl': ['coverurl', 'img_href'], 'language': ['language', 'LA', 'languages', 'dc.language'], 'pagesinfile': ['pagesinfile'], 'tags': ['tags'], 'filetype': ['extension'], 'source': ['source'], 'rank': ['rank'], 'place_published': ['CY'], 'issue': ['IS', 'issue'], 'startpage': ['SP'], 'lastpage': ['EP'], 'md5': ['md5'], 'landing_url': ['landing_url'], 'query': ['query']}
 
 # careful = ['core']
 #lvl2_aliases = {'core': {'name': {'affiliation': ['extra', 'affiliation']}, {'namePart':['bibjson', 'author']}},
@@ -174,26 +174,25 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
 
     output = []
 
-    if type(fielddata) == list:
-        nice_input = fielddata
-    elif type(fielddata) == dict:
-        pass
-    else:
-        if ";" in fielddata:
-            try:
-                nice_input = fielddata.split(';')
-                #print nice_input
-            except:
-                pass
+    if fielddata != None:
+        if type(fielddata) == list:
+            nice_input = fielddata
+        elif type(fielddata) == dict:
+            pass
         else:
-            try:
-                nice_input = fielddata.split(',')
-            except:
-                pass
+            if ";" in fielddata:
+                try:
+                    nice_input = fielddata.split(';')
+                    #print nice_input
+                except:
+                    pass
+            else:
+                try:
+                    nice_input = fielddata.split(',')
+                except:
+                    pass
 
     if fieldname == "author":
-        #print("Ordering authors ... ")
-        #print(fielddata)
         if source == "oadoi":
             all = []
             if isinstance(fielddata, list):
@@ -202,7 +201,7 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
                     try:
                         one['firstname'] = i['given']
                         one['lastname'] = i['family']
-                        one["name"] = i['given']+" "+i['family']
+                        one['name'] = i['given']+" "+i['family']
 
                         all.append(one)
                     except TypeError:
@@ -210,7 +209,24 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
                 output = all
             else:
                 pass
+        elif source == "doab":
+                one = {"name": "", "alternate": [""],  "firstname": "", "lastname": ""}
 
+                try:
+                    ph = fielddata.split(', ')
+                except Exception as e:
+                    one['name'] = fielddata
+                    output.append(one)
+                    pass
+
+                try:
+                    one['firstname'] = ph[1]
+                    one['lastname'] = ph[0]
+                    one['name'] = ph[1]+' '+ph[0]
+                    output.append(one)
+                except:
+                    one['name'] = fielddata
+                    output.append(one)
         else:
             try:
                 for i in nice_input:
@@ -280,16 +296,19 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
                 except:
                     pass
         elif type(fielddata) == dict:
-            #print(fielddata)
             pass
 
         else:
-            appendone(fielddata)
+            if fielddata.startswith('10.') or 'doi' in fielddata:
+                appendone(fielddata, 'doi')
+            else:
+                appendone(fielddata)
 
 
     elif fieldname == "link":
         one = {'name': '','type': '', 'href': ''}
         if type(fielddata)==list:
+            print("link is list")
 
             if isinstance(fielddata[0], dict):
                 for i in fielddata:
@@ -330,23 +349,39 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
             else:
                 output.append(fielddata)
         else:
-            try:
-                if source == 'oapen':
+            if source == 'oapen':
+                try:
                     if 'download' in fielddata:
                         one['type'] = 'download_url'
                         one['name'] = 'download'
                     else:
                         one['type'] = 'landing_url'
                         one['name'] = 'landing page'
-                elif source == 'scielo':
+
+                    one['href'] = fielddata
+                    output.append(one)
+                except:
+                    pass
+            elif source == 'scielo':
+                try:
                     one['type'] = 'open_url'
                     one['name'] = 'open'
-
+                    one['href'] = fielddata
+                    output.append(one)
+                except:
+                    pass
+            elif source == 'doab':
+                if fielddata.endswith('.pdf') or fielddata.endswith('.epub'):
+                    one['type'] = 'download_url'
+                    one['name'] = 'download'
+                else:
+                    one['type'] = 'landing_url'
+                    one['name'] = 'landing page'
 
                 one['href'] = fielddata
                 output.append(one)
-            except:
-                pass
+
+
 
 
     elif fieldname == "subject":
@@ -450,6 +485,7 @@ def mein_main(incoming):
     logging.info("Initiated mein_main ...")
     hit = {'bibjson': []}
     meta = {'hits_per_source': []}
+    print(" --- init mein_main ---")
 
 
     try:
