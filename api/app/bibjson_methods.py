@@ -12,7 +12,7 @@ import logging
 
 
 # SETTINGS
-bibjson_aliases = {'abstract': ['abstract', 'AB', 'dc.description.abstract'], 'address': ['address'], 'annote': ['annote', 'descr', 'desc', 'N2'], 'booktitle': ['booktitle'], 'chapter': ['chapter'], 'crossref': ['crossref'], 'edition': ['edition'], 'howpublished': ['howpublished'], 'institution': ['institution'], 'key': ['key'], 'month': ['month'], 'note': ['note'], 'number': ['number'], 'organization': ['organization'], 'pages': ['pages', 'page'], 'publisher': ['publisher', 'PB', 'publishers', 'publisher.name'], 'school': ['school'], 'series': ['series'], 'title': ['title', 'TI', 'titleInfo', 'Title', 'dc.title'], 'type': ['type', 'TY', 'genre', 'ENTRYTYPE', 'dc.type'], 'volume': ['volume', 'VL'], 'year': ['year', 'PY', 'Year', 'publish_date', 'dc.date.issued'], 'author': ['author', 'AU', 'contributors', 'name', 'z_authors', 'Authors', 'dc.contributor.author'], 'editor': ['editor'], 'identifier': ['doi', 'identifier', 'identifierwodash', 'md5', 'issn', 'isbn', 'ID', 'SN', 'DO', 'issne', 'issnp', 'identifiers', 'journal_issns', 'ISBN-13', 'olid', 'isbn-10', 'oapen.identifier.doi'], 'link': ['locator', 'url', 'href', 'L1', 'UR', 'url_for_pdf', 'url_for_landing_page', 'best_oa_location', 'links', 'link'], 'subject': ['subject', 'KW', 'subjects', 'dc.subject.other'], 'journal': ['journal']}
+bibjson_aliases = {'abstract': ['abstract', 'AB', 'dc.description.abstract'], 'address': ['address'], 'annote': ['annote', 'descr', 'desc', 'N2'], 'booktitle': ['booktitle'], 'chapter': ['chapter'], 'crossref': ['crossref'], 'edition': ['edition'], 'howpublished': ['howpublished'], 'institution': ['institution'], 'key': ['key'], 'month': ['month'], 'note': ['note'], 'number': ['number'], 'organization': ['organization'], 'pages': ['pages', 'page'], 'publisher': ['publisher', 'PB', 'publishers', 'publisher.name'], 'school': ['school'], 'series': ['series'], 'title': ['title', 'TI', 'titleInfo', 'Title', 'dc.title'], 'type': ['type', 'TY', 'genre', 'ENTRYTYPE', 'dc.type'], 'volume': ['volume', 'VL'], 'year': ['year', 'PY', 'Year', 'publish_date', 'dc.date.issued'], 'author': ['author', 'AU', 'contributors', 'name', 'z_authors', 'Authors', 'dc.contributor.author'], 'editor': ['editor'], 'identifier': ['doi', 'identifier', 'identifierwodash', 'md5', 'issn', 'isbn', 'ID', 'SN', 'DO', 'issne', 'issnp', 'identifiers', 'journal_issns', 'ISBN-13', 'olid', 'isbn-10', 'oapen.identifier.doi', 'oapen.identifier.isbn'], 'link': ['locator', 'url', 'href', 'L1', 'UR', 'url_for_pdf', 'url_for_landing_page', 'best_oa_location', 'links', 'link', 'standard_oapen_url'], 'subject': ['subject', 'KW', 'subjects', 'dc.subject.other'], 'journal': ['journal']}
 
 extra_aliases = {'coverurl': ['coverurl', 'img_href'], 'language': ['language', 'LA', 'languages', 'dc.language'], 'pagesinfile': ['pagesinfile'], 'tags': ['tags'], 'filetype': ['extension'], 'source': ['source'], 'rank': ['rank'], 'place_published': ['CY'], 'issue': ['IS', 'issue'], 'startpage': ['SP'], 'lastpage': ['EP'], 'md5': ['md5'], 'landing_url': ['landing_url'], 'query': ['query']}
 
@@ -209,7 +209,7 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
                 output = all
             else:
                 pass
-        elif source == "doab":
+        elif source == "doab" or source == "oapen":
                 one = {"name": "", "alternate": [""],  "firstname": "", "lastname": ""}
 
                 try:
@@ -301,6 +301,8 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
         else:
             if fielddata.startswith('10.') or 'doi' in fielddata:
                 appendone(fielddata, 'doi')
+            elif fielddata.startswith('978'):
+                appendone(fielddata, 'isbn')
             else:
                 appendone(fielddata)
 
@@ -349,20 +351,7 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
             else:
                 output.append(fielddata)
         else:
-            if source == 'oapen':
-                try:
-                    if 'download' in fielddata:
-                        one['type'] = 'download_url'
-                        one['name'] = 'download'
-                    else:
-                        one['type'] = 'landing_url'
-                        one['name'] = 'landing page'
-
-                    one['href'] = fielddata
-                    output.append(one)
-                except:
-                    pass
-            elif source == 'scielo':
+            if source == 'scielo':
                 try:
                     one['type'] = 'open_url'
                     one['name'] = 'open'
@@ -370,7 +359,7 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
                     output.append(one)
                 except:
                     pass
-            elif source == 'doab':
+            elif source == 'doab' or source == 'oapen':
                 if fielddata.endswith('.pdf') or fielddata.endswith('.epub'):
                     one['type'] = 'download_url'
                     one['name'] = 'download'

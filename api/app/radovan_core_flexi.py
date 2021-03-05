@@ -42,7 +42,7 @@ doaj_base = 'http://doaj.org/api/v1/search/articles/'
 doab_base = 'https://directory.doabooks.org/rest/search?query='
 osf_base = 'https://share.osf.io/api/v2/search/creativeworks/_search'
 memory_base = 'https://library.memoryoftheworld.org/'
-oapen_base = 'http://www.oapen.org/search?'
+oapen_base = 'https://library.oapen.org/rest/search?query='
 openedition_base = 'http://books.openedition.org/'
 core_base = 'https://mla.hcommons.org/wp-admin/admin-ajax.php'
 scielo_base = 'http://search.scielo.org/?q='
@@ -64,7 +64,7 @@ aaaaarg_username = ""
 aaaaarg_password = ""
 
 
-sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'https://directory.doabooks.org/rest/search?query=', 'selected': 1}, {'full_name': 'OAPEN', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'http://www.doabooks.org/doab?func=search&query=', 'selected': 1}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s=', 'selected': 1}, {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://libgen.unblocked.name/json.php?', 'selected': 1}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://libgen.unblocked.name/scimag/index.php?', 'selected': 1}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query=', 'selected': 1}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php', 'selected': 1}, {'full_name': 'SciELO', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q=', 'selected': 1}, {'full_name': 'Memory of The World', 'url': 'http://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/', 'selected': 1}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/', 'selected': 1}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search', 'selected': 1},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/', 'selected': 1}, {'full_name': 'media/rep/', 'url': 'https://mediarep.org/', 'code_name': 'mediarep' , 'id': 12, 'books': 1, 'articles': 1, 'query_url': 'https://mediarep.org/discover?', 'selected': 1}]
+sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'https://directory.doabooks.org/rest/search?query=', 'selected': 1}, {'full_name': 'OAPEN', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'https://library.oapen.org/rest/search?query=', 'selected': 1}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s=', 'selected': 1}, {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://libgen.unblocked.name/json.php?', 'selected': 1}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://libgen.unblocked.name/scimag/index.php?', 'selected': 1}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query=', 'selected': 1}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php', 'selected': 1}, {'full_name': 'SciELO', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q=', 'selected': 1}, {'full_name': 'Memory of The World', 'url': 'http://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/', 'selected': 1}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/', 'selected': 1}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search', 'selected': 1},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/', 'selected': 1}, {'full_name': 'media/rep/', 'url': 'https://mediarep.org/', 'code_name': 'mediarep' , 'id': 12, 'books': 1, 'articles': 1, 'query_url': 'https://mediarep.org/discover?', 'selected': 1}]
 
 sources_short = {}
 
@@ -550,8 +550,7 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
 
     count = 0
 
-    # can search by ISBN
-    # can still search by ISBN?
+    # can search by ISBN and DOI!
     if len(isbn) > 2:
         query = isbn+'&expand=metadata&limit='+str(hit_limit)
     else:
@@ -596,6 +595,8 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
         del results[i]['bitstreams']
         # confuses bibjson_methods and is a duplicate of dc.title anyway
         del results[i]['name']
+        # by default these are /rest links and they take you to an xml page
+        results[i]['link'] = 'https://directory.doabooks.org/handle/'+results[i]['handle']
 
     hits['hits'] = results
 
@@ -608,9 +609,12 @@ def oapen(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
     #print("Searching OAPEN ...")
     logging.info("Searching oapen ...")
 
-    author = author.replace(' ', '+')
-    title = title.replace(' ', '+')
-    query = 'creator='+author+'&title='+title+'&pubdate='+year+'&isbn='+isbn+'&doi='+doi+'&smode=advanced'
+    if len(isbn)>2:
+        query = isbn+'&expand=metadata,bitstreams'+'&limit='+str(hit_limit)
+    elif len(doi)>2:
+        query = doi+'&expand=metadata,bitstreams'+'&limit='+str(hit_limit)
+    else:
+        query = author+title+year+'&expand=metadata,bitstreams'+'&limit='+str(hit_limit)
 
     oapen_url = oapen_base+query
 
@@ -619,41 +623,51 @@ def oapen(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
     try:
         r = requests.get(oapen_url)
     except:
-        logging.exception("Oapen request failed")
         result_queue.put({'oapen': hits})
         return {'oapen': hits}
 
-    strain = SoupStrainer('td',{'class': 'docHit'})
-    soup = BeautifulSoup(r.text, 'lxml', parse_only=strain)
-    links = soup.select('h3 a')
+    results = r.json()
 
-    count = 0
+    for i in range(len(results)):
+        results[i]['rank'] = i
 
-    for i in links:
-        i = i.get('href').split('=')[1]
-        gt_mdata = "http://oapen.org/download?type=export&export=ris&docid="+i
-        r = urllib.request.urlopen(gt_mdata).readlines()
-        mdata = rtd(r)
-        mdata['rank'] = count
-        slect = 'img[src*="'+i+'"]'
-        gt_imag = soup.select(slect)
-        more_hrefs = soup.select('a[href*="'+i+'"]')
 
+        # there are multiple bitstreams (images, multiple text formats); only using one for now
         try:
-            view = [url_constructor("open", "open_url", "http://oapen.org/"+m.get('href')) for m in more_hrefs if 'view' in m.get_text().lower()]
-            mdata['links'] = view
-        except Exception as e:
-            logging.debug("Error constructing url in oapen(): ", e)
-
+            bit = results[i]['bitstreams'][0]
+        except:
+            bit = None
         try:
-            img_href = gt_imag[0].get('src')
-            mdata['img_href'] = "http://oapen.org"+img_href
-        except Exception as e:
-            pass
+            bit_meta = results[i]['bitstreams'][0]['metatada']
+        except:
+            bit_meta = None
 
-        mdata['query'] = oapen_url
-        hits['hits'].append(mdata)
-        count+=1
+
+        if bit_meta:
+            for b in bit_meta:
+                # extract download url
+                if b['key'] == 'dc.identifier.uri':
+                    results[i]['url'] = b['value']
+
+
+        if bit:
+            results[i]['standard_oapen_url'] = 'https://library.oapen.org/bitstream/handle/'+results[i]['handle']+'/'+bit['name']
+
+            results[i]['coverurl'] = 'https://library.oapen.org/bitstream/handle/'+results[i]['handle']+'/'+bit['name']+'.jpg'
+
+
+        for m in results[i]['metadata']:
+            results[i][m['key']] = m['value']
+
+
+        del results[i]['metadata']
+        del results[i]['bitstreams']
+        # confuses bibjson_methods and is a duplicate of dc.title anyway
+        del results[i]['name']
+        # by default these are /rest links and they take you to an xml page
+        results[i]['link'] = 'https://library.oapen.org/handle/'+results[i]['handle']
+
+    hits['hits'] = results
 
     result_queue.put({'oapen': hits})
     return {'oapen': hits}
@@ -1517,7 +1531,7 @@ def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_
 
 # main search functoins, runs combined or new_combined
 def search(author='', title='', year='', doi='', isbn='', sources='', aaaaarg_browser=None):
-    print("RADOVAN SEARCHING ...")
+    #print("RADOVAN SEARCHING ...")
 
     output_dict = {'entries': []}
     global global_hit_limit
@@ -1556,5 +1570,7 @@ def search(author='', title='', year='', doi='', isbn='', sources='', aaaaarg_br
 
     for r in rslt:
         output_dict['entries'].append(r)
+
+    #print(" ... DONE.")
 
     return output_dict
