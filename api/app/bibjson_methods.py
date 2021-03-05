@@ -310,7 +310,6 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
     elif fieldname == "link":
         one = {'name': '','type': '', 'href': ''}
         if type(fielddata)==list:
-            print("link is list")
 
             if isinstance(fielddata[0], dict):
                 for i in fielddata:
