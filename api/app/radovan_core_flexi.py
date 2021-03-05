@@ -546,7 +546,6 @@ def oadoi(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
 #BOOKS
 
 def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    #print("Searching doab ... ")
     logging.info("Searching doab ... ")
 
     count = 0
@@ -567,6 +566,7 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
     except requests.exceptions.SSLError:
         result_queue.put({'doab': hits})
         return {'doab': hits}
+
 
     strain = SoupStrainer(id="result")
     soup = BeautifulSoup(r.text, "lxml", parse_only=strain)
@@ -621,6 +621,7 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
 
         count+=1
 
+
     result_queue.put({'doab': hits})
     return {'doab': hits}
 
@@ -636,12 +637,19 @@ def oapen(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
 
     oapen_url = oapen_base+query
 
-    r = requests.get(oapen_url)
+    hits = {'hits': []}
+
+    try:
+        r = requests.get(oapen_url)
+    except:
+        logging.exception("Oapen request failed")
+        result_queue.put({'oapen': hits})
+        return {'oapen': hits}
+
     strain = SoupStrainer('td',{'class': 'docHit'})
     soup = BeautifulSoup(r.text, 'lxml', parse_only=strain)
     links = soup.select('h3 a')
 
-    hits = {'hits': []}
     count = 0
 
     for i in links:
