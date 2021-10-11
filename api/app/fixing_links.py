@@ -110,8 +110,9 @@ def process_bibtex_onpage(q):
 
 def update_libgen_json(data):
     #print("--- updating json ---")
-    current_libgen_ip = "http://93.174.95.29/main/"
-    for_cover = "http://93.174.95.29/covers/"
+    #http://31.42.184.140/main/
+    current_libgen_ip = "http://31.42.184.140/main/"
+    for_cover = "http://31.42.184.140/covers/"
     current_libgen_home = "http://libgen.unblocked.name"
 
     tmp = []
