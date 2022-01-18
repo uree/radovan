@@ -15,19 +15,21 @@ def validate_parameters(rargs):
 
     # is isbn in the right format
     isbn = rargs.get('isbn')
-    if len(isbn) != 0:
-        isbn_clean = isbn.strip().replace('-','')
+    if isbn != None:
+        if len(isbn) != 0:
+            isbn_clean = isbn.strip().replace('-','')
 
-        if len(isbn_clean) not in [10, 13]:
-            return {"valid_query": False, "message": "Invalid ISBN. Accepts ISBN10 or ISBN13 with or without dashes."}
+            if len(isbn_clean) not in [10, 13]:
+                return {"valid_query": False, "message": "Invalid ISBN. Accepts ISBN10 or ISBN13 with or without dashes."}
 
     # is doi in the right format
     # https://support.datacite.org/docs/doi-basics
 
     doi = rargs.get('doi')
-    if len(doi) != 0:
-        if not doi.startswith('10.'):
-            return {"valid_query": False, "message": "Misformatted DOI. Should start with 10.", "sample_query": "10.5061/DRYAD.0SN63/7"}
+    if doi != None:
+        if len(doi) != 0:
+            if not doi.startswith('10.'):
+                return {"valid_query": False, "message": "Misformatted DOI. Should start with 10.", "sample_query": "10.5061/DRYAD.0SN63/7"}
 
     # all ok
     return {"valid_query": True}

@@ -8,6 +8,7 @@ chardet==3.0.4
 Click==7.0
 cryptography==2.8
 Flask==1.1.1
+flask_cors==3.0.10
 future==0.18.2
 gevent==1.4.0
 greenlet==0.4.15

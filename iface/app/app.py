@@ -59,10 +59,16 @@ def get_search():
 
     return render_template('results.html', return_data=return_data, form_data=sources_d, title=title, author=author, year=year, doi=doi, isbn=isbn)
 
+@app.route('/barcode', methods=['GET'])
+def get_barcode():
+    return render_template('photo-radovan.html')
+
 
 @app.route('/about', methods=['GET'])
 def about():
     return render_template('about.html')
+
+
 
 
 

@@ -2,6 +2,7 @@
 # python 3.6.9
 
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 from json import dumps
 from radovan_core_flexi import search
 from radovan_core_flexi import get_sources
@@ -18,9 +19,11 @@ import logging
 from keys import *
 
 app = Flask(__name__)
+CORS(app, resources={r'/search/single': {'origins': 'http://localhost:9090'}})
+
 app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
 
-logging.basicConfig(filename='logs/radovan_api_log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
+logging.basicConfig(filename='logs/radovan_api_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
 try:
@@ -30,6 +33,7 @@ except:
     aaaaarg_username = None
     aaaaarg_password = None
 
+# GENERAL
 def jsonify(dictoner, status=200, indent=4, sort_keys=True):
   response = make_response(dumps(dictoner, indent=indent, sort_keys=sort_keys))
   response.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -43,6 +47,20 @@ def is_number(s):
         return True
     except ValueError:
         return False
+
+# SORT BY OPEN
+def sort_by_open(data):
+    output = []
+
+    for d in data:
+        if d['bibjson'][0]['link'][0]['type'] == 'open_url':
+            d['extra'][0]['rank'] += 10
+
+        output.append(d)
+
+    output_sorted = sorted(output, key=lambda k: k['extra'][0]['rank'], reverse=True)
+
+    return output_sorted
 
 # PROFILING, TIMING
 def profile(fnc):
@@ -130,11 +148,17 @@ def search_one():
 
     nice_output = mein_main(simple_results)
 
-    nice_output_sorted = sorted(nice_output['hits'], key=lambda k: k['extra'][0]['rank'])
+    if rargs['open_first'][0] == '1':
+        nice_output_sorted = sort_by_open(nice_output['hits'])
+    else:
+        nice_output_sorted = sorted(nice_output['hits'], key=lambda k: k['extra'][0]['rank'])
 
     nice_dict = {'hits': nice_output_sorted, 'meta': {'number_of_hits': len(nice_output_sorted), 'hits_per_source': nice_output['meta']['hits_per_source']}}
 
-    return nice_dict
+    response = make_response(nice_dict)
+
+    response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+    return response
 
 
 @app.route('/v1.0/simple/items')
