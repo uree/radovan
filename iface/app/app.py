@@ -31,7 +31,6 @@ def get_search():
     sources_d = requests.get('http://localhost:9003/sources').json()
 
     rargs = request.args.to_dict(flat=False)
-    print(rargs)
 
     source_choice_int = [int(n) for n in rargs['sources']]
 
@@ -59,9 +58,23 @@ def get_search():
 
     return render_template('results.html', return_data=return_data, form_data=sources_d, title=title, author=author, year=year, doi=doi, isbn=isbn)
 
+
+@app.route('/barcode/search', methods=['GET'])
+def barcode_search():
+    query = "http://localhost:9003/search/single?"+request.query_string.decode("utf-8")
+
+    radovan = requests.get(query)
+
+    return_data = radovan.json()
+    response = make_response(return_data)
+
+    response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+    return response
+
+
 @app.route('/barcode', methods=['GET'])
 def get_barcode():
-    return render_template('photo-radovan.html')
+    return render_template('photo_radovan.html')
 
 
 @app.route('/about', methods=['GET'])
