@@ -182,10 +182,6 @@
                 </div>
             </template>
 
-            <template id="select-options">
-
-            </template>
-
         </div>
 
         <div class="scan-container">
@@ -222,20 +218,11 @@
             <img id="bottom-radovan" src="{{ url_for('static', filename='img/radovan_part1.png')}}" alt="">
         </div>
 
-        <div class="test-call">
+        <!-- <div class="test-call">
             <button type="submit" name="button" style="height: 100px; width: 200px;" onclick="callRadovan(9781844673001);">TEST</button>
-        </div>
+        </div> -->
 
         <script type="text/javascript">
-            // save to zoreto option would require api would need storage and accounts
-            // unless there's a way to access the zotero plugin from the browser
-            // but who uses zotero on the phone anyway ...
-
-            // well here's the android code
-            // javascript:var d=document,s=d.createElement('script');s.src='https://www.zotero.org/bookmarklet/loader.js';(d.body?d.body:d.documentElement).appendChild(s);void(0);
-
-            // here's the apple code
-            // javascript:var d=document,s=d.createElement('script');s.src='https://www.zotero.org/bookmarklet/loader.js';(d.body?d.body:d.documentElement).appendChild(s);void(0);
 
             const showTemplate = (templateName) => {
                 document.getElementById("qr-shaded-region").innerHTML = '<'+templateName+'></'+templateName+'>';
@@ -264,7 +251,6 @@
                 }
             }
 
-            // this is radovan's problem, the links should be ordered
             function selectLink(links){
                 console.log("select links");
             }
@@ -289,8 +275,6 @@
             }
 
             const gotResults = (results) => {
-                console.log('gotResults?');
-                console.log(results.meta.number_of_hits);
                 if (results.meta.number_of_hits == 0) {
                     console.log('no results');
                     return false;
@@ -300,16 +284,13 @@
             }
 
             const noResults = () => {
-                console.log('noResults called');
-                document.getElementById("qr-shaded-region").innerHTML = "No results. Try again or try a different book.";
+                document.getElementById("qr-shaded-region").innerHTML = "<no-results></no-results>";
                 setTimeout(() => { restartCamera(); }, 3000);
             }
 
             async function callRadovan(isbn){
                 const radovan = '{{url_for('barcode_search')}}?author=&title=&year=&isbn=';
                 const suffix = '&doi=&sources=0&sources=3&sources=8&open_first=1';
-                console.log("radovan called");
-                console.log(isbn);
                 var request = radovan+isbn+suffix;
 
                 $.ajax({
@@ -321,13 +302,12 @@
                         "Access-Control-Allow-Origin": "http://localhost:9090"
                     },
                     success: function(result){
-                        console.log('success');
-                        console.log(result);
+                        //console.log('success');
                         if (gotResults(result) == false) {
-                            console.log('no results for real');
+                            //console.log('no results');
                             noResults();
                         } else {
-                            console.log('results');
+                            //console.log('results');
                             const downloadUrl = result['hits'][0]['bibjson'][0]['link'][0]['href'];
                             console.log('download url: ', downloadUrl);
 
@@ -346,7 +326,7 @@
 
             const html5QrCode = new Html5Qrcode("code-reader");
             const qrCodeSuccessCallback = isbn => {
-                console.log('qrCallback');
+                //console.log('qrCallback');
                 html5QrCode.stop();
 
                 document.getElementById("qr-shaded-region").style.background = "#6aaf5042";
