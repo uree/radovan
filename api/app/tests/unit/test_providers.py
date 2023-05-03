@@ -2,6 +2,7 @@ import pytest
 from app import *
 from radovan_core_flexi import *
 
+
 def test_doab():
     results = new_combined(title="memory", sources=[0])
 
