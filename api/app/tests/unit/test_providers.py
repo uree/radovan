@@ -72,7 +72,7 @@ def test_osf():
 
     assert len(results[0]["osf"]["hits"]) > 0
     assert len(results[0]["osf"]["hits"][0]["title"]) > 0
-    assert "memory" in results[0]["doaj"]["hits"][0]["description"]
+    assert "memory" in results[0]["osf"]["hits"][0]["description"]
 
 
 def test_unpaywall():
