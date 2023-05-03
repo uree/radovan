@@ -813,7 +813,6 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
 
 
 def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    print("Searching libgen_book ...")
     logging.info("Searching libgen_book ...")
 
     global libgen_home
