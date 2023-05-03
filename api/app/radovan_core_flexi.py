@@ -220,6 +220,7 @@ def doaj(result_queue, author='', title='', year='', doi='', isbn='', hit_limit 
     #print("Searching doaj ...")
     logging.info("Searching doaj ...")
     count = 0
+    hits = {'hits': []}
 
     # doi needs to be stripped
     if doi:
@@ -229,8 +230,13 @@ def doaj(result_queue, author='', title='', year='', doi='', isbn='', hit_limit 
 
     doaj_url = doaj_base+query
     iface_query = "https://doaj.org/search?ref=homepage-box&source=%7B%22query%22%3A%7B%22query_string%22%3A%7B%22query%22%3A%22"+query+"%22%2C%22default_operator%22%3A%22AND%22%7D%7D%7D"
-    request = requests.get(doaj_url)
-    data = request.json()
+
+    try:
+        request = requests.get(doaj_url, timeout=5)
+        data = request.json()
+    except:
+        result_queue.put({'doaj': hits})
+        return hits
 
     for i in data['results']:
         i['bibjson']['rank'] = count
@@ -238,7 +244,6 @@ def doaj(result_queue, author='', title='', year='', doi='', isbn='', hit_limit 
         i['bibjson']['query'] = iface_query
         count += 1
 
-    hits = {'hits': []}
     hits['hits'] = data['results']
     result_queue.put({'doaj': hits})
     return hits

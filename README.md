@@ -37,3 +37,8 @@ This will start the API at port 9003 and the interface at port 9090.
 
 To be able to search [aaaaarg](https://aaaaarg.fail/), create a file called keys.py in api/app/ and save your login info as yarr_user and yarr_pass.
 To be able to search [oadoi/unpaywall](https://api.unpaywall.org/v2/), you need to enter your email address in the same file under oadoi_email.
+
+
+## Development
+
+To use the profiler in `radovan_core_flexi.py`, place `@profile` in front of the function you want to analyse. 
