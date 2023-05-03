@@ -64,7 +64,7 @@ aaaaarg_username = ""
 aaaaarg_password = ""
 
 
-sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'https://directory.doabooks.org/rest/search?query=', 'selected': 1}, {'full_name': 'OAPEN', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'https://library.oapen.org/rest/search?query=', 'selected': 1}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s=', 'selected': 1}, {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://libgen.unblocked.name/json.php?', 'selected': 1}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://libgen.unblocked.name/scimag/index.php?', 'selected': 1}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query=', 'selected': 1}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php', 'selected': 1}, {'full_name': 'SciELO', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q=', 'selected': 1}, {'full_name': 'Memory of The World', 'url': 'http://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/', 'selected': 1}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/', 'selected': 1}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search', 'selected': 1},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/', 'selected': 1}, {'full_name': 'media/rep/', 'url': 'https://mediarep.org/', 'code_name': 'mediarep' , 'id': 12, 'books': 1, 'articles': 1, 'query_url': 'https://mediarep.org/discover?', 'selected': 1}]
+sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'https://directory.doabooks.org/rest/search?query=', 'selected': 1}, {'full_name': 'OAPEN', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'https://library.oapen.org/rest/search?query=', 'selected': 1}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s=', 'selected': 1}, {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://libgen.unblocked.name/json.php?', 'selected': 1}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://libgen.unblocked.name/scimag/index.php?', 'selected': 1}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query=', 'selected': 1}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php', 'selected': 1}, {'full_name': 'SciELO', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q=', 'selected': 1}, {'full_name': 'Memory of The World', 'url': 'https://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/', 'selected': 1}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/', 'selected': 1}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search', 'selected': 1},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/', 'selected': 1}, {'full_name': 'media/rep/', 'url': 'https://mediarep.org/', 'code_name': 'mediarep' , 'id': 12, 'books': 1, 'articles': 1, 'query_url': 'https://mediarep.org/discover?', 'selected': 1}]
 
 sources_short = {}
 
@@ -813,7 +813,7 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
 
 
 def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    #print("Searching libgen_book ...")
+    print("Searching libgen_book ...")
     logging.info("Searching libgen_book ...")
 
     global libgen_home
@@ -898,8 +898,9 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
             count+=1
             hits['hits'].append(good_links[0])
 
-    #print("libgen_book_hits")
+    print("libgen_book_hits")
     #print(hits)
+    print(r)
 
     result_queue.put({'libgen_book': hits})
     return {'libgen_book': hits}
@@ -1524,10 +1525,6 @@ def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_
 
     for p in proc:
         p.join()
-
-    #print("New combined results:")
-    #pp.pprint(results)
-    logging.debug(results)
 
     return results
 

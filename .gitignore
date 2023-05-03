@@ -1,5 +1,4 @@
 env/
-tests/
 __pycache__/
 api/app/keys.py
 lgb.py
@@ -7,3 +6,4 @@ rsync-exclude.txt
 sync.sh
 *.py.bak
 *.pyc
+.pytest_cache

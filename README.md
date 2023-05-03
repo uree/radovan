@@ -41,4 +41,6 @@ To be able to search [oadoi/unpaywall](https://api.unpaywall.org/v2/), you need 
 
 ## Development
 
-To use the profiler in `radovan_core_flexi.py`, place `@profile` in front of the function you want to analyse. 
+To use the profiler in `radovan_core_flexi.py`, place `@profile` in front of the function you want to analyse.
+
+Run tests inside the `app` folder.  Use `python -m pytest -sv` for verbose output with logging included (in case debugging is needed).

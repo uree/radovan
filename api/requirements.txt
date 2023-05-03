@@ -19,6 +19,7 @@ lxml==4.4.2
 MarkupSafe==1.1.1
 pycparser==2.19
 pyparsing==2.4.5
+pytest
 pytz==2019.3
 requests==2.22.0
 requests-futures==1.0.0
