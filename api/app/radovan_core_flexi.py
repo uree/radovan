@@ -38,7 +38,7 @@ pp = pprint.PrettyPrinter(indent=4)
 global_hit_limit = 10
 
 #base urls
-doaj_base = 'http://doaj.org/api/v1/search/articles/'
+doaj_base = 'https://doaj.org/api/v1/search/articles/'
 doab_base = 'https://directory.doabooks.org/rest/search?query='
 osf_base = 'https://share.osf.io/api/v2/search/creativeworks/_search'
 memory_base = 'https://library.memoryoftheworld.org/'
@@ -236,9 +236,7 @@ def doaj(result_queue, author='', title='', year='', doi='', isbn='', hit_limit 
         i['bibjson']['rank'] = count
         i['bibjson']['type'] = 'article'
         i['bibjson']['query'] = iface_query
-
         count += 1
-
 
     hits = {'hits': []}
     hits['hits'] = data['results']
@@ -562,14 +560,14 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
 
     hits = {'hits': []}
 
+    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"}
+
     try:
-        r = requests.get(doab_url)
-    except:
+        r = requests.get(doab_url, headers=headers)
+        results = r.json()
+    except Exception as e:
         result_queue.put({'doab': hits})
         return {'doab': hits}
-
-
-    results = r.json()
 
     # unnest metadata and isolate cover and link url; this is the way
     for i in range(len(results)):
@@ -620,13 +618,14 @@ def oapen(result_queue, author='', title='', year='', doi='', isbn='', hit_limit
 
     hits = {'hits': []}
 
+    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"}
+
     try:
-        r = requests.get(oapen_url)
-    except:
+        r = requests.get(oapen_url, headers=headers)
+        results = r.json()
+    except Exception as e:
         result_queue.put({'oapen': hits})
         return {'oapen': hits}
-
-    results = r.json()
 
     for i in range(len(results)):
         results[i]['rank'] = i
