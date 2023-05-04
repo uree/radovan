@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+
+  flask_api:
+    build: ./api
+    container_name: radovan_api
+    restart: always
+    environment:
+      FLASK_DEBUG: 1
+      FLASK_APP: ./api/app.py
+      PYTHONUNBUFFERED: 1
+      PYTHONIOENCODING: UTF-8
+    volumes:
+      - ./api/app:/app
+    ports:
+      - "9003:9003"
+    networks:
+      - docker_app-network
+
+  flask_iface:
+    build: ./iface
+    container_name: radovan_iface
+    restart: always
+    environment:
+      FLASK_DEBUG: 1
+      FLASK_APP: ./iface/app.py
+      PYTHONUNBUFFERED: 1
+      PYTHONIOENCODING: UTF-8
+    volumes:
+      - ./iface/app:/app
+    ports:
+      - "9090:9090"
+    networks:
+      - docker_app-network
+
+networks:
+  docker_app-network:
+    external: true
