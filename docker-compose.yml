@@ -21,6 +21,8 @@ services:
     build: ./iface
     container_name: radovan_iface
     restart: always
+    env_file:
+      - iface/.env
     environment:
       FLASK_DEBUG: 1
       FLASK_APP: ./iface/app.py

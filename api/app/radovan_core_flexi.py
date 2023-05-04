@@ -897,10 +897,6 @@ def libgen_book(result_queue, author='', title='', year='', doi='', isbn='', hit
             count+=1
             hits['hits'].append(good_links[0])
 
-    print("libgen_book_hits")
-    #print(hits)
-    print(r)
-
     result_queue.put({'libgen_book': hits})
     return {'libgen_book': hits}
 

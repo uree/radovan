@@ -7,10 +7,12 @@ from flask import Flask, request, jsonify, make_response, render_template
 import collections
 import pprint
 import logging
+from config import Config
 
 
 app = Flask(__name__)
 app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
+app.config.from_object(Config)
 api_base = app.config['API_CONTAINER_NAME']
 
 logging.basicConfig(filename='logs/radovan_iface_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
