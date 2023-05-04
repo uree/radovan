@@ -11,6 +11,7 @@ import logging
 
 app = Flask(__name__)
 app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
+api_base = app.config['API_CONTAINER_NAME']
 
 logging.basicConfig(filename='logs/radovan_iface_log.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
@@ -18,7 +19,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 @app.route('/')
 def search():
-    sources_d = requests.get('http://localhost:9003/v1.0/sources').json()
+    sources_d = requests.get(api_base+':9003/v1.0/sources').json()
 
     for item in sources_d:
         item.update({"selected": 1})
@@ -28,7 +29,7 @@ def search():
 
 @app.route('/search', methods=['GET'])
 def get_search():
-    sources_d = requests.get('http://localhost:9003/sources').json()
+    sources_d = requests.get(api_base+':9003/sources').json()
 
     rargs = request.args.to_dict(flat=False)
     print(rargs)

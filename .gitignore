@@ -7,3 +7,4 @@ sync.sh
 *.py.bak
 *.pyc
 .pytest_cache
+.env*
