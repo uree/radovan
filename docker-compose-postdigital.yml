@@ -23,7 +23,7 @@ services:
     container_name: radovan_iface
     restart: always
     env_file:
-      -app/.env.postdigital
+      - iface/.env.postdigital
     environment:
       FLASK_DEBUG: 1
       FLASK_APP: ./iface/app.py

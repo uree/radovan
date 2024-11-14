@@ -44,11 +44,11 @@ def test_mla_core():
 
 
 def test_scielo():
-    results = new_combined(title="fashion", sources=[7])
+    results = new_combined(title="synthesis", sources=[7])
 
     assert len(results[0]["scielo"]["hits"]) > 0
     assert len(results[0]["scielo"]["hits"][0]["TI"]) > 0
-    assert "fashion" in results[0]["scielo"]["hits"][0]["TI"].lower()
+    assert "synthesis" in results[0]["scielo"]["hits"][0]["AB"].lower()
 
 
 def test_memoryoftheworld():

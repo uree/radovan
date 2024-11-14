@@ -51,7 +51,7 @@ def get_search():
     doi = request.args.get('doi', '')
     isbn = request.args.get('isbn', '')
 
-    query = "http://localhost:9003/search/single?"+request.query_string.decode("utf-8")
+    query = api_base+":9003/search/single?"+request.query_string.decode("utf-8")
 
     radovan = requests.get(query)
 

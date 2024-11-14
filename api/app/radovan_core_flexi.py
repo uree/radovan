@@ -51,8 +51,7 @@ monoskop_base = 'https://monoskop.org/log/?cat=17&s='
 oadoi_base = 'https://api.unpaywall.org/v2/'
 mediarep_base = 'https://mediarep.org/discover?'
 
-libgen_home = "http://libgen.unblocked.name"
-libgen_home = "http://gen.lib.rus.ec"
+libgen_home = 'https://libgen.is'
 libgen_base_articles = libgen_home+"/scimag/?"
 libgen_base_books = libgen_home+"/json.php?"
 
@@ -451,7 +450,7 @@ def scielo(result_queue, author='', title='', year='', doi='', isbn='', hit_limi
 
 def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
     #print("Searching libgen_article ...")
-    logging.info("Searching libgen_article ...")
+    logging.debug("Searching libgen_article ...")
 
     hits = {'hits': []}
     count = 0
@@ -464,7 +463,6 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
     libgen_url = libgen_base_articles+query
 
     r = requests.get(libgen_url)
-
     soup = BeautifulSoup(r.text, 'lxml')
     rows = soup.select(".catalog > tbody > tr")
 
@@ -974,7 +972,6 @@ def mediarep(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     count = 0
 
     query = mediarep_base+ 'filtertype_1=title&filter_relational_operator_1=contains&filter_1='+title+'&filtertype_2=author&filter_relational_operator_2=contains&filter_2='+author+'&query=&scope='
-
     r = requests.get(query)
     response = r.text
     strain = SoupStrainer(id="aspect_discovery_SimpleSearch_div_search-results")
