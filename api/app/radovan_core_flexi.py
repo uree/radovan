@@ -23,13 +23,15 @@ import ast
 
 import cProfile, pstats, io
 from fixing_links import update_libgen_src, update_libgen_json, url_constructor
+from sources import sources_dict
+from keys import oadoi_email
 
 from concurrent.futures import as_completed
 from requests_futures.sessions import FuturesSession
 from multiprocessing import Process, Queue
 
 import logging
-from keys import oadoi_email
+
 
 # GENERAL SETTINGS
 logging.basicConfig(filename='logs/radovan_core_log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
@@ -62,19 +64,10 @@ aaaaarg_base = 'http://aaaaarg.fail'
 aaaaarg_username = ""
 aaaaarg_password = ""
 
-
-sources_dict = [{'full_name': 'Directory of Open Access Books', 'url': 'https://www.doabooks.org/', 'code_name': 'doab' ,'id': 0, 'books': 1, 'articles': 0, 'query_url': 'https://directory.doabooks.org/rest/search?query=', 'selected': 1}, {'full_name': 'OAPEN', 'url': 'http://www.oapen.org/home', 'code_name': 'oapen' ,'id': 1, 'books': 1, 'articles': 0, 'query_url': 'https://library.oapen.org/rest/search?query=', 'selected': 1}, {'full_name': 'Monoskop', 'url': 'https://monoskop.org/Monoskop', 'code_name': 'monoskop' ,'id': 2, 'books': 1, 'articles': 1, 'query_url': 'https://monoskop.org/log/?cat=17&s=', 'selected': 1}, {'full_name': 'Library Genesis', 'url': 'http://gen.lib.rus.ec/', 'code_name': 'libgen_book' ,'id': 3, 'books': 1, 'articles': 0, 'query_url': 'http://libgen.unblocked.name/json.php?', 'selected': 1}, {'full_name': 'Library Genesis Scimag', 'url': 'http://gen.lib.rus.ec/scimag/index.php', 'code_name': 'libgen_article' ,'id': 4, 'books': 0, 'articles': 1, 'query_url': 'http://libgen.unblocked.name/scimag/index.php?', 'selected': 1}, {'full_name': 'AAAAARG', 'url': 'http://aaaaarg.fail', 'code_name': 'aaaaarg', 'id': 5, 'books': 0, 'articles': 0, 'query_url': 'http://aaaaarg.fail/search?query=', 'selected': 1}, {'full_name': 'MLA Commons CORE', 'url': 'https://mla.hcommons.org/deposits/', 'code_name': 'core', 'id': 6, 'books': 1, 'articles': 1, 'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php', 'selected': 1}, {'full_name': 'SciELO', 'url': 'http://www.scielo.org/', 'code_name': 'scielo' ,'id': 7, 'books': 0, 'articles': 1, 'query_url': 'http://search.scielo.org/?q=', 'selected': 1}, {'full_name': 'Memory of The World', 'url': 'https://library.memoryoftheworld.org/', 'code_name': 'memoryoftheworld' ,'id': 8, 'books': 0, 'articles': 0, 'query_url': 'https://library.memoryoftheworld.org/', 'selected': 1}, {'full_name': 'Directory of Open Access Journals', 'url': 'https://doaj.org/', 'code_name': 'doaj', 'id': 9, 'books': 0, 'articles': 1, 'query_url': 'http://doaj.org/api/v1/search/articles/', 'selected': 1}, {'full_name': 'Open Science Framework', 'url': 'https://osf.io/search/', 'code_name': 'osf' , 'id': 10, 'books': 0, 'articles': 1, 'query_url': 'https://share.osf.io/api/v2/search/creativeworks/_search', 'selected': 1},   {'full_name': 'Unpaywall', 'url': 'https://unpaywall.org/data', 'code_name': 'oadoi' , 'id': 11, 'books': 0, 'articles': 1, 'query_url': 'https://api.unpaywall.org/v2/', 'selected': 1}, {'full_name': 'media/rep/', 'url': 'https://mediarep.org/', 'code_name': 'mediarep' , 'id': 12, 'books': 1, 'articles': 1, 'query_url': 'https://mediarep.org/discover?', 'selected': 1}]
-
-sources_short = {}
-
-for i in sources_dict:
-    sources_short[i['id']] = i['code_name']
-
 # BULK SEARCH SETTINGS
 bibjson_location = "tests/ch1_nolinks.json"
 output_filename = bibjson_location[:-5]+'_links.json'
 output_filename = "tests/testing.json"
-
 
 
 # PROFILING, TIMING
@@ -208,7 +201,10 @@ def process_bibtex_onpage(q):
     return item
 
 
-def get_sources():
+def get_sources(disabled=False):
+    if not disabled:
+        return [n for n in sources_dict if n['enabled']]
+
     return sources_dict
 
 
@@ -1491,7 +1487,7 @@ def debug_pileup(author='', title='', year='', doi='', isbn=''):
 def new_combined(author='', title='', year='', doi='', isbn='', sources='', hit_limit=10, aaaaarg_browser=None):
     print("--- new combined init ---")
 
-    selection = [n['code_name'] for n in sources_dict if n['id'] in sources]
+    selection = [n['code_name'] for n in sources_dict if n['id'] in sources and n['enabled']]
 
     possibles = globals().copy()
     possibles.update(locals())
@@ -1549,8 +1545,6 @@ def search(author='', title='', year='', doi='', isbn='', sources='', aaaaarg_br
                 num = [n['id'] for n in sources_dict if n['code_name'] == s]
                 tmp.append(num[0])
             sources = tmp
-    elif sources == None:
-        sources = themall
     else:
         pass
 
@@ -1559,7 +1553,16 @@ def search(author='', title='', year='', doi='', isbn='', sources='', aaaaarg_br
         sources.remove(5)
 
     # clean input
-    rslt = new_combined(author=author.strip(), title=title.strip(), year=year.strip(), doi=doi.strip(), isbn=isbn.strip().replace('-',''), sources=sources, hit_limit=10, aaaaarg_browser=aaaaarg_browser)
+    rslt = new_combined(
+        author=author.strip(),
+        title=title.strip(),
+        year=year.strip(),
+        doi=doi.strip(),
+        isbn=isbn.strip().replace('-',''),
+        sources=sources,
+        hit_limit=10,
+        aaaaarg_browser=aaaaarg_browser
+    )
 
     for r in rslt:
         output_dict['entries'].append(r)
