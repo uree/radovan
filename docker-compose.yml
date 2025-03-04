@@ -15,7 +15,8 @@ services:
       - ./api/app:/app
     ports:
       - "9003:9003"
-    network_mode: "host"
+    networks:
+      - docker_app-network
 
   flask_iface:
     build: ./iface
@@ -32,4 +33,9 @@ services:
       - ./iface/app:/app
     ports:
       - "9090:9090"
-    network_mode: "host"
+    networks:
+      - docker_app-network
+
+networks:
+  docker_app-network:
+    external: true
