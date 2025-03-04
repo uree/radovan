@@ -36,8 +36,8 @@ sources_dict = [{
     'books': 1,
     'articles': 0,
     'query_url': 'https://libgen.li/json.php?',
-    'selected': 1,
-    'enabled': 1,
+    'selected': 0,
+    'enabled': 0,
 }, {
     'full_name': 'Library Genesis Scimag',
     'url': 'https://libgen.li/scimag/index.php',
@@ -46,8 +46,8 @@ sources_dict = [{
     'books': 0,
     'articles': 1,
     'query_url': 'https://libgen.li/scimag/index.php?',
-    'selected': 1,
-    'enabled': 1,
+    'selected': 0,
+    'enabled': 0,
 }, {
     'full_name': 'AAAAARG',
     'url': 'http://aaaaarg.fail',
@@ -56,8 +56,8 @@ sources_dict = [{
     'books': 0,
     'articles': 0,
     'query_url': 'http://aaaaarg.fail/search?query=',
-    'selected': 1,
-    'enabled': 1,
+    'selected': 0,
+    'enabled': 0,
 }, {
     'full_name': 'MLA Commons CORE',
     'url': 'https://mla.hcommons.org/deposits/',
