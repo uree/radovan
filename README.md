@@ -16,9 +16,9 @@ Radovan is a meta search engine aggregating 12 open access sources of (mostly ac
 - [Open Science Framework Preprints](https://osf.io/search/)
 - [Unpaywall](https://unpaywall.org/data)
 
-[Suggest more](https://pad.riseup.net/p/radovan_sources-keep) to be added.
+There is a of sources waiting to be added in PROVIDERS.md. Open an issue to suggest more.
 
-A live version is available [here](https://yurisearch.coventry.ac.uk/radovan/). Along with [additional information](https://yurisearch.coventry.ac.uk/radovan/about), including on how to use the API.
+A live version is available [here](https://yurisearch.postdigitalcultures.org/radovan/). Along with [additional information](https://yurisearch.postdigitalcultures.org/radovan/about), including on how to use the API.
 
 The results inherit the order in which they are displayed on the original page and are grouped accordingly. This instance of Radovan currently harvests 10 hits per source. This can be changed in the settings section on top of radovan_core_flexi.py.
 
