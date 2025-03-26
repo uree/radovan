@@ -8,3 +8,4 @@ sync.sh
 *.pyc
 .pytest_cache
 .env*
+DEVNOTES.md
