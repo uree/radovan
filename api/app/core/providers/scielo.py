@@ -1,7 +1,7 @@
 import logging
 import requests
 
-from core.radovan_core_flexi import rtd2
+from core.utils import rtd2
 
 
 logger = logging.getLogger(__name__)
