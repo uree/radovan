@@ -1,26 +1,31 @@
 # -*- coding: utf-8 -*-
 # python 3.6.9
+import cProfile
+import io
+import logging
+import pprint
+import pstats
+from json import dumps
 
 from flask import Flask, request, jsonify, make_response
-from json import dumps
-from radovan_core_flexi import search
-from radovan_core_flexi import get_sources
-from bibjson_methods import mein_main
-from validators import validate_parameters
-import pprint
-import cProfile, pstats, io
-
-from robobrowser import RoboBrowser
 from requests import Session
+from robobrowser import RoboBrowser
 
-import logging
+from bibjson_methods.methods import mein_main
+from core.keys import *
+from logs.setup import setup_logging
+from core.radovan_core_flexi import search
+from core.radovan_core_flexi import get_sources
+from validators import validate_parameters
 
-from keys import *
 
 app = Flask(__name__)
-app.config['RESTFUL_JSON'] = { 'ensure_ascii': False }
+app.config['RESTFUL_JSON'] = {'ensure_ascii': False}
 
-logging.basicConfig(filename='logs/radovan_api_log.log', level=logging.ERROR, format='%(asctime)s:%(levelname)s:%(message)s')
+setup_logging()
+app.logger = logging.getLogger(__name__)
+app.logger.info("Error logging works.")
+
 pp = pprint.PrettyPrinter(indent=4)
 
 try:
@@ -30,6 +35,7 @@ except:
     aaaaarg_username = None
     aaaaarg_password = None
 
+
 def jsonify(dictoner, status=200, indent=4, sort_keys=True):
   response = make_response(dumps(dictoner, indent=indent, sort_keys=sort_keys))
   response.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -37,12 +43,14 @@ def jsonify(dictoner, status=200, indent=4, sort_keys=True):
   response.status_code = status
   return response
 
+
 def is_number(s):
     try:
         float(s)
         return True
     except ValueError:
         return False
+
 
 # PROFILING, TIMING
 def profile(fnc):
@@ -92,14 +100,18 @@ def hello_world_current():
     hlo = {'hello': hello, 'version_info': version, 'endpoint': endpoint, 'parameters': parameters, 'sample_query': sample_query}
     return hlo
 
+
 @app.route('/v1.0')
 def hello_world():
+    # app.flogger.info("hello")
+    app.logger.debug("hello both ways")
     hello = "Hello, World! This is Radovan. The API is running at /radovan/api/v1.0/"
     endpoint = ["/simple for single queries", '/bulk for bulk queries']
     parameters = "author, title, year, doi, isbn, sources"
     sample_query = ""
     hlo = {'hello': hello, 'endpoint': endpoint, 'parameters': parameters, 'sample_query': sample_query}
     return jsonify(hlo)
+
 
 # SEARCH
 @app.route('/search/single')
@@ -125,8 +137,6 @@ def search_one():
         sources_int = [int(n) for n in rargs['sources'][0].split()]
 
     simple_results = search(rargs['author'][0], rargs['title'][0], rargs['year'][0], rargs['doi'][0], rargs['isbn'][0], sources_int)
-
-    logging.info("---- end core flexi ----")
 
     nice_output = mein_main(simple_results)
 
@@ -158,7 +168,6 @@ def simple():
     else:
         simple_results = search(author, title, year, doi, isbn, sources_int)
         #print("------------------- END CORE FLEXI ---------------------")
-        logging.info("---- end core flexi ----")
 
         # TRANSFORM TO BIBJSON
         #print("------------------- FORMATTING DATA ---------------------")
@@ -189,7 +198,6 @@ def search_bulk():
     try:
         results_combined = {'references_with_new_links': None, 'total_references': len(data), 'total_number_links': None, 'bib_and_links': []}
     except Exception as e:
-        logging.debug("Error generating results: ", e)
         return error
 
     # this should be executed in parallel (quasi), no?
@@ -252,11 +260,9 @@ def search_bulk():
         try:
             temp['search_results'] = sorted(nice_output, key=lambda k: k['extra'][0]['rank'])
         except Exception as e:
-            logging.debug("Error while sorting results: ", e)
             pass
 
         results_combined['bib_and_links'].append(temp)
-
 
     results_combined['total_number_links'] = links_total
     results_combined['references_with_new_links'] = refs_with_hits
@@ -282,7 +288,6 @@ def bulk():
     try:
         results_combined = {'references_with_new_links': None, 'total_references': len(data), 'total_number_links': None, 'bib_and_links': []}
     except Exception as e:
-        logging.debug("Error generating results: ", e)
         return error
 
     # this should be executed in parallel (quasi), no?
@@ -345,7 +350,6 @@ def bulk():
         try:
             temp['search_results'] = sorted(nice_output['hits'], key=lambda k: k['extra'][0]['rank'])
         except Exception as e:
-            logging.debug("Error while sorting results: ", e)
             pass
 
         results_combined['bib_and_links'].append(temp)
@@ -363,10 +367,12 @@ def rsources_two():
     all = get_sources()
     return jsonify(all)
 
+
 @app.route('/v1.0/sources')
 def rsources():
     all = get_sources()
     return jsonify(all)
+
 
 @app.route('/v1.0/sources/<string:key>/<value>')
 def frsources(key, value):
@@ -375,7 +381,6 @@ def frsources(key, value):
         value = int(value)
     ftr = [a for a in all if a[key] == value]
     return jsonify(ftr)
-
 
 
 if __name__ == '__main__':
@@ -387,10 +392,5 @@ if __name__ == '__main__':
         aaaaarg_browser = arglogin(aaaaarg_username, aaaaarg_password)
     else:
         aaaaarg_browser = None
-
-    if aaaaarg_browser != None:
-        logging.info("Login successful.")
-    else:
-        logging.info("Aaaaarg login failed.")
 
     app.run(host ='0.0.0.0', port = 9003, debug=True)

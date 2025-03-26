@@ -1,6 +1,6 @@
 import pytest
 from app import *
-from radovan_core_flexi import *
+from core.radovan_core_flexi import *
 
 
 def test_doab():

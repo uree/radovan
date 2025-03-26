@@ -2,7 +2,8 @@ import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
 
-#FORMATTING LINKS
+
+# FORMATTING LINKS
 def url_constructor(name, type, link):
     names = ['landing_url', 'download_url', 'open_url']
     one_link = {'name': '', 'href': '', 'type': ''}
@@ -15,6 +16,7 @@ def url_constructor(name, type, link):
         return link_dict
     except IndexError:
         pass
+
 
 # tying links to probable function (open, download, landing) based on experience with pages
 def standardize_links(source, data, keep=False):
@@ -83,93 +85,4 @@ def standardize_links(source, data, keep=False):
         # tell them to save info in name?
         print("keep")
 
-
     return data
-
-
-def update_libgen_src(libgen_home, lst, target):
-    srcs = [libgen_home+l.get(target).replace('..','') for l in lst]
-    return srcs
-
-def process_bibtex_onpage(q):
-    r = requests.get(q)
-
-    soup = BeautifulSoup(r.text, 'lxml')
-
-    try:
-        bibtex = soup.select("p")[0].get_text()
-    except:
-        pass
-    if bibtex:
-        bibdict = bibtexparser.loads(bibtex)
-        item = bibdict.entries[0]
-    else:
-        item = "Not found"
-
-    return item
-
-def update_libgen_json(data):
-    #print("--- updating json ---")
-    #http://31.42.184.140/main/
-    current_libgen_ip = "http://31.42.184.140/main/"
-    for_cover = "http://31.42.184.140/covers/"
-    current_libgen_home = "http://libgen.unblocked.name"
-
-    tmp = []
-
-    for d in data:
-        cover_url = for_cover+d['coverurl']
-        magic_number = d['coverurl'].split('/')[0]
-
-        # generate download url
-        download_url = current_libgen_ip+magic_number+'/'+d['md5']+'/'+d['locator']
-
-        # update
-        d['coverurl'] = cover_url
-        mini_locator = {'type': 'landing_url', 'href': download_url, 'name': 'landing'}
-        d['locator'] = mini_locator
-        d['landing_url'] = current_libgen_home+'/book/index.php?md5='+d['md5']
-        tmp.append(d)
-
-
-    return tmp
-
-
-
-# temp backup
-def core_scrape(href, count):
-    try:
-        request = urllib.request.urlopen(href)
-    except IOError:
-        return "Not found"
-
-    data = lxml.html.parse(request)
-
-    try:
-
-        link = data.xpath('//a[@title="Download"]')[0]
-
-        mdata_href = data.xpath('//a[@class="bp-deposits-metadata"]')
-
-        mdata_xml = mdata_href[0].attrib['href']
-        #print(mdata_xml)
-        do = urllib.request.urlopen(mdata_xml)
-        da = do.read()
-        mdata = xmltodict.parse(da)
-
-
-
-        #print(link.attrib['href'])
-
-        output = {'href': '', 'rank': '', 'name': '' }
-        output['href'] = link.attrib['href']
-        output['rank'] = count
-        output['name'] = 'core'
-
-        for key, value in mdata['mods'].items():
-            output[key] = value
-
-        return output
-
-    except IndexError:
-        return "Not found"
