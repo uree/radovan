@@ -9,3 +9,4 @@ sync.sh
 .pytest_cache
 .env*
 DEVNOTES.md
+*.log
