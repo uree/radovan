@@ -108,12 +108,6 @@ def search(
 
     output_dict = {'entries': []}
 
-    def make_output_dict(results):
-        for i in results:
-            output_dict['entries'].append(i)
-
-        return output_dict
-
     try:
         sources = sources.split(' ')
     except Exception as e:
