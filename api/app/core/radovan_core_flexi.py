@@ -102,11 +102,11 @@ def search(
     doi='',
     isbn='',
     sources='',
+    hit_limit=10,
     aaaaarg_browser=None
 ):
 
     output_dict = {'entries': []}
-    global global_hit_limit
 
     def make_output_dict(results):
         for i in results:
@@ -116,7 +116,8 @@ def search(
 
     try:
         sources = sources.split(' ')
-    except:
+    except Exception as e:
+        logger.debug(e)
         pass
 
     if isinstance(sources, list):
@@ -132,7 +133,7 @@ def search(
         pass
 
     # remove aaaarg from list of sources if login unsuccessful
-    if aaaaarg_browser == None and 5 in sources:
+    if aaaaarg_browser is None and 5 in sources:
         sources.remove(5)
 
     # clean input
@@ -143,7 +144,7 @@ def search(
         doi=doi.strip(),
         isbn=isbn.strip().replace('-',''),
         sources=sources,
-        hit_limit=10,
+        hit_limit=hit_limit,
         aaaaarg_browser=aaaaarg_browser
     )
 
