@@ -1,6 +1,6 @@
 import pytest
 from app import *
-from core.radovan_core_flexi import *
+from core.radovan_core_flexi import new_combined
 
 
 def test_doab():

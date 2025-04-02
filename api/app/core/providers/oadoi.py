@@ -1,5 +1,6 @@
 import logging
 import requests
+from core.keys import oadoi_email
 
 
 logger = logging.getLogger(__name__)
@@ -7,7 +8,6 @@ oadoi_base = 'https://api.unpaywall.org/v2/'
 
 
 def oadoi(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    global oadoi_email
     email = oadoi_email
     # print("Searching oadoi ...")
     logger.info("Searching oadoi ...")

@@ -32,5 +32,7 @@ def scielo(result_queue, author='', title='', year='', doi='', isbn='', hit_limi
         hits['hits'].append(mdata)
         count += 1
 
+    logger.debug(hits)
+
     result_queue.put({'scielo': hits})
     return {'scielo': hits}

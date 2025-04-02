@@ -45,6 +45,7 @@ def get_sources(disabled=False):
     return sources_dict
 
 
+# TO DO: combine new_combined and search
 def new_combined(
     author='',
     title='',
@@ -142,6 +143,7 @@ def search(
         aaaaarg_browser=aaaaarg_browser
     )
 
+    # TO DO: why do i loop here?
     for r in rslt:
         output_dict['entries'].append(r)
 
