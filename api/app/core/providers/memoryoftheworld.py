@@ -6,9 +6,16 @@ logger = logging.getLogger(__name__)
 memory_base = 'https://library.memoryoftheworld.org/'
 
 
-def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    # this is the api version
-    logger.info("Searching memoryoftheworld ...")
+def memoryoftheworld(
+    result_queue,
+    author='',
+    title='',
+    year='',
+    doi='',
+    isbn='',
+    hit_limit=10,
+    request_timeout=5
+):
 
     url_authors = "https://library.memoryoftheworld.org/search/authors/"
     url_title = "https://library.memoryoftheworld.org/search/title/"
@@ -18,16 +25,16 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
     count = 0
 
     # it is actually less acurate if you remove ':'
-    if len(isbn)>2:
+    if len(isbn) > 2:
         isbn_prep = isbn.strip().replace('-', '')
         query = url_isbn+isbn_prep
-    elif len(author)>=2 and len(title)<=2:
+    elif len(author) >= 2 and len(title) <= 2:
         auth_prep = author.replace(' ', '+')
         query = url_authors+auth_prep
-    elif len(title)>=2 and len(author)<=2:
+    elif len(title) >= 2 and len(author) <= 2:
         title_prep = title.replace(' ', '+')
         query = url_title+title_prep
-    elif len(title)>=2 and len(author)>=2:
+    elif len(title) >= 2 and len(author) >= 2:
         title_prep = title.replace(' ', '+')
         query = url_title+title_prep
     else:
@@ -37,7 +44,7 @@ def memoryoftheworld(result_queue, author='', title='', year='', doi='', isbn=''
     logger.debug(query)
 
     try:
-        r = requests.get(query, verify=False) # ssl
+        r = requests.get(query, verify=False, timeout=request_timeout) # ssl
         data = r.json()
     except requests.exceptions.SSLError:
         data = {"_items": []}

@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from fixing_links import url_constructor
+from .utils import fetch_provider
 
 
 logger = logging.getLogger(__name__)
@@ -12,9 +13,16 @@ libgen_home = 'https://libgen.is'
 libgen_base_articles = libgen_home+"/scimag/?"
 
 
-def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    #print("Searching libgen_article ...")
-    logger.debug("Searching libgen_article ...")
+def libgen_article(
+    result_queue,
+    author='',
+    title='',
+    year='',
+    doi='',
+    isbn='',
+    hit_limit=10,
+    request_timeout=5
+):
 
     hits = {'hits': []}
     count = 0
@@ -26,8 +34,18 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
 
     libgen_url = libgen_base_articles+query
 
-    r = requests.get(libgen_url)
-    soup = BeautifulSoup(r.text, 'lxml')
+    results = fetch_provider(
+        "libgen_article",
+        libgen_url,
+        None,
+        request_timeout=request_timeout,
+        format="text"
+    )
+    if not results:
+        result_queue.put({'libgen_article': hits})
+        return hits
+
+    soup = BeautifulSoup(results, 'lxml')
     rows = soup.select(".catalog > tbody > tr")
 
     for i in rows[:hit_limit]:
@@ -37,7 +55,8 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
         tds = i.select('td')
         try:
             auth_data = tds[0].get_text().split(';')
-        except:
+        except Exception as e:
+            logger.debug(e)
             auth_data = tds[0].get_text()
 
         # check for impurities
@@ -52,7 +71,6 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
             journal_info = re.findall(r'\d+', journal_data[1].get_text())
         except Exception as e:
             logger.debug("Error extractig journal info @libgen_article: ", e)
-
         try:
             journal['volume'] = journal_info[0]
         except Exception as e:
@@ -61,7 +79,6 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
             journal['issue'] = journal_info[1]
         except Exception as e:
             logger.debug("Error extractig journal info @libgen_article: ", e)
-
         try:
             journal['year'] = journal_info[2]
         except Exception as e:
@@ -69,17 +86,15 @@ def libgen_article(result_queue, author='', title='', year='', doi='', isbn='', 
 
         links = tds[4].select('a')
 
-        item['href'] = [url_constructor(l.get_text(), l.get_text(), l.get('href')) for l in links]
+        item['href'] = [url_constructor(l.get_text(), l.get_text(), l.get('href')) for l in links]  # noqa
         item['rank'] = count
         item['query'] = libgen_url
-
-
         item['author'] = auth_data
         item['doi'] = get_doi
         item['title'] = get_title
         item['journal'] = journal
         hits['hits'].append(item)
-        count+=1
+        count += 1
 
     result_queue.put({'libgen_article': hits})
     return {'libgen_article': hits}

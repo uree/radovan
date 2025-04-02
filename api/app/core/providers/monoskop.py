@@ -11,16 +11,22 @@ logger = logging.getLogger(__name__)
 monoskop_base = 'https://monoskop.org/log/?cat=17&s='
 
 
-def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    # no isbn search
-    # print("Searching Monoskop ...")
-    logger.info("Searching monoskop ...")
+def monoskop(
+    result_queue,
+    author='',
+    title='',
+    year='',
+    doi='',
+    isbn='',
+    hit_limit=10,
+    request_timeout=5
+):
 
     hits = {'hits': []}
     count = 0
 
     # unicode characters problematic for urrlib
-    author = author.replace(' ','+')
+    author = author.replace(' ', '+')
     author = author.replace('\xa0', '+')
     # apostrophe
     author = author.replace('\u2019', '')
@@ -52,7 +58,7 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
             )
 
     try:
-        con = urllib.request.urlopen(request, timeout=5)
+        con = urllib.request.urlopen(request, timeout=request_timeout)
     except Exception as e:
         logger.debug(e)
         result_queue.put({'monoskop': hits})
@@ -64,8 +70,6 @@ def monoskop(result_queue, author='', title='', year='', doi='', isbn='', hit_li
     logger.debug(soup)
 
     for i in items:
-        #print("item")
-
         mdata = {}
 
         title = i.select('h1')[0].get_text()

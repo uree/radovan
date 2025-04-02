@@ -74,12 +74,17 @@ def test_osf():
     assert "memory" in results["entries"][0]["osf"]["hits"][0]["title"].lower()
 
 
-def test_unpaywall():
+def test_unpaywall():  # aka oadoi
     results = search(doi="10.1038/nature12373", sources=[11])
 
     assert len(results["entries"][0]["oadoi"]["hits"]) > 0
     assert len(results["entries"][0]["oadoi"]["hits"][0]["title"]) > 0
-    assert "thermometry" in results["entries"][0]["oadoi"]["hits"][0]["title"]
+    assert "thermometry" in results["entries"][0]["oadoi"]["hits"][0]["title"].lower()
+
+    results = search(title="cannabis", sources=[11])
+    assert len(results["entries"][0]["oadoi"]["hits"]) > 0
+    assert len(results["entries"][0]["oadoi"]["hits"][0]["title"]) > 0
+    assert "cannabis" in results["entries"][0]["oadoi"]["hits"][0]["title"].lower()
 
 
 def test_mediarep():

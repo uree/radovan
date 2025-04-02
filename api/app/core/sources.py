@@ -66,7 +66,7 @@ sources_dict = [{
     'books': 1,
     'articles': 1,
     'query_url': 'https://mla.hcommons.org/wp-admin/admin-ajax.php',
-    'selected': 0,
+    'selected': 1,
     'enabled': 0,
 }, {
     'full_name': 'SciELO',
@@ -125,7 +125,7 @@ sources_dict = [{
     'id': 12,
     'books': 1,
     'articles': 1,
-    'query_url': 'https://mediarep.org/discover?',
+    'query_url': 'https://mediarep.org/search?spc.page=1&f.itemtype=book,equals',
     'selected': 1,
     'enabled': 0,
 }]

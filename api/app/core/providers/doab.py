@@ -1,34 +1,45 @@
 import logging
 import requests
 
+from .utils import fetch_provider
+
 logger = logging.getLogger(__name__)
 doab_base = 'https://directory.doabooks.org/rest/search?query='
 
 
-def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=10):
-    logger.info("Searching doab ... ")
-
-    count = 0
+def doab(
+    result_queue,
+    author='',
+    title='',
+    year='',
+    doi='',
+    isbn='',
+    hit_limit=10,
+    request_timeout=5
+):
 
     # can search by ISBN and DOI!
     if len(isbn) > 2:
         query = isbn+'&expand=metadata&limit='+str(hit_limit)
     else:
         query = author+'+'+title+'+'+year+'&expand=metadata,bitstreams&limit='+str(hit_limit)
-        #query = author+'+'+title+'+'+year
+        # query = author+'+'+title+'+'+year
         query = query.replace(' ', '+')
 
     doab_url = doab_base+query
 
     hits = {'hits': []}
 
-    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"}
+    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"}  # noqa:501
 
-    try:
-        r = requests.get(doab_url, headers=headers)
-        results = r.json()
-    except Exception as e:
-        logger.debug(e)
+    results = fetch_provider(
+        "doab",
+        doab_url,
+        headers,
+        request_timeout=request_timeout,
+        format="json"
+    )
+    if not results:
         result_queue.put({'doab': hits})
         return {'doab': hits}
 
@@ -38,7 +49,8 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
 
         try:
             bit_meta = results[i]['bitstreams'][0]['metadata']
-        except:
+        except Exception as e:
+            logger.debug(e)
             bit_meta = None
 
         if bit_meta:
@@ -48,7 +60,7 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
                     results[i]['url'] = b['value']
 
                     # construct cover url
-                    results[i]['coverurl'] = 'https://directory.doabooks.org/bitstream/handle/'+results[i]['handle']+'/'+b['value'].split('/')[-1]+'.jpg'
+                    results[i]['coverurl'] = 'https://directory.doabooks.org/bitstream/handle/'+results[i]['handle']+'/'+b['value'].split('/')[-1]+'.jpg'  # noqa:E501
 
         for m in results[i]['metadata']:
             results[i][m['key']] = m['value']
@@ -60,6 +72,7 @@ def doab(result_queue, author='', title='', year='', doi='', isbn='', hit_limit=
         results[i]['link'] = 'https://directory.doabooks.org/handle/'+results[i]['handle']
 
     hits['hits'] = results
+    logger.debug(hits)
 
     result_queue.put({'doab': hits})
     return {'doab': hits}

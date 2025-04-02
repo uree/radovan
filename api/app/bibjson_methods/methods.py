@@ -2,13 +2,15 @@
 # python 3.7.2
 
 import json
+import logging
 import re
 import os.path
 from collections import Counter
 import pprint
 from fixing_links import standardize_links
 
-import logging
+
+logger = logging.getLogger(__name__)
 
 
 # SETTINGS
@@ -258,8 +260,8 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
 
     elif fieldname == "identifier":
         # need a test here?
-            # recognize DOI and ISBN
-            # split if contains space slash or comma?
+        # recognize DOI and ISBN
+        # split if contains space slash or comma?
         def appendix(input_lst, keyname=original_key):
             for i in input_lst:
                 one = {"id": "", "type": ""}
@@ -272,6 +274,9 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
                 one['type'] = keyname
                 one['id'] = input_val
                 output.append(one)
+
+        logger.debug(fielddata)
+        logger.debug(type(fielddata))
 
         if type(fielddata) == list:
             br = ' '.join(fielddata)
@@ -369,8 +374,6 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
                 output.append(one)
 
 
-
-
     elif fieldname == "subject":
         for i in fielddata:
             output.append(i)
@@ -451,10 +454,14 @@ def type_maker(type, data_key, data_value, source):
 
         bibjson[new_key] = data_value
 
-
     elif new_key in fields['list_of_dicts']:
-        lod = list_of_dicts(new_key, data_value, data_key, source)
-        bibjson[new_key] = lod
+        logger.debug("Calling list of dicts {}".format(new_key))
+        logger.debug("Data value {}".format(data_value))
+        logger.debug("Data key {}".format(data_key))
+        logger.debug("Source {}".format(source))
+        if data_value:
+            lod = list_of_dicts(new_key, data_value, data_key, source)
+            bibjson[new_key] = lod
     elif new_key in fields['objects']:
         bject = make_a_journal(new_key, data_value, data_key)
 
@@ -606,15 +613,16 @@ def mein_main(incoming):
                     # hack in the case of scielo ... optimize when time
                     if key == "type" or key == "TY":
                         value = nice_type
-
+                    logger.debug(nice_type)
+                    logger.debug(key)
+                    logger.debug(value)
+                    logger.debug(source)
                     bibjson_one = type_maker(nice_type, key, value, source)
-
-
 
                     if bool(bibjson_one) == True:
                         for k, v in bibjson_one.items():
-                            #print k, v
-                            #checks if value already exists in bibjson output ... if so it needs to be appended to existing bibjson differently
+                            # print k, v
+                            # checks if value already exists in bibjson output ... if so it needs to be appended to existing bibjson differently
                             if k in past_keys:
                                 if type(v)==list:
                                     try:
@@ -632,9 +640,10 @@ def mein_main(incoming):
                                     bibjson_output[k] = v
                                 except:
                                     pass
-
-                    if list(bibjson_one.keys())[0] not in past_keys:
-                        past_keys.append(list(bibjson_one.keys())[0])
+                    logger.debug(bibjson_one)
+                    if bibjson_one:
+                        if list(bibjson_one.keys())[0] not in past_keys:
+                            past_keys.append(list(bibjson_one.keys())[0])
 
                 for key, data_value in extra_fields.items():
                     # checks if data is weirdly nested
