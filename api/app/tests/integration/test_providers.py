@@ -36,7 +36,6 @@ def test_libgen_article():
 
 def test_mla_core():
     results = search(title="fashion", sources=[6])
-    print(results)
 
     assert len(results["entries"][0]["core"]["hits"]) > 0
     assert len(results["entries"][0]["core"]["hits"][0]["title"]) > 0
