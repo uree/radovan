@@ -53,8 +53,7 @@ def map_sources_to_ids(sources, sources_dict):
     return sources
 
 
-# TO DO: combine new_combined and search
-def new_combined(
+def search(
     author='',
     title='',
     year='',
@@ -64,7 +63,22 @@ def new_combined(
     hit_limit=10,
     aaaaarg_browser=None
 ):
-    logger.info("--- new combined init ---")
+
+    output_dict = {'entries': []}
+    author, title, year, doi = (arg.strip() for arg in (author, title, year, doi))
+    isbn = isbn.strip().replace('-', '')
+
+    try:
+        sources = sources.split(' ')
+    except Exception as e:
+        logger.debug(e)
+        pass
+
+    sources = map_sources_to_ids(sources, sources_dict)
+
+    # remove aaaarg from list of sources if login unsuccessful
+    if aaaaarg_browser is None and 5 in sources:
+        sources.remove(5)
 
     selection = [n['code_name'] for n in sources_dict if n['id'] in sources and n['enabled']]
 
@@ -96,51 +110,9 @@ def new_combined(
     # pull the data out of the queue before the join
     for p in proc:
         item = result_queue.get()
-        results.append(item)
+        output_dict['entries'].append(item)
 
     for p in proc:
         p.join()
-
-    return results
-
-
-def search(
-    author='',
-    title='',
-    year='',
-    doi='',
-    isbn='',
-    sources='',
-    hit_limit=10,
-    aaaaarg_browser=None
-):
-
-    output_dict = {'entries': []}
-
-    try:
-        sources = sources.split(' ')
-    except Exception as e:
-        logger.debug(e)
-        pass
-
-    sources = map_sources_to_ids(sources, sources_dict)
-
-    # remove aaaarg from list of sources if login unsuccessful
-    if aaaaarg_browser is None and 5 in sources:
-        sources.remove(5)
-
-    # clean input
-    rslt = new_combined(
-        author=author.strip(),
-        title=title.strip(),
-        year=year.strip(),
-        doi=doi.strip(),
-        isbn=isbn.strip().replace('-',''),
-        sources=sources,
-        hit_limit=hit_limit,
-        aaaaarg_browser=aaaaarg_browser
-    )
-
-    output_dict['entries'] = rslt
 
     return output_dict
