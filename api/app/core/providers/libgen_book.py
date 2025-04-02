@@ -35,7 +35,7 @@ def update_libgen_json(data):
 
 
 def update_libgen_src(libgen_home, lst, target):
-    srcs = [libgen_home+l.get(target).replace('..','') for l in lst]
+    srcs = [libgen_home+l.get(target).replace('..', '') for l in lst]  # noqa
     return srcs
 
 

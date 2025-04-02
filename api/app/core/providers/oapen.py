@@ -61,9 +61,9 @@ def oapen(
                     results[i]['url'] = b['value']
 
         if bit:
-            results[i]['standard_oapen_url'] = 'https://library.oapen.org/bitstream/handle/'+results[i]['handle']+'/'+bit['name']
+            results[i]['standard_oapen_url'] = 'https://library.oapen.org/bitstream/handle/'+results[i]['handle']+'/'+bit['name']  # noqa:501
 
-            results[i]['coverurl'] = 'https://library.oapen.org/bitstream/handle/'+results[i]['handle']+'/'+bit['name']+'.jpg'
+            results[i]['coverurl'] = 'https://library.oapen.org/bitstream/handle/'+results[i]['handle']+'/'+bit['name']+'.jpg'  # noqa:501
 
         for m in results[i]['metadata']:
             results[i][m['key']] = m['value']
