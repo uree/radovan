@@ -44,6 +44,15 @@ def get_sources(disabled=False):
     return sources_dict
 
 
+def map_sources_to_ids(sources, sources_dict):
+    if isinstance(sources, list) and not is_number(sources[0]):
+        return [
+            next(n['id'] for n in sources_dict if n['code_name'] == s)
+            for s in sources
+        ]
+    return sources
+
+
 # TO DO: combine new_combined and search
 def new_combined(
     author='',
@@ -114,17 +123,7 @@ def search(
         logger.debug(e)
         pass
 
-    if isinstance(sources, list):
-        if is_number(sources[0]):
-            pass
-        else:
-            tmp = []
-            for s in sources:
-                num = [n['id'] for n in sources_dict if n['code_name'] == s]
-                tmp.append(num[0])
-            sources = tmp
-    else:
-        pass
+    sources = map_sources_to_ids(sources, sources_dict)
 
     # remove aaaarg from list of sources if login unsuccessful
     if aaaaarg_browser is None and 5 in sources:

@@ -170,7 +170,6 @@ def make_string(fieldname, fielddata):
 
 ## LISTS OF DICTS
 def list_of_dicts(fieldname, fielddata, original_key, source):
-    logging.info("Processing list_of_dicts ...")
 
     output = []
 
@@ -390,7 +389,6 @@ def list_of_dicts(fieldname, fielddata, original_key, source):
 
 # NESTED DICTS
 def make_a_journal(journaldata):
-    logging.info("Processing make_a_journal ...")
 
     j_fields = ['issns', 'language', 'publisher', 'journal', 'volume', 'pages', 'year', 'issue', 'month']
 
@@ -423,8 +421,6 @@ def make_a_journal(journaldata):
 
 
 def type_maker(type, data_key, data_value, source):
-    logging.info("Processing type_maker ...")
-
     bibjson = {}
     af2 = []
     for i in types:
