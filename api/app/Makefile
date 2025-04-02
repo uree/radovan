@@ -1,14 +1,14 @@
 FLASK_CONTAINER = "radovan_api"
+TEST_NAME ?=
 
-
-run-func-tests:
+run-tests:
 	docker exec $(FLASK_CONTAINER) \
 	python -m pytest tests
 
-run-func-tests-endpoints:
+run-int-tests-endpoints:
 	docker exec $(FLASK_CONTAINER) \
 	python -m pytest tests/integration/test_endpoints.py
 
-run-func-tests-providers:
+run-int-tests-providers:
 	docker exec $(FLASK_CONTAINER) \
-	python -m pytest tests/integration/test_providers.py
+	python -m pytest tests/integration/test_providers.py$(if $(TEST_NAME),::$(TEST_NAME))
