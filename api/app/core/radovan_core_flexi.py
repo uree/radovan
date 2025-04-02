@@ -71,7 +71,7 @@ def search(
     try:
         sources = sources.split(' ')
     except Exception as e:
-        logger.debug(e)
+        logger.debug(f"Sources already a list: {e}")
         pass
 
     sources = map_sources_to_ids(sources, sources_dict)

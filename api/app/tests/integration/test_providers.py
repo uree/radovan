@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa
 from core.radovan_core_flexi import search
 
 
