@@ -10,3 +10,4 @@ sync.sh
 .env*
 DEVNOTES.md
 *.log
+api/app/logs/output/*
