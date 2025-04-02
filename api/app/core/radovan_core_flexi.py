@@ -30,7 +30,6 @@ from .utils import is_number
 setup_logging()
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=4)
-global_hit_limit = 10
 
 # BULK SEARCH SETTINGS
 bibjson_location = "tests/ch1_nolinks.json"
@@ -143,8 +142,6 @@ def search(
         aaaaarg_browser=aaaaarg_browser
     )
 
-    # TO DO: why do i loop here?
-    for r in rslt:
-        output_dict['entries'].append(r)
+    output_dict['entries'] = rslt
 
     return output_dict
