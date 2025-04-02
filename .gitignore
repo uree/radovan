@@ -11,3 +11,4 @@ sync.sh
 DEVNOTES.md
 *.log
 api/app/logs/output/*
+main.log
