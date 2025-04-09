@@ -11,6 +11,8 @@ services:
       FLASK_APP: ./api/app.py
       PYTHONUNBUFFERED: 1
       PYTHONIOENCODING: UTF-8
+    env_file:
+      - api/app/.env
     volumes:
       - ./api/app:/app
     ports:
