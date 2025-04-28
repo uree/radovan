@@ -2,7 +2,7 @@ aniso8601==8.0.0
 beautifulsoup4==4.8.1
 bibtexparser==1.1.0
 bs4==0.0.1
-certifi==2019.11.28
+certifi==2022.12.7
 cffi==1.13.2
 chardet==3.0.4
 Click==7.0
