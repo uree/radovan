@@ -24,7 +24,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://directory.doabooks.org/rest/search?query=",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
     },
     {
         "full_name": "OAPEN",
@@ -35,7 +35,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://library.oapen.org/rest/search?query=",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Monoskop",

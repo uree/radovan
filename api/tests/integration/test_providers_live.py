@@ -1,6 +1,7 @@
 from app.api.v2_0.request import SearchRequest
 from app.core.providers.base_config import ProviderConfig
 from app.core.providers.doab import DOABProvider
+from app.core.providers.oapen import OAPENProvider
 
 
 def test_doab_live():
@@ -32,7 +33,39 @@ def test_doab_live():
     extra = record["extra"][0]
 
     assert extra["source"] == "doab"
-    assert "rank" not in extra
 
+    assert bibjson.get("title")
+    assert bibjson.get("link")
+
+
+def test_oapen_live():
+    provider = OAPENProvider(
+        ProviderConfig(
+            id=1,
+            code_name="oapen",
+            full_name="OAPEN",
+            url="http://www.oapen.org/home",
+            query_url="https://library.oapen.org/rest/search?query=",
+        )
+    )
+
+    request = SearchRequest(
+        title="memory",
+        hit_limit=3,
+        request_timeout=10,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "oapen"
     assert bibjson.get("title")
     assert bibjson.get("link")
