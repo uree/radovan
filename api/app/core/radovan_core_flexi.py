@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
-# python 3.6.9
-
 import logging
 import pprint
 
+from flask import current_app
+
 from multiprocessing import Process, Queue
 
-from .logs.setup import setup_logging
-
-from .providers.aaaaarg import aaaaarg  # noqa
+# from .providers.aaaaarg import aaaaarg  # noqa
 from .providers.core import core  # noqa
-from .providers.doab import doab  # noqa
+# from .providers.doab import doab  # noqa
 from .providers.doaj import doaj  # noqa
 from .providers.libgen_article import libgen_article  # noqa
 from .providers.libgen_book import libgen_book  # noqa
@@ -22,19 +19,11 @@ from .providers.oapen import oapen  # noqa
 from .providers.osf import osf  # noqa
 from .providers.scielo import scielo  # noqa
 
-from .sources import sources_dict
+from .sources import sources_dict  # to object?
 from .utils import is_number
 
 
-# GENERAL SETTINGS/STEUP
-setup_logging()
 logger = logging.getLogger(__name__)
-pp = pprint.PrettyPrinter(indent=4)
-
-# BULK SEARCH SETTINGS
-bibjson_location = "tests/ch1_nolinks.json"
-output_filename = bibjson_location[:-5]+'_links.json'
-output_filename = "tests/testing.json"
 
 
 def get_sources(disabled=False):
@@ -64,6 +53,7 @@ def search(
     aaaaarg_browser=None
 ):
 
+    # can do without all this validation now (pydantic)
     output_dict = {'entries': []}
     author, title, year, doi = (arg.strip() for arg in (author, title, year, doi))
     isbn = isbn.strip().replace('-', '')
@@ -74,7 +64,9 @@ def search(
         logger.debug(f"Sources already a list: {e}")
         pass
 
+    # what is the point of this?
     sources = map_sources_to_ids(sources, sources_dict)
+    logger.debug(sources)
 
     # remove aaaarg from list of sources if login unsuccessful
     if aaaaarg_browser is None and 5 in sources:
@@ -84,8 +76,10 @@ def search(
 
     logger.debug(selection)
 
+    # callables?
     possibles = globals().copy()
     possibles.update(locals())
+    logger.debug(possibles)
 
     result_queue = Queue()
     proc = []

@@ -1,6 +1,6 @@
 import logging
 
-from fixing_links import url_constructor
+from app.core.fixing_links import url_constructor
 from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)

@@ -1,14 +1,20 @@
 import logging
 import re
 import requests
-from concurrent.futures import as_completed
+import time
+from typing import Iterable, List
 
+from concurrent.futures import as_completed
 from bs4 import BeautifulSoup, SoupStrainer
 from requests_futures.sessions import FuturesSession
 
-from fixing_links import url_constructor
+from app.api.v2_0.request import SearchRequest
+from app.bibjson_methods.models import BibRecord
+from app.core.fixing_links import url_constructor
+from .base_provider import Provider
 
 
+# TO DO: this file has a misleading name ("core")
 logger = logging.getLogger(__name__)
 core_base = 'https://mla.hcommons.org/wp-admin/admin-ajax.php'
 
@@ -141,3 +147,46 @@ def core(
 
     result_queue.put({'core': hits})
     return {'core': hits}
+
+
+
+
+class COREProvider(Provider):
+    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+        raw_items = self._fetch(request)
+        logger.debug("Fetching from CORE ...")
+        time.sleep(10)
+
+        return [
+            self.to_bibrecord(item)
+            for item in raw_items
+        ]
+
+    def _fetch(self, request: SearchRequest) -> List[dict]:
+        # mock dataset (pretend this came from DOAB API)
+        return [
+            {
+                "title": "Open Science and Research Infrastructure",
+                "creator": ["Emma Johnson", "Liam Wilson"],
+                "year": "2022",
+                "id": "core-001",
+                "link": "https://example.org/core/1",
+            },
+            {
+                "title": "Metadata Standards for Digital Repositories",
+                "creator": ["Sophia Martinez"],
+                "year": "2020",
+                "id": "core-002",
+                "link": "https://example.org/core/2",
+            },
+            {
+                "title": "Advances in Scholarly Data Aggregation",
+                "creator": ["Noah Davis", "Olivia Taylor"],
+                "year": "2024",
+                "id": "core-003",
+                "link": "https://example.org/core/3",
+            },
+        ]
+
+
+

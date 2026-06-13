@@ -5,7 +5,7 @@ from concurrent.futures import as_completed
 from bs4 import BeautifulSoup, SoupStrainer
 from requests_futures.sessions import FuturesSession
 
-from fixing_links import url_constructor
+from app.core.fixing_links import url_constructor
 from .utils import fetch_provider
 
 

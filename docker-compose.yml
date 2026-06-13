@@ -2,24 +2,34 @@ version: "3.7"
 
 services:
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - radovan-network
+
   flask_api:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     build: ./api
     container_name: radovan_api
     restart: always
     environment:
       FLASK_DEBUG: 1
-      FLASK_APP: ./api/app.py
       PYTHONUNBUFFERED: 1
       PYTHONIOENCODING: UTF-8
     env_file:
       - api/app/.env
     volumes:
-      - ./api/app:/app
+      - ./api:/app
     ports:
       - "9003:9003"
     networks:
-      - docker_app-network
-
+      - radovan-network
+ 
   flask_iface:
     build: ./iface
     container_name: radovan_iface
@@ -36,8 +46,8 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - docker_app-network
+      - radovan-network
 
 networks:
-  docker_app-network:
+  radovan-network:
     external: true

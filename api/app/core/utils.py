@@ -8,7 +8,7 @@ import bibtexparser
 import cProfile
 from bs4 import BeautifulSoup
 
-from fixing_links import url_constructor
+from .fixing_links import url_constructor
 
 logger = logging.getLogger(__name__)
 

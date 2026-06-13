@@ -4,7 +4,7 @@ import re
 import urllib
 from bs4 import BeautifulSoup
 
-from fixing_links import url_constructor
+from app.core.fixing_links import url_constructor
 
 
 logger = logging.getLogger(__name__)

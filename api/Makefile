@@ -1,4 +1,4 @@
-FLASK_CONTAINER = "radovan_api"
+FLASK_CONTAINER = flask_api
 TEST_NAME ?=
 
 run-tests:
@@ -12,3 +12,6 @@ run-int-tests-endpoints:
 run-int-tests-providers:
 	docker exec $(FLASK_CONTAINER) \
 	python -m pytest tests/integration/test_providers.py$(if $(TEST_NAME),::$(TEST_NAME))
+
+install-package:
+	docker compose exec $(FLASK_CONTAINER) sh -c "uv pip install --system $(pkg) && uv pip freeze > requirements.txt"

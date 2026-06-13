@@ -1,685 +1,164 @@
-# -*- coding: utf-8 -*-
-# python 3.7.2
-
-import json
 import logging
-import re
-import os.path
-from collections import Counter
 import pprint
-from fixing_links import standardize_links
+
+from app.core.fixing_links import standardize_links
+from .process_datatypes import convert_data_to_bibjson, process_nested_dict
+from .settings import bibjson_aliases, extra_aliases, types, sources_bibjson
+from .utils import flatten_dict_values, convert_to_bibjson_key, resolve_depth, resolve_nice_type, extract_original_type
 
 
 logger = logging.getLogger(__name__)
-
-
-# SETTINGS
-bibjson_aliases = {'abstract': ['abstract', 'AB', 'dc.description.abstract'], 'address': ['address'], 'annote': ['annote', 'descr', 'desc', 'N2'], 'booktitle': ['booktitle'], 'chapter': ['chapter'], 'crossref': ['crossref'], 'edition': ['edition'], 'howpublished': ['howpublished'], 'institution': ['institution'], 'key': ['key'], 'month': ['month'], 'note': ['note'], 'number': ['number'], 'organization': ['organization'], 'pages': ['pages', 'page'], 'publisher': ['publisher', 'PB', 'publishers', 'publisher.name'], 'school': ['school'], 'series': ['series'], 'title': ['title', 'TI', 'titleInfo', 'Title', 'dc.title'], 'type': ['type', 'TY', 'genre', 'ENTRYTYPE', 'dc.type'], 'volume': ['volume', 'VL'], 'year': ['year', 'PY', 'Year', 'publish_date', 'dc.date.issued'], 'author': ['author', 'AU', 'contributors', 'name', 'z_authors', 'Authors', 'dc.contributor.author'], 'editor': ['editor'], 'identifier': ['doi', 'identifier', 'identifierwodash', 'md5', 'issn', 'isbn', 'ID', 'SN', 'DO', 'issne', 'issnp', 'identifiers', 'journal_issns', 'ISBN-13', 'olid', 'isbn-10', 'oapen.identifier.doi', 'oapen.identifier.isbn'], 'link': ['locator', 'url', 'href', 'L1', 'UR', 'url_for_pdf', 'url_for_landing_page', 'best_oa_location', 'links', 'link', 'standard_oapen_url'], 'subject': ['subject', 'KW', 'subjects', 'dc.subject.other'], 'journal': ['journal']}
-
-extra_aliases = {'coverurl': ['coverurl', 'img_href'], 'language': ['language', 'LA', 'languages', 'dc.language'], 'pagesinfile': ['pagesinfile'], 'tags': ['tags'], 'filetype': ['extension'], 'source': ['source'], 'rank': ['rank'], 'place_published': ['CY'], 'issue': ['IS', 'issue'], 'startpage': ['SP'], 'lastpage': ['EP'], 'md5': ['md5'], 'landing_url': ['landing_url'], 'query': ['query']}
-
-# careful = ['core']
-#lvl2_aliases = {'core': {'name': {'affiliation': ['extra', 'affiliation']}, {'namePart':['bibjson', 'author']}},
-
-#type_aliases = {'type': ['TY', 'genre', 'type']}
-
-# careful_aliases = {"name": [{"path": "['namePart'][0][0]['text']", "condition": {"@type": "family"}, "in_nice_key": "name"}, {"path": "['namePart'][0][1]['#text']", "condition": {"@type": "given"}, "in_nice_key": "name"}], "originInfo": {"path": "['dateIssued']['#text']", "in_nice_key": "year"}, "relatedItem": [{"path": "['relatedItem']['part']['extent']['start']", "in_nice_key": "startpage"}, {"path": "['relatedItem']['part']['extent']['end']", "in_nice_key": "lastpage"}, {"path": "['relatedItem']['part']['detail']['number']", "in_nice_key": "issue"}, {"path": "['relatedItem']['identifier']['#text']", "in_nice_key": "identifier"}], "titleInfo": {"path": "['title']", "in_nice_key": "title"}}
-
-fields = {'strings': ['abstract', 'address', 'annote', 'booktitle', 'chapter', 'crossref', 'edition', 'howpublished', 'institution', 'key', 'month', 'note', 'number', 'organization', 'pages', 'publisher', 'school', 'series', 'title', 'type', 'volume', 'year', 'journal', 'language'], 'list_of_dicts': ['author', 'editor', 'identifier', 'link', 'subject'], 'objects': ['']}
-
-types = [{'article': {'required': ['author', 'title', 'journal', 'year', 'volume'], 'optional': ['number', 'pages', 'month', 'note', 'key'], 'aliases': ['article', 'jour', 'JOUR']}}, {'book': {'required': ['author', 'editor', 'title', 'publisher', 'year'], 'optional': ['volume', 'number', 'series', 'address', 'edition', 'month', 'note', 'key', 'url', 'type'], 'aliases': ['book', 'edition', 'work']}}, {'booklet': {'required': ['title'], 'optional': ['author', 'howpublished', 'address', 'month', 'year', 'note', 'key'], 'aliases': ['booklet']}}, {'conference': {'required': ['author', 'editor', 'title', 'chapter/pages', 'publisher', 'year'], 'optional': ['volume', 'number', 'series', 'type', 'address', 'edition', 'month', 'note', 'key'], 'aliases': ['conference']}}, {'inbook': {'required': ['author', 'title', 'booktitle', 'publisher', 'year'], 'optional': ['editor', 'volume', 'number', 'series', 'type', 'chapter', 'pages', 'address', 'edition', 'month', 'note', 'key'], 'aliases': ['inbook']}}, {'incollection': {'required': ['author', 'title', 'booktitle', 'year'], 'optional': ['editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'key'], 'aliases': ['incollection']}}, {'inproceedings': {'required': ['author', 'title', 'booktitle', 'year'], 'optional': ['editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'key'], 'aliases': ['inproceedings', 'conference paper']}}, {'manual': {'required': ['title'], 'optional': ['author', 'organization', 'address', 'edition', 'month', 'year', 'note', 'key'], 'aliases': ['manual']}}, {'masterthesis': {'required': ['author', 'title', 'school', 'year'], 'optional': ['type', 'address', 'month', 'note', 'key'], 'aliases': ['masterthesis']}}, {'misc': {'required': ['none'], 'optional': ['author', 'title', 'howpublished', 'month', 'year', 'note', 'key'], 'aliases': ['misc', 'creative work', 'artwork']}}, {'phdthesis': {'required': ['author', 'title', 'school', 'year'], 'optional': ['type', 'address', 'month', 'note', 'key'], 'aliases': ['phdthesis']}}, {'proceedings': {'required': ['title', 'year'], 'optional': ['editor', 'volume', 'number', 'series', 'address', 'month', 'publisher', 'organization', 'note', 'key'], 'aliases': ['proceedings']}}, {'techreport': {'required': ['author', 'title', 'institution', 'year'], 'optional': ['type', 'number', 'address', 'month', 'note', 'key'], 'aliases': ['techreport']}}, {'unpublished': {'required': ['author', 'title', 'note'], 'optional': ['month', 'year', 'key'], 'aliases': ['unpublished']}}]
-
-current_source = ''
-
-resolving_nesting = [{'test': {'problem_fields': [{'field_name': 'title', 'depth_and_keys': 'title'}]}, 'aaaaarg': {'problem_fields': [{'field_name': 'language', 'depth_and_keys': 'key'}]}}]
-
-#sources_bibjson = [{'doaj': [{'level': 'hits','depth': 'results'}, {'level': 'hit', 'depth': 'bibjson'}]}]
-sources_bibjson = [{'doaj': [{'level': 'hit', 'depth': 'bibjson'}]}]
-
-logging.basicConfig(filename='logs/bibjson_methods_log.log', level=logging.DEBUG, format='%(asctime)s:%(levelname)s:%(message)s')
 pp = pprint.PrettyPrinter(indent=4)
 
-
-def join_lists(slovar):
-    list = []
-    for key, value in slovar.items():
-        if len(value)>1:
-            list.append(value)
-        else:
-            pass
-    return list
-
-def join_lists2(slovar):
-    oput = []
-    for k, v in slovar.items():
-        for xx in v:
-            oput.append(xx)
-    return oput
-
-def dis_ambig(slovar, alias):
-    for key, value in slovar.items():
-        if alias in value:
-            return key
-
-def gen_dict_extract(key, var):
-    all_paths = []
-    if hasattr(var,'iteritems'):
-        for k, v in var.items():
-            if k == key:
-                yield v
-            if isinstance(v, dict):
-                for result in gen_dict_extract(key, v):
-                    yield result
-            elif isinstance(v, list):
-                for d in v:
-                    for result in gen_dict_extract(key, d):
-                        yield result
-
-def get_all_keys(dict_item, key_base=''):
-    all_paths = []
-    if isinstance(dict_item, dict):
-        for key in dict_item:
-            if key_base:
-                new_key = key_base + "/" + key
-            else:
-                new_key = key
-            all_paths.extend(get_all_keys(dict_item[key], new_key))
-    else:
-        if key_base:
-            all_paths.append(key_base)
-
-    return all_paths
-
-def really_get_all_keys(dict_item, key_base=''):
-    all_paths = []
-    if isinstance(dict_item, dict):
-        for key in dict_item:
-            if key_base:
-                new_key = key_base + "/" + key
-            else:
-                new_key = key
-            all_paths.extend(really_get_all_keys(dict_item[key], new_key))
-    else:
-        if key_base:
-            all_paths.append(key_base)
-
-    return all_paths
+# TO DO: this module should create BibRecords, which can be translated into any format (implement that), but they need to be able to carry multiple urls
 
 
-def dict_path(path,my_dict,out):
-    for k,v in my_dict.items():
-        if isinstance(v,dict):
-            dict_path(path+"['"+k+"']",v,out)
-        elif isinstance(v,list):
-            for blj in v:
-                dict_path(path+"['"+k+"']",blj,out)
-        else:
-            struct = {'path': path+"['"+k+"']", 'value': v}
-            out.append(struct)
+# TO DO: move this into the BibRecord model
+def process_hit(
+    hit_data,
+    source,
+    extra_aliases_flat,
+    bibjson_aliases_flat,
+    types
+):
+    hit = {"bibjson": [], "extra": []}
+    bibjson_output = {}
+    extra_output = {}
+    extra_fields = {}
+    bibjson_fields = {}
+    original_type = ""
+    nice_type = ""
+    past_keys = []
 
+    # if source returns bibjson make use it's clean and return
+    if source in sources_bibjson:
+        cleaner = resolve_depth(sources_bibjson["source"], "hit")
+        extra = {
+            'source': source,
+            'rank': hit_data[cleaner]['rank'],
+            'query': hit_data[cleaner]['query']
+        }
+        hit['extra'].append(extra)
+        del hit_data[cleaner]['rank']
 
+        hit_data[cleaner]['link'] = [standardize_links(source, link) for link in hit_data[cleaner]['link']]  # noqa:501
+        hit['bibjson'].append(hit_data[cleaner])
 
-def parse_keys(all_paths, search_key):
-    output = []
+        return hit
 
-    if all_paths:
-        for i in all_paths:
-            op = i.split('/')
-            mar = [n for n in op if op[-1] == search_key]
-            if mar:
-                output.append(mar)
+    # split keys into valid bibjson and extra fields
+    if isinstance(hit_data, dict):
+        for key, value in hit_data.items():
+            listo = bibjson_aliases['type']
+            if key in listo:
+                original_type = extract_original_type(value)
 
-    return output
+            if key in extra_aliases_flat:
+                extra_fields[convert_to_bibjson_key(extra_aliases, key)] = value
+            elif key in bibjson_aliases_flat:
+                bibjson_fields[key] = value
 
+    nice_type = resolve_nice_type(original_type, types)
 
-def return_data_type(data_value):
-    if isinstance(data_value, dict):
-        return "dict"
-    elif isinstance(data_value, list):
-        return "list"
-    elif isinstance(data_value, str):
-        return "string"
-    else:
-        return None
-
-def resolve_depth(pod, source, level):
-    depth = ''
-    for i in pod:
-        #print(i)
-        if source in i:
-            for k, v in i.items():
-                for s in v:
-                    if s['level'] == level:
-                        depth = s['depth']
-    return depth
-
-def get_it(lod, val):
-    for i in lod:
-        if val in i:
-            return True
-        else:
-            return False
-
-
-
-# GENERATING STANDARD BIBJSON DATA TYPES FROM MESSY INPUTS
-
-## STRINGS // not really necessary
-def make_string(fieldname, fielddata):
-    return dict(fieldname=fielddata)
-
-
-
-## LISTS OF DICTS
-def list_of_dicts(fieldname, fielddata, original_key, source):
-
-    output = []
-
-    if fielddata != None:
-        if type(fielddata) == list:
-            nice_input = fielddata
-        elif type(fielddata) == dict:
-            pass
-        else:
-            if ";" in fielddata:
-                try:
-                    nice_input = fielddata.split(';')
-                    #print nice_input
-                except:
-                    pass
-            else:
-                try:
-                    nice_input = fielddata.split(',')
-                except:
-                    pass
-
-    if fieldname == "author":
-        if source == "oadoi":
-            all = []
-            if isinstance(fielddata, list):
-                for i in fielddata:
-                    one = {"name": "", "alternate": [""],  "firstname": "", "lastname": ""}
-                    try:
-                        one['firstname'] = i['given']
-                        one['lastname'] = i['family']
-                        one['name'] = i['given']+" "+i['family']
-
-                        all.append(one)
-                    except TypeError:
-                        pass
-                output = all
-            else:
-                pass
-        elif source == "doab" or source == "oapen":
-                one = {"name": "", "alternate": [""],  "firstname": "", "lastname": ""}
-
-                try:
-                    ph = fielddata.split(', ')
-                except Exception as e:
-                    one['name'] = fielddata
-                    output.append(one)
-                    pass
-
-                try:
-                    one['firstname'] = ph[1]
-                    one['lastname'] = ph[0]
-                    one['name'] = ph[1]+' '+ph[0]
-                    output.append(one)
-                except:
-                    one['name'] = fielddata
-                    output.append(one)
-        else:
-            try:
-                for i in nice_input:
-                    one =  {"name": "", "alternate": [""],  "firstname": "", "lastname": "", "type": "author"}
-
-                    # this works for aarg let's hope it doesn't ruin anything elsewhere
-                    ftype = return_data_type(i)
-                    if ftype == 'dict':
-                        ks = get_all_keys(i)
-                        tmp = gen_dict_extract(ks[0], i)
-                        lst = [el for el in tmp]
-                        one['name'] = lst[0]
-                        output.append(one)
-                    else:
-                        one['name'] = i
-                        output.append(one)
-
-            except Exception as e:
-                pass
-
-
-    elif fieldname == "editor":
-        try:
-            for i in nice_input:
-                one =  {"name": "", "alternate": [""],  "firstname": "", "lastname": "", "type": "editor"}
-                one['name'] = i
-                output.append(one)
-        except:
-            pass
-
-    elif fieldname == "identifier":
-        # need a test here?
-        # recognize DOI and ISBN
-        # split if contains space slash or comma?
-        def appendix(input_lst, keyname=original_key):
-            for i in input_lst:
-                one = {"id": "", "type": ""}
-                one['type'] = keyname
-                one['id'] = i
-                output.append(one)
-
-        def appendone(input_val, keyname=original_key):
-                one = {"id": "", "type": ""}
-                one['type'] = keyname
-                one['id'] = input_val
-                output.append(one)
-
-        logger.debug(fielddata)
-        logger.debug(type(fielddata))
-
-        if type(fielddata) == list:
-            br = ' '.join(fielddata)
-
-            isbns = re.findall(r"\d{10,13}", br)
-
-            dois = re.findall(r"/^10.\d{4,9}/[-._;()/:A-Z0-9]+$/i", br)
-
-            if len(isbns)>1:
-                appendix(isbns, "isbn")
-            else:
-                pass
-
-            if len(dois)>1:
-                appendix(dois, "doi")
-            else:
-                try:
-                    #specifically because of osf ...
-                    dois2 = re.findall(r"10.[-._;()/:A-Z0-9]+$", br)
-                    appendix(dois2, "doi")
-                except:
-                    pass
-        elif type(fielddata) == dict:
-            pass
-
-        else:
-            if fielddata.startswith('10.') or 'doi' in fielddata:
-                appendone(fielddata, 'doi')
-            elif fielddata.startswith('978'):
-                appendone(fielddata, 'isbn')
-            else:
-                appendone(fielddata)
-
-
-    elif fieldname == "link":
-        one = {'name': '','type': '', 'href': ''}
-        if type(fielddata)==list:
-
-            if isinstance(fielddata[0], dict):
-                for i in fielddata:
-                    i2 = standardize_links(source, i)
-                    output.append(i2)
-            else:
-                for i in fielddata:
-                    try:
-                        for key, value in i.items():
-                            one['href'] = value
-                            output.append(one)
-                    except:
-                        one['href'] = i
-                        output.append(one)
-
-        elif type(fielddata) == dict:
-            if source =="oadoi":
-                # skipping link standardization
-                for k, v in fielddata.items():
-                    tmp = {}
-                    if k == 'url_for_pdf':
-                        tmp['type'] = 'open_url'
-                        tmp['href'] = v
-                        tmp['name'] = 'open'
-                    elif k == 'url_for_landing_page':
-                        tmp['type'] = 'landing_url'
-                        tmp['href'] = v
-                        tmp['name'] = 'landing'
-                    elif k == 'url':
-                        tmp['type'] = 'open_url'
-                        tmp['href'] = v
-                        tmp['name'] = 'open'
-
-                    if not tmp:
-                        pass
-                    else:
-                        output.append(tmp)
-            else:
-                output.append(fielddata)
-        else:
-            if source == 'scielo':
-                try:
-                    one['type'] = 'open_url'
-                    one['name'] = 'open'
-                    one['href'] = fielddata
-                    output.append(one)
-                except:
-                    pass
-            elif source == 'doab' or source == 'oapen':
-                if fielddata.endswith('.pdf') or fielddata.endswith('.epub'):
-                    one['type'] = 'download_url'
-                    one['name'] = 'download'
+    # clean up/convert bibjson and append extra values/keys
+    for key, value in bibjson_fields.items():
+        # hacky fixes catching outliers
+        if not nice_type:
+            nice_type = 'misc'
+        if key in ["type", "TY"]:
+            value = nice_type
+        bibjson_one = convert_data_to_bibjson(nice_type, key, value, source)
+        logger.debug(bibjson_output)
+        if bibjson_one:
+            for k, v in bibjson_one.items():
+                if k in past_keys:
+                    if isinstance(v, list):
+                        bibjson_output[k].extend(v)
+                    # else:
+                    #     try:
+                    #         bibjson_output[k].append(v)
+                    #     except Exception as e:
+                    #         logger.debug(f"Error adding data to bibjson Key <{k}> Val <{v}> Error {e}")
                 else:
-                    one['type'] = 'landing_url'
-                    one['name'] = 'landing page'
+                    bibjson_output[k] = v
+                if k not in past_keys:
+                    past_keys.append(k)
 
-                one['href'] = fielddata
-                output.append(one)
+    for key, data_value in extra_fields.items():
+        extra_output[key] = data_value
 
-
-    elif fieldname == "subject":
-        for i in fielddata:
-            output.append(i)
-
-    return output
-
-    # author =  [{"name": "", "alternate": [""],  "firstname": "", "lastname": ""}]
-    #
-    # editor = [{"name": "", "alternate": [""],  "firstname": "", "lastname": ""}]
-    #
-    # identifier = [{"id": "", "type": ""}]
-    #
-    # link = [{"content_type":"", "type":"", "url":""}]
-    #
-    # subject = [{"code": "", "scheme": "", "term": ""}]
-
-# NESTED DICTS
-def make_a_journal(journaldata):
-
-    j_fields = ['issns', 'language', 'publisher', 'journal', 'volume', 'pages', 'year', 'issue', 'month']
-
-    j_dict = {}
-    out = {'bibjson': [], 'extra': []}
-    bibout = {}
-    extraout = {}
-
-    for k, v in journaldata['bibjson'][0].items():
-
-        if k in j_fields:
-            j_dict[k] = v
-        else:
-            bibout[k] = v
-
-
-    for k, v in journaldata['extra'][0].items():
-        if k in j_fields:
-            j_dict[k] = v
-        else:
-            extraout[k] = v
-
-    out['bibjson'].append(bibout)
-    out['extra'].append(extraout)
-    out['bibjson'][0]['journal'] = j_dict
-    return out
-
-
-
-
-
-def type_maker(type, data_key, data_value, source):
-    bibjson = {}
-    af2 = []
-    for i in types:
-        if type in i:
-            af = join_lists(i[type])
-            af2 = af[0]+af[1]
-        else:
-            pass
-
-    new_key = dis_ambig(bibjson_aliases, data_key)
-
-
-    if new_key in fields['strings']:
-        dv = return_data_type(data_value)
-
-        if dv != 'string':
-            for s in resolving_nesting:
-                if source in s:
-                    #print(s[source])
-                    pf = s[source]['problem_fields']
-                    for f in pf:
-                        if f['field_name'] == new_key:
-                            temp = data_value[f['depth_and_keys']]
-                            #print(temp)
-                            data_value = temp
-                else:
-                    pass
-
-        bibjson[new_key] = data_value
-
-    elif new_key in fields['list_of_dicts']:
-        logger.debug("Calling list of dicts {}".format(new_key))
-        logger.debug("Data value {}".format(data_value))
-        logger.debug("Data key {}".format(data_key))
-        logger.debug("Source {}".format(source))
-        if data_value:
-            lod = list_of_dicts(new_key, data_value, data_key, source)
-            bibjson[new_key] = lod
-    elif new_key in fields['objects']:
-        bject = make_a_journal(new_key, data_value, data_key)
-
-    return bibjson
-
-# file for testing
-source ='stuff/arg_output.json'
-
-# CONTROLLER FUNCTION
-def mein_main(incoming):
-    hits = {'hits': []}
-    logging.info("Initiated mein_main ...")
-    hit = {'bibjson': []}
-    meta = {'hits_per_source': []}
-    print(" --- init mein_main ---")
-
+    extra_output['source'] = source
+    hit['bibjson'].append(bibjson_output)
+    hit['extra'].append(extra_output)
 
     try:
-        os.path.isfile(incoming)
-        f = open(incoming)
-        data = json.load(f)
-        data = data['entries']
-    except TypeError:
-        data = incoming['entries']
+        if bibjson_output["type"] == "article":
+            bibout, extraout, jdict = process_nested_dict(hit)
+            hit["bibjson"].append(bibout)
+            hit["extra"].append(extraout)
+            hit["bibjson"][0]["journal"] = jdict
+    except KeyError:
+        pass
 
-    # this is where i could count the hits?
-    for i in data:
+    return hit
+
+
+# possible refactor of the above
+# def process_hit(...):
+#     if is_native_bibjson_source(...):
+#         return process_native_bibjson(...)
+
+#     bibjson_fields, extra_fields = extract_fields(...)
+#     bibjson_output = convert_bibjson(...)
+#     extra_output = build_extra(...)
+
+#     hit = {
+#         "bibjson": [bibjson_output],
+#         "extra": [extra_output],
+#     }
+
+#     process_journal(hit)
+
+#     return hit
+
+
+
+def mein_main(data):
+    hits = {'hits': [], 'meta': {'hits_per_source': []}}  # move this logic to API
+
+    if "entries" not in data:
+        return hits
+
+    # TO DO: move this loop inside the provider model
+    # this is a for each provider loop
+    for entry in data["entries"]:
         new_hits = []
-
         try:
-            source = list(i.keys())[0]
+            source = list(entry.keys())[0]
         except Exception as e:
-            return "Error"
+            logger.error(f"Error getting source info: {e}")
 
-        global current_source
-        current_source = source
+        hit_count = {'source': source, 'count': len(entry[source]['hits'])}
+        hits['meta']['hits_per_source'].append(hit_count)
 
-        hit_count = {'source': source, 'count': len(i[source]['hits'])}
-
-        meta['hits_per_source'].append(hit_count)
-
+        # some sort of cleanup
         try:
-            for x in i[source]['hits']:
-                new_hits.append(x)
+            new_hits = entry[source]["hits"]
         except TypeError:
             pass
 
+        extra_aliases_flat = flatten_dict_values(extra_aliases)
+        bibjson_aliases_flat = flatten_dict_values(bibjson_aliases)
 
-        # rename all the compatible fields?
-        ea = join_lists2(extra_aliases)
-        bt = join_lists2(bibjson_aliases)
+        # this is a for each hit in provider loop
+        for hit_data in new_hits:
+            hit = process_hit(
+                hit_data,
+                source,
+                extra_aliases_flat,
+                bibjson_aliases_flat,
+                types
+            )
+            hits['hits'].append(hit)
 
-        #print(json.dumps(i, sort_keys=True, indent=4))
-
-        for i in new_hits:
-            hit = {"bibjson": [], "extra": []}
-            bibjson_output = {}
-            extra_output = {}
-            extra_fields = {}
-            bibjson_fields = {}
-            original_type = ''
-            nice_type = ''
-            past_keys = []
-
-            cs = {"source": current_source}
-
-
-            # for results which come in the form of bibjson (doaj only currently)
-            if get_it(sources_bibjson, current_source):
-                #count = 0
-                cleaner = resolve_depth(sources_bibjson, current_source, 'hit')
-
-                extra = {}
-                extra['source'] = current_source
-                extra['rank'] = i[cleaner]['rank']
-                extra['query'] = i[cleaner]['query']
-
-                #dirty hack for doaj, only thing ending here
-                hit['extra'].append(extra)
-                del i[cleaner]['rank']
-
-                hit_tmp = [standardize_links(current_source, n) for n in i[cleaner]['link']]
-                i[cleaner]['link'] = hit_tmp
-
-                hit['bibjson'].append(i[cleaner])
-
-                hits['hits'].append(hit)
-                #count+=1
-            else:
-                if isinstance(i, dict):
-                    for key, value in i.items():
-                        mua = {}
-
-                        listo = bibjson_aliases['type']
-
-                        # extracts original type value
-                        if key in listo:
-                            if isinstance(value, (list)):
-                                original_type = value[0].lower()
-                            elif isinstance(value, dict):
-                                tmp_typ = value[next(iter(value))]
-                                #print(tmp_typ)
-                                try:
-                                    original_type = tmp_typ.split('/')[-1]
-                                    #print(original_type)
-                                except:
-                                    original_type = value[next(iter(value))]
-                            else:
-                                original_type = value.lower()
-
-
-                        # translates keys to standard values
-                        if key in ea:
-                            try:
-                                extra_fields[dis_ambig(extra_aliases, key)] = value
-                            except Exception as e:
-                                pass
-                        elif key in bt:
-                            try:
-                                bibjson_fields[key] = value
-                            except Exception as e:
-                                pass
-                        else:
-                            pass
-                else:
-                    pass
-
-
-                # standardizes type names based on aliases in types (top)
-                # print("Resolving item type ...")
-                for i in types:
-                    type_name = list(i.keys())[0]
-
-                    if original_type in i[type_name]['aliases']:
-                        #print("Original type in aliases.")
-                        nice_type = type_name
-                    else:
-                        #print("Original type NOT in aliases.")
-                        pass
-
-                for key, value in bibjson_fields.items():
-
-                    # IF NICE TYPE IS MISSING ASSIGN misc
-                    if nice_type == '':
-                        nice_type = 'misc'
-
-
-                    # USES CLEANED UP TYPE VLAUE IF TYPE FIELD IS BEING PROCESSED
-                    # hack in the case of scielo ... optimize when time
-                    if key == "type" or key == "TY":
-                        value = nice_type
-                    logger.debug(nice_type)
-                    logger.debug(key)
-                    logger.debug(value)
-                    logger.debug(source)
-                    bibjson_one = type_maker(nice_type, key, value, source)
-
-                    if bool(bibjson_one) == True:
-                        for k, v in bibjson_one.items():
-                            # print k, v
-                            # checks if value already exists in bibjson output ... if so it needs to be appended to existing bibjson differently
-                            if k in past_keys:
-                                if type(v)==list:
-                                    try:
-                                        for i in v:
-                                            bibjson_output[k].append(i)
-                                    except:
-                                        pass
-                                else:
-                                    try:
-                                        bibjson_output[k].append(v)
-                                    except:
-                                        pass
-                            else:
-                                try:
-                                    bibjson_output[k] = v
-                                except:
-                                    pass
-                    logger.debug(bibjson_one)
-                    if bibjson_one:
-                        if list(bibjson_one.keys())[0] not in past_keys:
-                            past_keys.append(list(bibjson_one.keys())[0])
-
-                for key, data_value in extra_fields.items():
-                    # checks if data is weirdly nested
-                    for s in resolving_nesting:
-                        if source in s:
-                            pf = s[source]['problem_fields']
-                            for f in pf:
-                                if f['field_name'] == key:
-                                    # this is not sustainable
-                                    if return_data_type(data_value) == "list":
-                                        data_value = data_value[0]
-
-                                    temp = data_value[f['depth_and_keys']]
-                                    data_value = temp
-                        else:
-                            pass
-
-                    extra_output[key] = data_value
-
-                extra_output['source'] = current_source
-
-                hit['bibjson'].append(bibjson_output)
-                hit['extra'].append(extra_output)
-
-
-                # CORRECTION IF IT'S A JOURNAL
-                # this is where the <built in method> issue arises. sometimes?
-                try:
-                    if bibjson_output['type'] == 'article':
-                        hit = make_a_journal(hit)
-                except KeyError:
-                    pass
-
-                #print(json.dumps(hit, sort_keys=True, indent=4))
-
-                hits['hits'].append(hit)
-
-    hits['meta'] = meta
     return hits

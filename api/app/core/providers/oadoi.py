@@ -1,7 +1,6 @@
 import logging
 import requests
 
-from core.keys import oadoi_email
 from .utils import fetch_provider
 
 
@@ -17,7 +16,8 @@ def oadoi(
     doi='',
     isbn='',
     hit_limit=10,
-    request_timeout=5
+    request_timeout=5,
+    oadoi_email="smrkej@coventry.ac.uk"
 ):
     hits = {'hits': []}
     count = 0

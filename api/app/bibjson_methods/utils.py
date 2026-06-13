@@ -1,0 +1,176 @@
+import re
+
+def convert_fielddata_to_list(fielddata):
+    if isinstance(fielddata, list):
+        return fielddata
+    elif isinstance(fielddata, dict):
+        return []
+    elif isinstance(fielddata, str):
+        if ';' in fielddata:
+            return fielddata.split(';')
+        else:
+            return fielddata.split(',')
+    return []
+
+
+def flatten_dict_values(slovar):
+    output = []
+    for value in slovar.values():
+        if isinstance(value, list):
+            output.extend(value)
+    return output
+
+
+def convert_to_bibjson_key(slovar, alias):
+    """ Return correnct bibjson term based on input variable name. """
+    for key, value in slovar.items():
+        if alias in value:
+            return key
+
+
+def gen_dict_extract(key, var):
+    all_paths = []
+    if hasattr(var,'iteritems'):
+        for k, v in var.items():
+            if k == key:
+                yield v
+            if isinstance(v, dict):
+                for result in gen_dict_extract(key, v):
+                    yield result
+            elif isinstance(v, list):
+                for d in v:
+                    for result in gen_dict_extract(key, d):
+                        yield result
+
+
+def get_all_keys(dict_item, key_base=''):
+    all_paths = []
+    if isinstance(dict_item, dict):
+        for key in dict_item:
+            if key_base:
+                new_key = key_base + "/" + key
+            else:
+                new_key = key
+            all_paths.extend(get_all_keys(dict_item[key], new_key))
+    else:
+        if key_base:
+            all_paths.append(key_base)
+
+    return all_paths
+
+
+def really_get_all_keys(dict_item, key_base=''):
+    all_paths = []
+    if isinstance(dict_item, dict):
+        for key in dict_item:
+            if key_base:
+                new_key = key_base + "/" + key
+            else:
+                new_key = key
+            all_paths.extend(really_get_all_keys(dict_item[key], new_key))
+    else:
+        if key_base:
+            all_paths.append(key_base)
+
+    return all_paths
+
+
+def dict_path(path, my_dict, out):
+    for k, v in my_dict.items():
+        if isinstance(v, dict):
+            dict_path(path+"['"+k+"']", v, out)
+        elif isinstance(v, list):
+            for blj in v:
+                dict_path(path+"['"+k+"']",blj,out)
+        else:
+            struct = {'path': path+"['"+k+"']", 'value': v}
+            out.append(struct)
+
+
+def parse_keys(all_paths, search_key):
+    output = []
+
+    if all_paths:
+        for i in all_paths:
+            op = i.split('/')
+            mar = [n for n in op if op[-1] == search_key]
+            if mar:
+                output.append(mar)
+
+    return output
+
+
+def return_data_type(data_value):
+    if isinstance(data_value, dict):
+        return "dict"
+    elif isinstance(data_value, list):
+        return "list"
+    elif isinstance(data_value, str):
+        return "string"
+    else:
+        return None
+
+
+def resolve_depth(settings, level):
+    for s in settings:
+        if s['level'] == level:
+            depth = s['depth']
+            return depth
+    return None
+
+
+def extract_isbns(strng):
+    """Extract ISBNs from string."""
+    isbns = re.findall(r"\b\d{10,13}\b", strng)
+
+    if not isbns and strng.startswith('978'):
+        isbns = [strng]
+
+    return isbns
+
+
+def extract_dois(strng):
+    """Extract DOIs from the string."""
+    dois = re.findall(r"\b10.\d{4,9}/[-._;()/:A-Z0-9]+\b", strng)
+
+    if not dois:
+        dois = re.findall(r"\b10.[-._;()/:A-Z0-9]+\b", strng)
+
+    if not dois and (strng.startswith('10.') or 'doi' in strng):
+        dois = [strng]
+
+    return dois
+
+
+def resolve_nice_type(original_type, types):
+    """ Standardizes type names based on aliases in types. """
+    for i in types:
+        type_name = list(i.keys())[0]
+        if original_type in i[type_name]['aliases']:
+            return type_name
+
+    return ""
+
+
+def extract_original_type(value):
+    if isinstance(value, list):
+        return value[0].lower()
+    elif isinstance(value, dict):
+        tmp_typ = value[next(iter(value))]
+        try:
+            return tmp_typ.split('/')[-1]
+        except:
+            return value[next(iter(value))]
+    else:
+        return value.lower()
+
+
+def resolve_nesting(data, source, bibjson_key, resolving_nesting):
+    """ This is supposed to handle strangely nested data from aaaaarg. """
+    if not isinstance(data, "string"):
+        for s in resolving_nesting:
+            if source in s:
+                pf = s[source]['problem_fields']
+                for f in pf:
+                    if f['field_name'] == bibjson_key:
+                        return data[f['depth_and_keys']]

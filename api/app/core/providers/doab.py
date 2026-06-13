@@ -1,6 +1,12 @@
 import logging
 import requests
 
+from typing import Iterable, List
+
+from app.api.v2_0.request import SearchRequest
+from app.bibjson_methods.models import BibRecord
+
+from .base_provider import Provider
 from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)
@@ -76,3 +82,50 @@ def doab(
 
     result_queue.put({'doab': hits})
     return {'doab': hits}
+
+
+
+class DOABProvider(Provider):
+    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+        raw_items = self._fetch(request)
+        logger.debug("Fetching from DOAB ...")
+
+        # consider this: return results meta like count
+
+        results = [
+            self.to_bibrecord(item).to_dict()
+            for item in raw_items
+        ]
+
+        logger.debug(results)
+        return results
+
+    def _fetch(self, request: SearchRequest) -> List[dict]:
+        # mock dataset (pretend this came from DOAB API)
+
+        return [
+            {
+                "title": "Open Access Publishing Basics",
+                "creator": ["Jane Doe", "John Smith"],
+                "year": "2021",
+                "id": "doab-001",
+                "link": "https://example.org/doab/1",
+            },
+            {
+                "title": "Digital Libraries and Knowledge Access",
+                "creator": ["Alice Brown"],
+                "year": "2019",
+                "id": "doab-002",
+                "link": "https://example.org/doab/2",
+            },
+            {
+                "title": "Scholarly Communication in the 21st Century",
+                "creator": ["Michael Green", "Sara White"],
+                "year": "2023",
+                "id": "doab-003",
+                "link": "https://example.org/doab/3",
+            },
+        ]
+
+
+

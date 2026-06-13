@@ -1,0 +1,95 @@
+import json
+import logging
+import uuid
+
+from dataclasses import dataclass, asdict, field
+from threading import Thread
+from typing import List
+
+from app.api.v2_0.request import SearchRequest
+from app.core.search import search
+
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SearchJob:
+    id: str
+    status: str = "running"
+    providers_total: int = 0
+    providers_completed: List[str] = field(default_factory=list)
+    hits: List[dict] = field(default_factory=list)
+
+    def to_dict(self):
+        return asdict(self)
+    
+    @staticmethod
+    def from_redis(job_id: str, data: dict):
+        return SearchJob(
+            id=job_id,
+            status=data.get("status", "running"),
+            providers_total=int(data.get("providers_total", 0)),
+            providers_completed=json.loads(data.get("providers_completed", "[]")),
+            hits=json.loads(data.get("results", "[]")),
+        )
+
+
+def get_search_job(redis, job_id: str) -> SearchJob | None:
+    key = f"search:{job_id}"
+    data = redis.hgetall(key)
+
+    if not data:
+        return None
+
+    return SearchJob.from_redis(job_id, data)
+
+
+def run_search_job(redis, providers, job_id: str, request: SearchRequest):
+
+    key = f"search:{job_id}"
+    providers_completed = []
+    hits = {}
+
+    try:
+        for event in search(providers, request):
+            provider_name = event["provider"]
+            if provider_name not in providers_completed:
+                providers_completed.append(provider_name)
+
+            hits[provider_name] = event["results"]
+            redis.hset(key, mapping={
+                "providers_completed": json.dumps(providers_completed),
+                "status": "running",
+            })
+        redis.hset(key, mapping={
+            "status": "done",
+            "providers_completed": json.dumps(providers_completed),
+            "results": json.dumps(hits),
+        })
+    except Exception as e:
+        logger.debug(str(e))
+        redis.hset(key, mapping={
+            "status": "error",
+            "error": str(e),
+        })
+
+
+def start_search_job(redis, providers, request: SearchRequest) -> str:
+
+    job_id = str(uuid.uuid4())
+    key = f"search:{job_id}"
+
+    redis.hset(key, mapping={
+        "status": "running",
+        "providers_total": len(providers),
+        "providers_completed": json.dumps([]),
+    })
+
+    Thread(
+        target=run_search_job,
+        args=(redis, providers, job_id, request),
+        daemon=True
+    ).start()
+
+    return job_id

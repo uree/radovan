@@ -1,6 +1,6 @@
 import logging
 
-from core.utils import rtd2
+from app.core.utils import rtd2
 from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)
