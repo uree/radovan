@@ -1,5 +1,4 @@
 import logging
-
 from typing import Iterable, List
 from urllib.parse import quote_plus
 

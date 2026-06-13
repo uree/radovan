@@ -2,6 +2,7 @@ from app.api.v2_0.request import SearchRequest
 from app.core.providers.base_config import ProviderConfig
 from app.core.providers.doab import DOABProvider
 from app.core.providers.oapen import OAPENProvider
+from app.core.providers.monoskop import MonoskopProvider
 
 
 def test_doab_live():
@@ -67,5 +68,37 @@ def test_oapen_live():
     extra = record["extra"][0]
 
     assert extra["source"] == "oapen"
+    assert bibjson.get("title")
+    assert bibjson.get("link")
+
+
+def test_monoskop_live():
+    provider =MonoskopProvider(
+        ProviderConfig(
+            id=1,
+            code_name="monoskop",
+            full_name="Monoskop",
+            url="https://monoskop.org/Monoskop",
+            query_url="https://monoskop.org/log/?cat=17&s=",
+        )
+    )
+
+    request = SearchRequest(
+        author="tomislav medak",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "monoskop"
     assert bibjson.get("title")
     assert bibjson.get("link")

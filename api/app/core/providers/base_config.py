@@ -35,7 +35,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://library.oapen.org/rest/search?query=",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
     },
     {
         "full_name": "Monoskop",
@@ -46,7 +46,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://monoskop.org/log/?cat=17&s=",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Library Genesis",

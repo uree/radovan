@@ -1,14 +1,20 @@
 import logging
 import re
+from typing import Iterable, List
+from urllib.parse import quote_plus
 
-import urllib
+import urllib.request
 from bs4 import BeautifulSoup
 
+from app.api.v2_0.request import SearchRequest
+from app.bibjson_methods.models import BibRecord
 from app.core.fixing_links import url_constructor
+from .base_provider import Provider
 
 
 logger = logging.getLogger(__name__)
-monoskop_base = 'https://monoskop.org/log/?cat=17&s='
+MONOSKOP_BASE = 'https://monoskop.org/log/?cat=17&s='
+MONOSKOP_ROOT = 'https://monoskop.org/'
 
 
 def monoskop(
@@ -23,7 +29,6 @@ def monoskop(
 ):
 
     hits = {'hits': []}
-    count = 0
 
     # unicode characters problematic for urrlib
     author = author.replace(' ', '+')
@@ -48,7 +53,7 @@ def monoskop(
     else:
         query = author+'+'+title
 
-    monoskop_url = monoskop_base+query
+    monoskop_url = MONOSKOP_BASE+query
 
     logger.debug(f"Making request {monoskop_url}")
 
@@ -69,7 +74,7 @@ def monoskop(
     items = soup.select(".item")
     logger.debug(soup)
 
-    for i in items:
+    for i in items[:hit_limit]:
         mdata = {}
 
         title = i.select('h1')[0].get_text()
@@ -133,7 +138,6 @@ def monoskop(
                 pass
 
         desc = '\n'.join(not_links)
-        mdata['rank'] = count
         mdata['img_href'] = img_href
         mdata['desc'] = desc
 
@@ -147,9 +151,154 @@ def monoskop(
         mdata['isbn'] = isbns
         mdata['type'] = 'book'
 
-        count += 1
-
         hits['hits'].append(mdata)
 
     result_queue.put({'monoskop': hits})
     return {'monoskop': hits}
+
+
+class MonoskopProvider(Provider):
+    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+        logger.debug("Fetching from Monoskop ...")
+        raw_items = self._fetch(request)
+
+        results = [
+            self.to_bibrecord(item).to_dict()
+            for item in raw_items
+        ]
+
+        logger.debug(results)
+        return results
+
+    def _fetch(self, request: SearchRequest) -> List[dict]:
+        monoskop_url = MONOSKOP_BASE + self._build_query(request)
+        logger.debug(f"Making request {monoskop_url}")
+
+        provider_request = urllib.request.Request(
+            monoskop_url,
+            headers={"User-Agent": "Magic Browser"}
+        )
+
+        try:
+            response = urllib.request.urlopen(
+                provider_request,
+                timeout=request.request_timeout
+            )
+        except Exception as e:
+            logger.debug(e)
+            return []
+
+        soup = BeautifulSoup(response, 'lxml')
+        items = soup.select(".item")
+
+        results = []
+        for item in items[:request.hit_limit]:
+            normalized = self._normalize_item(item, monoskop_url)
+            if normalized:
+                results.append(normalized)
+
+        return results
+
+    def _build_query(self, request: SearchRequest) -> str:
+        if request.isbn:
+            return quote_plus(request.isbn)
+
+        search_terms = " ".join(
+            part
+            for part in [
+                request.author,
+                request.title,
+                request.year,
+            ]
+            if part
+        )
+
+        return quote_plus(search_terms)
+
+    def _normalize_item(self, item, query: str) -> dict | None:
+        try:
+            title = item.select('h1')[0].get_text()
+            landing = item.select('h1 a')[0].get('href')
+            image = item.select('img')[0]
+        except IndexError as e:
+            logger.debug(e)
+            return None
+
+        img_href = self._absolute_url(image.get('src', ''))
+        links, description_parts = self._extract_links_and_description(image)
+
+        if landing:
+            links.append(
+                url_constructor(
+                    'landing',
+                    'landing_url',
+                    self._absolute_url(landing)
+                )
+            )
+
+        return {
+            'img_href': img_href,
+            'desc': '\n'.join(description_parts),
+            'href': links,
+            'title': title,
+            'query': query,
+            'isbn': self._extract_isbns(item),
+            'type': 'book',
+        }
+
+    def _extract_links_and_description(self, image) -> tuple[list[dict], list[str]]:
+        links = []
+        description_parts = []
+
+        # This relies on the cover image position in Monoskop's item markup.
+        for sibling in image.parent.next_siblings:
+            try:
+                anchors = sibling.find_all('a')
+            except AttributeError:
+                continue
+
+            if not anchors:
+                text = sibling.get_text(strip=True)
+                if text:
+                    description_parts.append(text)
+                continue
+
+            for anchor in anchors:
+                if anchor.text.startswith('Comment'):
+                    continue
+
+                href = anchor.get('href')
+                if not href:
+                    continue
+
+                links.append({
+                    'type': anchor.text,
+                    'name': anchor.text,
+                    'href': self._absolute_url(href),
+                })
+
+        return links, description_parts
+
+    # TO DO: is this func reusable elsewhere?
+    def _extract_isbns(self, item) -> list[str]:
+        isbn = re.search('(ISBN)(.*)', str(item))
+        if not isbn:
+            return []
+
+        isbns = []
+        for value in isbn.group(2).split(','):
+            value = value.strip()
+            value = re.sub('[^0-9]', '', value)
+            if value:
+                isbns.append(value)
+
+        return isbns
+
+    def _absolute_url(self, url: str) -> str:
+        if url.startswith('../'):
+            return MONOSKOP_ROOT + url[3:]
+
+        if url.startswith('/'):
+            return MONOSKOP_ROOT.rstrip('/') + url
+
+        return url
