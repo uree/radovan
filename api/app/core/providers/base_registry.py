@@ -1,8 +1,8 @@
 from app.core.providers.doab import DOABProvider
-from app.core.providers.core import COREProvider
+from app.core.providers.mlacore import COREProvider
 
 # consider moving into __ini__.py
 PROVIDERS = {
     "doab": DOABProvider,
-    "core": COREProvider,
+    "mlacore": COREProvider,
 }

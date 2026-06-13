@@ -84,7 +84,7 @@ provider_dict = [
     {
         "full_name": "MLA Commons CORE",
         "url": "https://mla.hcommons.org/deposits/",
-        "code_name": "core",
+        "code_name": "mlacore",
         "id": 6,
         "books": 1,
         "articles": 1,

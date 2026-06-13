@@ -6,7 +6,7 @@ from flask import current_app
 from multiprocessing import Process, Queue
 
 # from .providers.aaaaarg import aaaaarg  # noqa
-from .providers.core import core  # noqa
+from .providers.mlacore import mlacore  # noqa
 # from .providers.doab import doab  # noqa
 from .providers.doaj import doaj  # noqa
 from .providers.libgen_article import libgen_article  # noqa

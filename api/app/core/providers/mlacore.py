@@ -80,7 +80,7 @@ def fetch_and_parse_items(follou, hit_limit, timeout):
     return items
 
 
-def core(
+def mlacore(
     result_queue,
     author='',
     title='',

@@ -7,6 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_provider(provider, url, headers, request_timeout=5, format="json"):
+    logger.debug(provider)
+    logger.debug(url)
+    logger.debug(headers)
     try:
         request = requests.get(url, timeout=request_timeout)
         request.raise_for_status()

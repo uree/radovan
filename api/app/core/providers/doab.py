@@ -1,7 +1,7 @@
 import logging
-import requests
 
 from typing import Iterable, List
+from urllib.parse import quote_plus
 
 from app.api.v2_0.request import SearchRequest
 from app.bibjson_methods.models import BibRecord
@@ -10,9 +10,12 @@ from .base_provider import Provider
 from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)
-doab_base = 'https://directory.doabooks.org/rest/search?query='
+DOAB_BASE = 'https://directory.doabooks.org/rest/search?query='
+DOAB_HANDLE_BASE = 'https://directory.doabooks.org/handle'
+DOAB_BITSTREAM_BASE = 'https://directory.doabooks.org/bitstream/handle'
 
 
+# TO DO: remove this when removing old api routes
 def doab(
     result_queue,
     author='',
@@ -32,7 +35,7 @@ def doab(
         # query = author+'+'+title+'+'+year
         query = query.replace(' ', '+')
 
-    doab_url = doab_base+query
+    doab_url = DOAB_BASE+query
 
     hits = {'hits': []}
 
@@ -51,8 +54,6 @@ def doab(
 
     # unnest metadata and isolate cover and link url; this is the way
     for i in range(len(results)):
-        results[i]['rank'] = i
-
         try:
             bit_meta = results[i]['bitstreams'][0]['metadata']
         except Exception as e:
@@ -75,7 +76,7 @@ def doab(
         # confuses bibjson_methods and is a duplicate of dc.title anyway
         del results[i]['name']
         # by default these are /rest links and they take you to an xml page
-        results[i]['link'] = 'https://directory.doabooks.org/handle/'+results[i]['handle']
+        results[i]['link'] = DOAB_HANDLE_BASE+'/'+results[i]['handle']
 
     hits['hits'] = results
     logger.debug(hits)
@@ -87,9 +88,8 @@ def doab(
 
 class DOABProvider(Provider):
     def search(self, request: SearchRequest) -> Iterable[BibRecord]:
-        raw_items = self._fetch(request)
         logger.debug("Fetching from DOAB ...")
-
+        raw_items = self._fetch(request)
         # consider this: return results meta like count
 
         results = [
@@ -101,31 +101,90 @@ class DOABProvider(Provider):
         return results
 
     def _fetch(self, request: SearchRequest) -> List[dict]:
-        # mock dataset (pretend this came from DOAB API)
+        logger.debug("Fetch called.")
+        query = self._build_query(request)
+        doab_url = DOAB_BASE + query
+
+        headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"}  # noqa:501
+
+        results = fetch_provider(
+            "doab",
+            doab_url,
+            headers,
+            request_timeout=request.request_timeout,
+            format="json"
+        )
+        logger.debug(results)
+
+        if not results:
+            return []
 
         return [
-            {
-                "title": "Open Access Publishing Basics",
-                "creator": ["Jane Doe", "John Smith"],
-                "year": "2021",
-                "id": "doab-001",
-                "link": "https://example.org/doab/1",
-            },
-            {
-                "title": "Digital Libraries and Knowledge Access",
-                "creator": ["Alice Brown"],
-                "year": "2019",
-                "id": "doab-002",
-                "link": "https://example.org/doab/2",
-            },
-            {
-                "title": "Scholarly Communication in the 21st Century",
-                "creator": ["Michael Green", "Sara White"],
-                "year": "2023",
-                "id": "doab-003",
-                "link": "https://example.org/doab/3",
-            },
+            self._normalize_item(item)
+            for item in results[:request.hit_limit]
         ]
 
+    def _build_query(self, request: SearchRequest) -> str:
+        if request.isbn:
+            search_terms = request.isbn
+            expand = "metadata"
+        elif request.doi:
+            search_terms = request.doi
+            expand = "metadata,bitstreams"
+        else:
+            search_terms = " ".join(
+                part
+                for part in [
+                    request.author,
+                    request.title,
+                    request.year,
+                ]
+                if part
+            )
+            expand = "metadata,bitstreams"
+
+        return (
+            f"{quote_plus(search_terms)}"
+            f"&expand={quote_plus(expand)}"
+            f"&limit={request.hit_limit}"
+        )
+
+    def _normalize_item(self, item: dict) -> dict:
+        normalized = {
+            key: value
+            for key, value in item.items()
+            if key not in {"metadata", "bitstreams", "name"}
+        }
+
+        handle = item.get("handle")
+        if handle:
+            normalized["link"] = f"{DOAB_HANDLE_BASE}/{handle}"
+
+        for metadata in item.get("metadata", []):
+            key = metadata.get("key")
+            value = metadata.get("value")
+            if key and value:
+                normalized[key] = value
+
+        for bitstream in item.get("bitstreams", []):
+            for metadata in bitstream.get("metadata", []):
+                if metadata.get("qualifier") != "downloadUrl":
+                    continue
+
+                download_url = metadata.get("value")
+                if not download_url:
+                    continue
+
+                normalized["url"] = download_url
+
+                if handle:
+                    filename = download_url.rsplit("/", 1)[-1]
+                    normalized["coverurl"] = (
+                        f"{DOAB_BITSTREAM_BASE}/{handle}/{filename}.jpg"
+                    )
+
+                return normalized
+
+        return normalized
 
 
