@@ -3,6 +3,7 @@ from app.core.providers.base_config import ProviderConfig
 from app.core.providers.doab import DOABProvider
 from app.core.providers.oapen import OAPENProvider
 from app.core.providers.monoskop import MonoskopProvider
+from app.core.providers.libgen import LibgenProvider
 
 
 def test_doab_live():
@@ -102,3 +103,34 @@ def test_monoskop_live():
     assert extra["source"] == "monoskop"
     assert bibjson.get("title")
     assert bibjson.get("link")
+
+
+def test_libgen_live():
+    provider =LibgenProvider(
+        ProviderConfig(
+            id=1,
+            code_name="libgen",
+            full_name="Library Genesis",
+            url="https://libgen.vg",
+            query_url="https://libgen.vg/index.php",
+        )
+    )
+
+    request = SearchRequest(
+        author="donna haraway",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "libgen"
+    assert bibjson.get("title")
