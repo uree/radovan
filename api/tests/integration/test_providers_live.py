@@ -4,6 +4,7 @@ from app.core.providers.doab import DOABProvider
 from app.core.providers.oapen import OAPENProvider
 from app.core.providers.monoskop import MonoskopProvider
 from app.core.providers.libgen import LibgenProvider
+from app.core.providers.mlacore import MLACOREProvider
 
 
 def test_doab_live():
@@ -134,3 +135,39 @@ def test_libgen_live():
 
     assert extra["source"] == "libgen"
     assert bibjson.get("title")
+
+
+def test_mlacore_live():
+    provider = MLACOREProvider(
+        ProviderConfig(
+            id=1,
+            code_name="mlacore",
+            full_name="MLA Commons CORE",
+            url="https://works.hcommons.org/",
+            query_url="https://works.hcommons.org/api/records",
+        )
+    )
+
+    request = SearchRequest(
+        author="senchyne",
+        title="money",
+        year="2017",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "mlacore"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
+    assert bibjson.get("link")
+    assert extra.get("landing_url")

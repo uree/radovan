@@ -14,9 +14,8 @@ from app.core.fixing_links import url_constructor
 from .base_provider import Provider
 
 
-# TO DO: this file has a misleading name ("core")
 logger = logging.getLogger(__name__)
-core_base = 'https://mla.hcommons.org/wp-admin/admin-ajax.php'  # TO DO: this is a duplicate ... already in settings
+core_base = 'https://mla.hcommons.org/wp-admin/admin-ajax.php'  # TO DO: this is a duplicate ... already in settings ... remove during clenup
 
 
 def fetch_and_parse_items(follou, hit_limit, timeout):
