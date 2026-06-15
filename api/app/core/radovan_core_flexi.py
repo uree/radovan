@@ -9,8 +9,7 @@ from multiprocessing import Process, Queue
 from .providers.mlacore import mlacore  # noqa
 # from .providers.doab import doab  # noqa
 from .providers.doaj import doaj  # noqa
-from .providers.libgen_article import libgen_article  # noqa
-from .providers.libgen_book import libgen_book  # noqa
+from .providers.libgen import libgen_book  # noqa
 from .providers.mediarep import mediarep  # noqa
 from .providers.memoryoftheworld import memoryoftheworld  # noqa
 from .providers.monoskop import monoskop  # noqa
