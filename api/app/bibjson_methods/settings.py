@@ -147,7 +147,8 @@ bibjson_aliases = {
 extra_aliases = {
     "coverurl": [
         "coverurl",
-        "img_href"
+        "img_href",
+        "cover_url"
     ],
     "language": [
         "language",
@@ -188,6 +189,9 @@ extra_aliases = {
     ],
     "landing_url": [
         "landing_url"
+    ],
+    "download_url": [
+        "download_url"
     ],
     "query": [
         "query"
