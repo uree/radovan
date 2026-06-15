@@ -3,7 +3,8 @@ bibjson_aliases = {
     "abstract": [
         "abstract",
         "AB",
-        "dc.description.abstract"
+        "dc.description.abstract",
+        "description"
     ],
     "address": [
         "address"
@@ -95,7 +96,8 @@ bibjson_aliases = {
         "name",
         "z_authors",
         "Authors",
-        "dc.contributor.author"
+        "dc.contributor.author",
+        "creators"
     ],
     "editor": [
         "editor"

@@ -5,7 +5,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-
+# TO DO: what is this mess
 def fetch_provider(provider, url, headers, request_timeout=5, format="json"):
     logger.debug(provider)
     logger.debug(url)

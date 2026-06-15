@@ -57,7 +57,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://libgen.vg/index.php",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
     },
     {
         "full_name": "AAAAARG",
@@ -72,12 +72,12 @@ provider_dict = [
     },
     {
         "full_name": "MLA Commons CORE",
-        "url": "https://mla.hcommons.org/deposits/",
+        "url": "https://works.hcommons.org/",
         "code_name": "mlacore",
         "id": 5,
         "books": 1,
         "articles": 1,
-        "query_url": "https://mla.hcommons.org/wp-admin/admin-ajax.php",
+        "query_url": "https://works.hcommons.org/api/records",
         "selected": 1,
         "enabled": 1,
     },

@@ -41,6 +41,11 @@ def process_authors(fielddata, source):
         except (IndexError, AttributeError):
             author['name'] = fielddata
             output.append(author)
+    elif source == "mlacore":  # hacky hack but this all needs to be refactored anyway
+        logger.debug(fielddata)
+        # for item in fielddata
+        for item in fielddata:
+            output.append(item)
     else:
         for item in convert_fielddata_to_list(fielddata):
             author = {"name": "", "alternate": [""], "firstname": "", "lastname": "", "type": "author"}
