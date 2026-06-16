@@ -129,17 +129,21 @@ def extract_isbns(strng):
     return isbns
 
 
-def extract_dois(strng):
+def extract_dois(text):
     """Extract DOIs from the string."""
-    dois = re.findall(r"\b10.\d{4,9}/[-._;()/:A-Z0-9]+\b", strng)
+    doi_regex = re.compile(
+        r"""10\.\d{4,9}/[^\s"'<>]+""",
+        re.IGNORECASE
+    )
+    if not text:
+        return []
 
-    if not dois:
-        dois = re.findall(r"\b10.[-._;()/:A-Z0-9]+\b", strng)
+    candidates = doi_regex.findall(text)
 
-    if not dois and (strng.startswith('10.') or 'doi' in strng):
-        dois = [strng]
-
-    return dois
+    # cleanup common trailing punctuation
+    return [
+        doi.rstrip(".,;:)") for doi in candidates
+    ]
 
 
 def resolve_nice_type(original_type, types):

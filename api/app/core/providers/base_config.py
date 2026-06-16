@@ -83,7 +83,7 @@ provider_dict = [
     },
     {
         "full_name": "SciELO",
-        "url": "http://www.scielo.org/",
+        "url": "https://www.scielo.org/",
         "code_name": "scielo",
         "id": 6,
         "books": 0,
