@@ -7,6 +7,7 @@ from app.core.providers.libgen import LibgenProvider
 from app.core.providers.mlacore import MLACOREProvider
 from app.core.providers.scielo import ScieloProvider
 from app.core.providers.memoryoftheworld import MOTWProvider
+from app.core.providers.doaj import DOAJProvider
 
 
 def test_doab_live():
@@ -258,5 +259,59 @@ def test_memoryoftheworld_live():
     extra = record["extra"][0]
 
     assert extra["source"] == "memoryoftheworld"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
+
+
+def test_doaj_live():
+    provider = DOAJProvider(
+        ProviderConfig(
+            id=8,
+            code_name="doaj",
+            full_name="Directory of Open Access Journals",
+            url="https://doaj.org/",
+            query_url="http://doaj.org/api/v1/search/articles/",
+        )
+    )
+
+    request = SearchRequest(
+        title="money",
+        author="appelt",
+        year="2017",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "doaj"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
+
+    request = SearchRequest(
+        doi="10.18096/TMP.2017.01.01",
+        hit_limit=3,
+    )
+    
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "doaj"
     assert bibjson.get("title")
     assert bibjson.get("author")
