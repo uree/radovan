@@ -5,6 +5,7 @@ from app.core.providers.oapen import OAPENProvider
 from app.core.providers.monoskop import MonoskopProvider
 from app.core.providers.libgen import LibgenProvider
 from app.core.providers.mlacore import MLACOREProvider
+from app.core.providers.scielo import ScieloProvider
 
 
 def test_doab_live():
@@ -171,3 +172,38 @@ def test_mlacore_live():
     assert bibjson.get("author")
     assert bibjson.get("link")
     assert extra.get("landing_url")
+
+
+def test_scielo_live():
+    provider = ScieloProvider(
+        ProviderConfig(
+            id=6,
+            code_name="scielo",
+            full_name="SciELO",
+            url="https://www.scielo.org/",
+            query_url="https://search.scielo.org/",
+        )
+    )
+
+    request = SearchRequest(
+        author="jesus",
+        title="mapuche",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "scielo"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
+    assert bibjson.get("link")
+    assert extra.get("download_url")
