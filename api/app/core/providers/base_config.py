@@ -79,7 +79,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://works.hcommons.org/api/records",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
     },
     {
         "full_name": "SciELO",
@@ -88,9 +88,9 @@ provider_dict = [
         "id": 6,
         "books": 0,
         "articles": 1,
-        "query_url": "http://search.scielo.org/?q=",
+        "query_url": "https://search.scielo.org/",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Memory of The World",

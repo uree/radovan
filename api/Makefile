@@ -1,4 +1,4 @@
-FLASK_CONTAINER = radovan_api
+FLASK_CONTAINER = flask_api
 TEST_NAME ?=
 
 run-tests:

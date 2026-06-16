@@ -24,4 +24,5 @@ def fetch_provider(provider, url, headers, request_timeout=5, format="json"):
         return request.json()
 
     if format == "text":
+        logger.debug(request.text)
         return request.text

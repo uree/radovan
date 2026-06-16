@@ -97,7 +97,7 @@ bibjson_aliases = {
         "z_authors",
         "Authors",
         "dc.contributor.author",
-        "creators"
+        "creators",
     ],
     "editor": [
         "editor"

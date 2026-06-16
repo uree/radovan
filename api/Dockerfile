@@ -9,7 +9,9 @@ COPY requirements.txt .
 
 # Install the dependencies
 RUN pip install uv && \
-    uv pip install --system -r requirements.txt
+    uv pip install --system -r requirements.txt && \
+    playwright install firefox && \
+    playwright install-deps firefox
 
 COPY . .
 # Run the command to start gunicorn

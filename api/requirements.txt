@@ -23,10 +23,12 @@ lxml==6.1.1
 markupsafe==3.0.3
 packaging==26.2
 pip==24.0
+playwright==1.60.0
 pluggy==1.6.0
 pycparser==3.0
 pydantic==2.11.0
 pydantic-core==2.33.0
+pyee==13.0.1
 pygments==2.20.0
 pyparsing==3.3.2
 pytest==9.0.3
