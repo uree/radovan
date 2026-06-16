@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 import re
 
@@ -5,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from stdnum import isbn as isbnlib
 
 
+logger = logging.getLogger(__name__)
 DOI_RE = re.compile(
     r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$",
     re.I,
@@ -46,11 +48,14 @@ class SearchRequest(BaseModel):
             return ""
 
         value = value.strip()
+        value = isbnlib.compact(value)
 
         if not isbnlib.is_valid(value):
             raise ValueError("Invalid ISBN")
 
-        return isbnlib.normalize(value)
+        logger.debug(dir(isbnlib))
+
+        return value
 
     @field_validator("doi")
     @classmethod
