@@ -4,6 +4,7 @@ from app.core.providers.monoskop import MonoskopProvider
 from app.core.providers.libgen import LibgenProvider
 from app.core.providers.mlacore import MLACOREProvider
 from app.core.providers.scielo import ScieloProvider
+from app.core.providers.memoryoftheworld import MOTWProvider
 
 # consider moving into __init__.py
 PROVIDERS = {
@@ -13,4 +14,5 @@ PROVIDERS = {
     "libgen": LibgenProvider,
     "mlacore": MLACOREProvider,
     "scielo": ScieloProvider,
+    "memoryoftheworld": MOTWProvider,
 }

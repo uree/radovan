@@ -90,7 +90,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://search.scielo.org/",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
     },
     {
         "full_name": "Memory of The World",
@@ -99,9 +99,9 @@ provider_dict = [
         "id": 7,
         "books": 0,
         "articles": 0,
-        "query_url": "https://library.memoryoftheworld.org/",
+        "query_url": "https://library.memoryoftheworld.org/search",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Directory of Open Access Journals",
