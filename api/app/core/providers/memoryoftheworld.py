@@ -90,7 +90,7 @@ class MOTWProvider(Provider):
     def search(self, request: SearchRequest) -> Iterable[BibRecord]:
         logger.debug("Fetching from memoryoftheworld ...")
         # does not support doi or year
-        if request.doi or request.year:
+        if request.doi or request.year or request.isbn:
             return []
         
         raw_items = self._fetch(request)
@@ -100,14 +100,13 @@ class MOTWProvider(Provider):
             self.to_bibrecord(item).to_dict()
             for item in raw_items
         ]
-        logger.debug("we never got here have we")
-        logger.debug(results)
 
         logger.debug(results)
         return results
 
     def _fetch(self, request: SearchRequest) -> List[dict]:
         query = self._build_query(request)
+        logger.debug(query)
 
         try:
             r = requests.get(query, verify=False, timeout=request.request_timeout) # ssl
@@ -127,10 +126,6 @@ class MOTWProvider(Provider):
     def _build_query(self, request: SearchRequest) -> str:
         url_authors = "https://library.memoryoftheworld.org/search/authors/"
         url_title = "https://library.memoryoftheworld.org/search/title/"
-        url_isbn = "https://library.memoryoftheworld.org/search/_isbn/"
-
-        if request.isbn:
-            return f"{url_isbn}{request.isbn}"
         
         if request.author and request.title:
             return f"{url_title}{request.title}"

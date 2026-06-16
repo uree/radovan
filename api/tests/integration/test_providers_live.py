@@ -6,6 +6,7 @@ from app.core.providers.monoskop import MonoskopProvider
 from app.core.providers.libgen import LibgenProvider
 from app.core.providers.mlacore import MLACOREProvider
 from app.core.providers.scielo import ScieloProvider
+from app.core.providers.memoryoftheworld import MOTWProvider
 
 
 def test_doab_live():
@@ -207,3 +208,55 @@ def test_scielo_live():
     assert bibjson.get("author")
     assert bibjson.get("link")
     assert extra.get("download_url")
+
+
+def test_memoryoftheworld_live():
+    provider = MOTWProvider(
+        ProviderConfig(
+            id=7,
+            code_name="memoryoftheworld",
+            full_name="Memory of The World",
+            url="https://library.memoryoftheworld.org/",
+            query_url="https://library.memoryoftheworld.org/search",
+        )
+    )
+
+    request = SearchRequest(
+        author="adorno",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "memoryoftheworld"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
+
+    request = SearchRequest(
+        title="playing the whore",
+        hit_limit=3,
+    )
+
+    results = provider.search(request)
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "memoryoftheworld"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
