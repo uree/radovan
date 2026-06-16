@@ -112,7 +112,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "http://doaj.org/api/v1/search/articles/",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Open Science Framework",
