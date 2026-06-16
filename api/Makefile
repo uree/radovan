@@ -1,4 +1,4 @@
-FLASK_CONTAINER = flask_api
+FLASK_CONTAINER = radovan_api
 TEST_NAME ?=
 
 run-tests:
@@ -18,4 +18,4 @@ run-int-tests-providers-live:
 	python -m pytest tests/integration/test_providers_live.py$(if $(TEST_NAME),::$(TEST_NAME))
 
 install-package:
-	docker compose exec $(FLASK_CONTAINER) sh -c "uv pip install --system $(pkg) && uv pip freeze > requirements.txt"
+	docker exec $(FLASK_CONTAINER) sh -c "uv pip install --system $(pkg) && uv pip freeze > requirements.txt"
