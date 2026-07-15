@@ -1,4 +1,5 @@
 from app.api.v2_0.request import SearchRequest
+from app.config import Config
 from app.core.providers.base_config import ProviderConfig
 from app.core.providers.doab import DOABProvider
 from app.core.providers.oapen import OAPENProvider
@@ -9,6 +10,7 @@ from app.core.providers.scielo import ScieloProvider
 from app.core.providers.memoryoftheworld import MOTWProvider
 from app.core.providers.doaj import DOAJProvider
 from app.core.providers.osf import OSFProvider
+from app.core.providers.oadoi import UnpaywallProvider
 
 
 def test_doab_live():
@@ -326,7 +328,7 @@ def test_osf_live():
             full_name="Open Science Framework",
             url="https://osf.io/search/",
             query_url="https://share.osf.io/api/v2/search/creativeworks/_search",
-            supported_params=["author", "title", "year"]
+            supported_params=["author", "title", "year"],
         )
     )
 
@@ -350,3 +352,42 @@ def test_osf_live():
     assert extra["source"] == "osf"
     assert bibjson.get("title")
     assert bibjson.get("author")
+
+
+def test_oadoi_live():
+    # derp
+    secrets = {"OADOI_EMAIL": None}
+    secrets["OADOI_EMAIL"] = Config.OADOI_EMAIL
+
+    provider = UnpaywallProvider(
+        ProviderConfig(
+            id=10,
+            code_name="oadoi",
+            full_name="Unpaywall",
+            url="https://unpaywall.org/data",
+            query_url="https://api.unpaywall.org/v2/",
+            supported_params=["doi"],
+        ),
+        secrets=secrets
+    )
+
+    request = SearchRequest(
+        doi="10.1038/nature12373",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "oadoi"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
+    assert bibjson.get("link")
