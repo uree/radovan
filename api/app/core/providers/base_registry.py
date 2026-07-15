@@ -6,6 +6,7 @@ from app.core.providers.mlacore import MLACOREProvider
 from app.core.providers.scielo import ScieloProvider
 from app.core.providers.memoryoftheworld import MOTWProvider
 from app.core.providers.doaj import DOAJProvider
+from app.core.providers.osf import OSFProvider
 
 # consider moving into __init__.py
 PROVIDERS = {
@@ -17,4 +18,5 @@ PROVIDERS = {
     "scielo": ScieloProvider,
     "memoryoftheworld": MOTWProvider,
     "doaj": DOAJProvider,
+    "osf": OSFProvider,
 }

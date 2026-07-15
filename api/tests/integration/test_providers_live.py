@@ -8,6 +8,7 @@ from app.core.providers.mlacore import MLACOREProvider
 from app.core.providers.scielo import ScieloProvider
 from app.core.providers.memoryoftheworld import MOTWProvider
 from app.core.providers.doaj import DOAJProvider
+from app.core.providers.osf import OSFProvider
 
 
 def test_doab_live():
@@ -313,5 +314,39 @@ def test_doaj_live():
     extra = record["extra"][0]
 
     assert extra["source"] == "doaj"
+    assert bibjson.get("title")
+    assert bibjson.get("author")
+
+
+def test_osf_live():
+    provider = OSFProvider(
+        ProviderConfig(
+            id=9,
+            code_name="osf",
+            full_name="Open Science Framework",
+            url="https://osf.io/search/",
+            query_url="https://share.osf.io/api/v2/search/creativeworks/_search",
+            supported_params=["author", "title", "year"]
+        )
+    )
+
+    request = SearchRequest(
+        title="inequality",
+        author="boyd",
+        hit_limit=3,
+    )
+
+    results = list(provider.search(request))
+
+    assert len(results) > 0
+
+    record = results[0]
+    assert "bibjson" in record
+    assert "extra" in record
+
+    bibjson = record["bibjson"][0]
+    extra = record["extra"][0]
+
+    assert extra["source"] == "osf"
     assert bibjson.get("title")
     assert bibjson.get("author")
