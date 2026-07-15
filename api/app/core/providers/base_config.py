@@ -16,7 +16,7 @@ class ProviderConfig():
 
 
 DEFAULT_SUPPORTED_PARAMETES = ["author", "title", "year", "doi", "isbn"]
-
+# TO DO: selected should probably be a problem for the interface?
 provider_dict = [
     {
         "full_name": "Directory of Open Access Books",
@@ -104,7 +104,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://library.memoryoftheworld.org/search",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
     },
     {
         "full_name": "Directory of Open Access Journals",
@@ -126,7 +126,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://share.osf.io/api/v2/search/creativeworks/_search",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
         "supported_params": ["author", "title", "year"],
     },
     {
@@ -138,7 +138,8 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://api.unpaywall.org/v2/",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
+        "supported_params": ["doi"],
     },
     {
         "full_name": "media/rep/",

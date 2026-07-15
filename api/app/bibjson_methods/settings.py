@@ -98,6 +98,7 @@ bibjson_aliases = {
         "Authors",
         "dc.contributor.author",
         "creators",
+        "raw_author_name",
     ],
     "editor": [
         "editor"

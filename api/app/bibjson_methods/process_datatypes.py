@@ -24,9 +24,7 @@ def process_authors(fielddata, source):
             for item in fielddata:
                 author = {"name": "", "alternate": [""], "firstname": "", "lastname": ""}
                 try:
-                    author['firstname'] = item['given']
-                    author['lastname'] = item['family']
-                    author['name'] = f"{item['given']} {item['family']}"
+                    author['name'] = f"{item['raw_author_name']}"
                     output.append(author)
                 except (TypeError, KeyError):
                     pass
