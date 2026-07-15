@@ -8,6 +8,8 @@ from app.core.providers.memoryoftheworld import MOTWProvider
 from app.core.providers.doaj import DOAJProvider
 from app.core.providers.osf import OSFProvider
 from app.core.providers.oadoi import UnpaywallProvider
+from app.core.providers.mediarep import FIDMediaProvider
+
 
 # consider moving into __init__.py
 PROVIDERS = {
@@ -21,4 +23,5 @@ PROVIDERS = {
     "doaj": DOAJProvider,
     "osf": OSFProvider,
     "oadoi": UnpaywallProvider,
+    "fidmedia": FIDMediaProvider,
 }

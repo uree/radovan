@@ -1,122 +1,192 @@
 import logging
-import requests
-from concurrent.futures import as_completed
+from typing import Iterable, List
+from urllib.parse import urlencode, urljoin, parse_qs
 
-from bs4 import BeautifulSoup, SoupStrainer
-from requests_futures.sessions import FuturesSession
 
-from app.core.fixing_links import url_constructor
-from .utils import fetch_provider
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
+
+from app.api.v2_0.request import SearchRequest
+from app.bibjson_methods.models import BibRecord
+
+from .base_provider import Provider
+
 
 
 logger = logging.getLogger(__name__)
-mediarep_base = 'https://mediarep.org/search?spc.page=1&f.itemtype=book,equals'
 
-
-
-def fetch_and_parse_items(follou, hit_limit, request_timeout, query):
-    items = []
-    count = 0
-
-    with FuturesSession() as session:
-        results = [session.get(f, timeout=request_timeout) for f in follou]
-
-        for r in as_completed(results[:hit_limit]):
-            item = {}
-            # i can get it ALL from the meta tags
-            strainer = SoupStrainer("meta")
+# TO DO: continue here ... write test, run some more queries
+class FIDMediaProvider(Provider):
+    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+        logger.debug("Fetching from FIDMedia ...")
+        if not self.has_supported_params(request):
+            logger.debug("No supported parameters")
+            return []
+        
+        raw_items = self._fetch(request)
+        results = []
+        # a bit safer if issues
+        for item in raw_items:
             try:
-                suppchen = BeautifulSoup(r.result().text, 'lxml', parse_only=strainer)
-                #print(suppchen)
-                try:
-                    item['title'] = suppchen.select_one('meta[name="DC.title"]')['content']
-                except TypeError:
-                    pass
+                logger.debug(item)
+                results.append(self.to_bibrecord(item).to_dict())
+            except Exception:
+                logger.exception("Failed processing item: %r", item)
 
-                try:
-                    item['year'] = suppchen.select_one('meta[name="DCTERMS.issued"]')['content']
-                except TypeError:
-                    pass
+        logger.debug(results)
+        return results
 
-                try:
-                    item['doi'] = suppchen.select_one('meta[name="citation_doi"]')['content']
-                except TypeError:
-                    pass
+    def _fetch(self, request: SearchRequest) -> List[dict]:
+        query = self._build_query(request)
+        logger.debug(query)
 
-                try:
-                    href = suppchen.select_one('meta[name="citation_pdf_url"]')['content']
-                    item['href'] = url_constructor('open', 'open_url', href)
-                except TypeError:
-                    pass
-
-                try:
-                    item['isbn'] = suppchen.select_one('meta[content^="isbn:"]')['content'].replace('isbn:', '')
-                except TypeError:
-                    pass
-
-                # plethora of authorita
-                creators = suppchen.select('meta[name="DC.creator"]')
-                editors = suppchen.select('meta[name="DC.editor"]')
-
-                # strained
-                if editors:
-                    try:
-                        item['editor'] = [e['content'] for e in editors]
-                    except:
-                        pass
-                if creators:
-                    try:
-                        item['author'] = [c['content'] for c in creators]
-                    except:
-                        pass
-
-                item['rank'] = count
-                item['query'] = query
-                count += 1
-                items.append(item)
+        with sync_playwright() as p:
+            try:
+                browser = p.firefox.launch(headless=True)
+                page = browser.new_page(
+                    user_agent=(
+                        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:151.0) "
+                        "Gecko/20100101 Firefox/151.0"
+                    )
+                )
+                page.goto(query, wait_until="networkidle")
+                html = page.content()
+                browser.close()
             except Exception as e:
-                logger.debug(f"An error occurred: {e}")
+                logger.debug(e)
+        
+        logger.debug(html)
+        return self._parse_results(html, request.hit_limit)
 
-    return items
+
+    def _build_query(self, request: SearchRequest) -> str:
+        lookfor = []
+        types = []
+
+        if request.title:
+            lookfor.append(request.title)
+            types.append("AllFields")
+
+        if request.author:
+            lookfor.append(request.author)
+            types.append("Author")
+
+        if request.year:
+            lookfor.append(str(request.year))
+            types.append("year")
+
+        if request.isbn:
+            lookfor.append(request.isbn)
+            types.append("ISN")  # This is what the endpoint appears to expect.
+
+        params = [
+            ("join", "AND"),
+        ]
+
+        for value in lookfor:
+            params.append(("lookfor0[]", value))
+
+        for value in types:
+            params.append(("type0[]", value))
+
+        # One AND between each pair of search terms.
+        for _ in range(max(0, len(lookfor) - 1)):
+            params.append(("bool0[]", "AND"))
+
+        params.extend(
+            [
+                ("limit", request.hit_limit),
+                ("filter[]", '~facet_avail:"Online"'),
+                ("filter[]", '~facet_avail:"Free"'),
+                ("daterange[]", "publishDateSort"),
+                ("publishDateSortfrom", ""),
+                ("publishDateSortto", ""),
+            ]
+        )
+
+        return f"{self.config.query_url}?{urlencode(params)}"
+    
+
+    def _parse_results(self, html: str, hit_limit: int) -> dict:
+        soup = BeautifulSoup(html, "html.parser")
+
+        results = []
+
+        result_list = soup.select_one("ol")
+        logger.debug(result_list)
+        if not result_list:
+            return results
+
+        for item in result_list.find_all("li", class_="result", recursive=False)[:hit_limit]:
+            results.append(self._normalize_item(item))
+
+        return results
+
+    # COinS (ContextObjects in Spans) is a small but clever convention for embedding bibliographic metadata inside HTML pages so that reference managers, library tools, and citation software can extract it.
+    def _parse_coins(self, item: str) -> dict:
+        span = item.select_one("span.Z3988")
+
+        if not span:
+            return {}
+
+        data = parse_qs(span["title"])
+        logger.debug("Debugging parse coins.")
+        logger.debug(type(data))
+        logger.debug(data.keys())
+        logger.debug(data)
+
+        return {
+            "title": self._first(
+                data.get("rft.title")
+            ),
+            "author": data.get("rft.au", []),
+            "year": self._extract_year(self._first(data.get("rft.date"))),
+            "publisher": self._first(data.get("rft.pub")),
+            "isbn": self._first(data.get("rft.isbn")),
+        }
+
+    def _extract_year(self, value: str | None) -> int | None:
+        if not value:
+            return None
+
+        value = value.strip("[]")
+
+        if value.isdigit():
+            return int(value)
+
+        return None
 
 
-def mediarep(
-    result_queue,
-    author='',
-    title='',
-    year='',
-    doi='',
-    isbn='',
-    hit_limit=10,
-    request_timeout=5
-):
-    hits = {'hits': []}
+    def _first(self, value):
+        return value[0] if isinstance(value, list) and value else value
 
-    query = mediarep_base + f"&query={title}&f.itemtype=book,equals"
-    if author:
-        query += f"&f.author={author},equals"
 
-    results = fetch_provider(
-        "mediarep",
-        query,
-        None,
-        request_timeout=request_timeout,
-        format="text"
-    )
-    logger.debug(results)
+    def _normalize_item(self, item: dict) -> dict:
+        result_body = item.select_one(".result-body")
 
-    if not results:
-        result_queue.put({'mediarep': hits})
-        return {'mediarep': hits}
+        title_link = result_body.select_one("a.title")
+        logger.debug(title_link)
 
-    strain = SoupStrainer(id="aspect_discovery_SimpleSearch_div_search-results")
-    soup = BeautifulSoup(results, 'lxml', parse_only=strain)
+        url = (
+            urljoin(self.config.url, title_link["href"])
+            if title_link
+            else None
+        )
 
-    titles = soup.select('a')
-    follou = ["https://mediarep.org"+t.get('href')+'?show=full' for t in titles]
+        visible_authors = [
+            a.get_text(" ", strip=True)
+            for a in result_body.select("a.result-author")
+        ]
 
-    hits['hits'] = fetch_and_parse_items(follou, hit_limit, request_timeout, query)
+        coins = self._parse_coins(item)
+        logger.debug(coins)
 
-    logger.debug(hits)
-    result_queue.put({'mediarep': hits})
-    return {'mediarep': hits}
+        return {
+            "title": coins.get("title"),
+            "author": visible_authors or coins.get("author", []),
+            "link": url,  # TO DO: this fails
+            "landing_url": url,
+            "year": coins.get("date"),
+            "publisher": coins.get("pub"),
+            "isbn": coins.get("isbn"),
+        }

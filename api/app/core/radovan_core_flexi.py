@@ -10,7 +10,6 @@ from .providers.mlacore import mlacore  # noqa
 # from .providers.doab import doab  # noqa
 from .providers.doaj import doaj  # noqa
 from .providers.libgen import libgen_book  # noqa
-from .providers.mediarep import mediarep  # noqa
 from .providers.memoryoftheworld import memoryoftheworld  # noqa
 from .providers.monoskop import monoskop  # noqa
 from .providers.oadoi import oadoi  # noqa
