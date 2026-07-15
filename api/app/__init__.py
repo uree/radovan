@@ -22,7 +22,7 @@ def create_app(config_class=Config):
 
     configs = load_configs()
     app.extensions["providers"] = [
-        PROVIDERS[cfg.code_name](cfg) for cfg in configs if cfg.enabled
+        PROVIDERS[cfg.code_name](cfg, secrets=app.config) for cfg in configs if cfg.enabled
     ]
     try:
         app.logger.debug([n.supported_params for n in app.extensions["providers"]])

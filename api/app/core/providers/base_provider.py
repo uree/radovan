@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Provider(ABC):
 
-    def __init__(self, config: ProviderConfig):
+    def __init__(self, config: ProviderConfig, secrets=None):
         self.config = config
 
     @property
