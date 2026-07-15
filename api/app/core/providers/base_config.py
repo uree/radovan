@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -12,7 +12,10 @@ class ProviderConfig():
     articles: bool = False
     selected: bool = True
     enabled: bool = True
+    supported_params: list[int] = field(default_factory=list)  # not checking for sources, request_timeout or hit_limit
 
+
+DEFAULT_SUPPORTED_PARAMETES = ["author", "title", "year", "doi", "isbn"]
 
 provider_dict = [
     {
@@ -112,7 +115,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "http://doaj.org/api/v1/search/articles/",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
     },
     {
         "full_name": "Open Science Framework",
@@ -123,7 +126,8 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://share.osf.io/api/v2/search/creativeworks/_search",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
+        "supported_params": ["author", "title", "year"],
     },
     {
         "full_name": "Unpaywall",
@@ -162,5 +166,6 @@ def load_configs() -> list[ProviderConfig]:
             articles=bool(r.get("articles", False)),
             selected=bool(r.get("selected", True)),
             enabled=bool(r.get("enabled", True)),
+            supported_params=r.get("supported_params", DEFAULT_SUPPORTED_PARAMETES),
         )
         for r in provider_dict]

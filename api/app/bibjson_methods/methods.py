@@ -30,6 +30,8 @@ def process_hit(
     nice_type = ""
     past_keys = []
 
+    logger.debug("Processing hit ...")
+
     # if source returns bibjson make use it's clean and return
     if source in sources_bibjson:
         cleaner = resolve_depth(sources_bibjson[source], "hit")

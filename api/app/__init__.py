@@ -24,6 +24,10 @@ def create_app(config_class=Config):
     app.extensions["providers"] = [
         PROVIDERS[cfg.code_name](cfg) for cfg in configs if cfg.enabled
     ]
+    try:
+        app.logger.debug([n.supported_params for n in app.extensions["providers"]])
+    except Exception as e:
+        app.logger.debug(e)
     app.logger.info("Providers loaded.")
     app.logger.debug([n.code_name for n in app.extensions["providers"]])
     app.extensions["redis"] = redis.Redis(
