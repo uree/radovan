@@ -11,11 +11,9 @@ from app.bibjson_methods.models import BibRecord
 
 from .base_provider import Provider
 
-
-
 logger = logging.getLogger(__name__)
 
-# TO DO: continue here ... write test, run some more queries
+# TO DO: continue here ... write test, run some more queries, rename file
 class FIDMediaProvider(Provider):
     def search(self, request: SearchRequest) -> Iterable[BibRecord]:
         logger.debug("Fetching from FIDMedia ...")
@@ -93,10 +91,11 @@ class FIDMediaProvider(Provider):
         for _ in range(max(0, len(lookfor) - 1)):
             params.append(("bool0[]", "AND"))
 
+        # here i only query open access and online materials, but now that i am only scraping landing urls, this makes less sense, could expand
         params.extend(
             [
                 ("limit", request.hit_limit),
-                ("filter[]", '~facet_avail:"Online"'),
+                ("filter[]", '~facet_avail:"Online"'), 
                 ("filter[]", '~facet_avail:"Free"'),
                 ("daterange[]", "publishDateSort"),
                 ("publishDateSortfrom", ""),
