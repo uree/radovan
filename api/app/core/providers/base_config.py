@@ -17,6 +17,7 @@ class ProviderConfig():
 
 DEFAULT_SUPPORTED_PARAMETES = ["author", "title", "year", "doi", "isbn"]
 # TO DO: selected should probably be a problem for the interface?
+# TO DO: books vs articles = pointless selection
 provider_dict = [
     {
         "full_name": "Directory of Open Access Books",
@@ -27,7 +28,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://directory.doabooks.org/rest/search?query=",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "OAPEN",
@@ -38,7 +39,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://library.oapen.org/rest/search?query=",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Monoskop",
@@ -49,7 +50,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://monoskop.org/log/?cat=17&s=",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Library Genesis",
@@ -60,7 +61,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://libgen.vg/index.php",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "AAAAARG",
@@ -82,7 +83,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://works.hcommons.org/api/records",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "SciELO",
@@ -93,7 +94,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://search.scielo.org/",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Memory of The World",
@@ -104,7 +105,7 @@ provider_dict = [
         "articles": 0,
         "query_url": "https://library.memoryoftheworld.org/search",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Directory of Open Access Journals",
@@ -115,7 +116,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "http://doaj.org/api/v1/search/articles/",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
     },
     {
         "full_name": "Open Science Framework",
@@ -126,7 +127,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://share.osf.io/api/v2/search/creativeworks/_search",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
         "supported_params": ["author", "title", "year"],
     },
     {
@@ -138,7 +139,7 @@ provider_dict = [
         "articles": 1,
         "query_url": "https://api.unpaywall.org/v2/",
         "selected": 1,
-        "enabled": 0,
+        "enabled": 1,
         "supported_params": ["doi"],
     },
     {

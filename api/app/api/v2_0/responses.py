@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from flask import jsonify, render_template, request
+from flask import jsonify, render_template_string, request
 
 
 @dataclass
@@ -23,8 +23,15 @@ def respond(data: ApiResponse, page_template: str = None, **kwargs):
         return jsonify(data.to_dict())
     
     if request.headers.get("HX-Request"):
-        return render_template(page_template, data.to_dict())
+        return render_template_string(
+            page_template,
+            **data.to_dict(),
+            **kwargs,
+        )
     
-    return render_template(page_template)
-
+    return render_template_string(
+        page_template,
+        **data.to_dict(),
+        **kwargs,
+    )
 
