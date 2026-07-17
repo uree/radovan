@@ -29,6 +29,7 @@ provider_dict = [
         "query_url": "https://directory.doabooks.org/rest/search?query=",
         "selected": 1,
         "enabled": 1,
+        "supported_params": DEFAULT_SUPPORTED_PARAMETES,
     },
     {
         "full_name": "OAPEN",
@@ -40,6 +41,7 @@ provider_dict = [
         "query_url": "https://library.oapen.org/rest/search?query=",
         "selected": 1,
         "enabled": 1,
+        "supported_params": DEFAULT_SUPPORTED_PARAMETES,
     },
     {
         "full_name": "Monoskop",
@@ -51,6 +53,7 @@ provider_dict = [
         "query_url": "https://monoskop.org/log/?cat=17&s=",
         "selected": 1,
         "enabled": 1,
+        "supported_params": ["author", "title", "year", "isbn"],
     },
     {
         "full_name": "Library Genesis",
@@ -62,6 +65,7 @@ provider_dict = [
         "query_url": "https://libgen.vg/index.php",
         "selected": 1,
         "enabled": 1,
+        "supported_params": DEFAULT_SUPPORTED_PARAMETES,
     },
     {
         "full_name": "AAAAARG",
@@ -84,6 +88,7 @@ provider_dict = [
         "query_url": "https://works.hcommons.org/api/records",
         "selected": 1,
         "enabled": 1,
+        "suported_params": ["author", "title", "year"],
     },
     {
         "full_name": "SciELO",
@@ -95,6 +100,7 @@ provider_dict = [
         "query_url": "https://search.scielo.org/",
         "selected": 1,
         "enabled": 1,
+        "supported_params": ["author", "title", "year", "doi"],
     },
     {
         "full_name": "Memory of The World",
@@ -106,6 +112,7 @@ provider_dict = [
         "query_url": "https://library.memoryoftheworld.org/search",
         "selected": 1,
         "enabled": 1,
+        "supported_params": ["author", "title"],
     },
     {
         "full_name": "Directory of Open Access Journals",
@@ -117,6 +124,7 @@ provider_dict = [
         "query_url": "http://doaj.org/api/v1/search/articles/",
         "selected": 1,
         "enabled": 1,
+        "supported_params": ["author", "title", "year", "doi"],
     },
     {
         "full_name": "Open Science Framework",
