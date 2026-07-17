@@ -1,5 +1,3 @@
-import json
-
 from flask import current_app, request, Blueprint, jsonify
 from pydantic import ValidationError
 
@@ -100,12 +98,43 @@ SEARCH_JOB_HTML = """
 {% elif job.status == "done" %}
 <div class="panel">
   <h2>Search complete</h2>
-  <pre>{{ job_json }}</pre>
+  {% if job.hits %}
+    {% for provider_name, provider_hits in job.hits.items() %}
+      <h3>{{ provider_name }}</h3>
+      {% for result in provider_hits %}
+        {% set meta = result.bibjson[0] if result.bibjson else {} %}
+        {% set extra = result.extra[0] if result.extra else {} %}
+        <div style="margin: 0 0 1rem 0; padding: 0.75rem; border-top: 1px solid #e5e5e5;">
+          <div><strong>{{ meta.title or "Untitled" }}</strong></div>
+          <div>
+            {% if meta.author %}
+              {% for author in meta.author %}
+                {{ author.name }}{{ ", " if not loop.last }}
+              {% endfor %}
+            {% else %}
+              <span class="muted">No authors listed</span>
+            {% endif %}
+          </div>
+          <div>{{ meta.year or "" }}</div>
+          <div>{{ extra.source or provider_name }}</div>
+          {% if meta.link %}
+            <div>
+              {% for link in meta.link %}
+                <a href="{{ link.href }}" target="_blank" rel="noopener">{{ link.name or link.href }}</a>{{ " " if not loop.last }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endfor %}
+  {% else %}
+    <p>No results found.</p>
+  {% endif %}
 </div>
 {% elif job.status == "error" %}
 <div class="panel">
   <h2>Search error</h2>
-  <pre>{{ job_json }}</pre>
+  <p>The search job failed.</p>
 </div>
 {% else %}
 <div class="panel"
@@ -221,7 +250,6 @@ def search_status(job_id):
         ApiResponse(message="OK", data=job),
         page_template=SEARCH_JOB_HTML,
         job=job,
-        job_json=json.dumps(job.to_dict(), indent=2),
     )
 
 
