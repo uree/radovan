@@ -92,6 +92,10 @@ def oapen(
 class OAPENProvider(Provider):
     def search(self, request: SearchRequest) -> Iterable[BibRecord]:
         logger.debug("Fetching from OAPEN ...")
+        if not self.has_supported_params(request):
+            logger.debug("No supported parameters")
+            return []
+            
         raw_items = self._fetch(request)
 
         results = [

@@ -88,8 +88,11 @@ def doab(
 class DOABProvider(Provider):
     def search(self, request: SearchRequest) -> Iterable[BibRecord]:
         logger.debug("Fetching from DOAB ...")
+        if not self.has_supported_params(request):
+            logger.debug("No supported parameters")
+            return []
+
         raw_items = self._fetch(request)
-        # consider this: return results meta like count
 
         results = [
             self.to_bibrecord(item).to_dict()

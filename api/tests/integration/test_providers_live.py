@@ -21,6 +21,7 @@ def test_doab_live():
             full_name="Directory of Open Access Books",
             url="https://www.doabooks.org/",
             query_url="https://directory.doabooks.org/rest/search?query=",
+            supported_params=["author", "title", "year", "doi", "isbn"],
         )
     )
 
@@ -55,6 +56,7 @@ def test_oapen_live():
             full_name="OAPEN",
             url="http://www.oapen.org/home",
             query_url="https://library.oapen.org/rest/search?query=",
+            supported_params=["author", "title", "year", "doi", "isbn"],
         )
     )
 
@@ -81,13 +83,14 @@ def test_oapen_live():
 
 
 def test_monoskop_live():
-    provider =MonoskopProvider(
+    provider = MonoskopProvider(
         ProviderConfig(
             id=1,
             code_name="monoskop",
             full_name="Monoskop",
             url="https://monoskop.org/Monoskop",
             query_url="https://monoskop.org/log/?cat=17&s=",
+            supported_params=["author", "title", "year", "isbn"],
         )
     )
 
@@ -120,6 +123,7 @@ def test_libgen_live():
             full_name="Library Genesis",
             url="https://libgen.vg",
             query_url="https://libgen.vg/index.php",
+            supported_params=["author", "title", "year", "doi", "isbn"],
         )
     )
 
@@ -151,6 +155,7 @@ def test_mlacore_live():
             full_name="MLA Commons CORE",
             url="https://works.hcommons.org/",
             query_url="https://works.hcommons.org/api/records",
+            supported_params=["author", "title", "year"],
         )
     )
 
@@ -187,6 +192,7 @@ def test_scielo_live():
             full_name="SciELO",
             url="https://www.scielo.org/",
             query_url="https://search.scielo.org/",
+            supported_params=["author", "title", "year", "doi"],
         )
     )
 
@@ -222,6 +228,7 @@ def test_memoryoftheworld_live():
             full_name="Memory of The World",
             url="https://library.memoryoftheworld.org/",
             query_url="https://library.memoryoftheworld.org/search",
+            supported_params=["author", "title"],
         )
     )
 
@@ -274,6 +281,7 @@ def test_doaj_live():
             full_name="Directory of Open Access Journals",
             url="https://doaj.org/",
             query_url="http://doaj.org/api/v1/search/articles/",
+            supported_params=["author", "title", "year", "doi"],
         )
     )
 

@@ -161,6 +161,10 @@ def libgen_book(
 class LibgenProvider(Provider):
     def search(self, request: SearchRequest) -> Iterable[BibRecord]:
         logger.debug("Fetching from Libgen ...")
+        if not self.has_supported_params(request):
+            logger.debug("No supported parameters")
+            return []
+            
         raw_items = self._fetch(request)
 
         results = [
