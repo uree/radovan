@@ -1,3 +1,4 @@
+import json
 from flask import current_app, request, Blueprint, jsonify
 from pydantic import ValidationError
 
@@ -131,6 +132,9 @@ SEARCH_JOB_HTML = """
     <p>No results found.</p>
   {% endif %}
 </div>
+<div class="panel">
+  <pre>{{ job | tojson(indent=2) }}</pre>
+<div>
 {% elif job.status == "error" %}
 <div class="panel">
   <h2>Search error</h2>
@@ -249,7 +253,7 @@ def search_status(job_id):
     return respond(
         ApiResponse(message="OK", data=job),
         page_template=SEARCH_JOB_HTML,
-        job=job,
+        job=job
     )
 
 
