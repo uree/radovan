@@ -8,7 +8,7 @@ from app.core.providers.memoryoftheworld import MOTWProvider
 from app.core.providers.doaj import DOAJProvider
 from app.core.providers.osf import OSFProvider
 from app.core.providers.oadoi import UnpaywallProvider
-from app.core.providers.mediarep import FIDMediaProvider
+from app.core.providers.fidmedia import FIDMediaProvider
 
 
 # consider moving into __init__.py

@@ -13,7 +13,7 @@ from .base_provider import Provider
 
 logger = logging.getLogger(__name__)
 
-# TO DO: continue here ... write test, run some more queries, rename file
+
 class FIDMediaProvider(Provider):
     def search(self, request: SearchRequest) -> Iterable[BibRecord]:
         logger.debug("Fetching from FIDMedia ...")

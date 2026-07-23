@@ -45,7 +45,7 @@ provider_dict = [
     },
     {
         "full_name": "Monoskop",
-        "url": "https://monoskop.org/Monoskop",
+        "url": "https://monoskop.org/",
         "code_name": "monoskop",
         "id": 2,
         "books": 1,
