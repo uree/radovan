@@ -8,7 +8,6 @@ from app.core.search_service import get_search_job, start_search_job
 from app.core.search import search as search
 
 
-
 api_2_0 = Blueprint("api_2_0", __name__)
 
 
@@ -96,8 +95,13 @@ def search_status(job_id):
     )
 
 
-# TO DO: fix
-@api_2_0.route("/sources", methods=["GET"])
-def rsources():
-    response = ApiResponse()
-    return respond(response)
+@api_2_0.route("/providers", methods=["GET"])
+def get_providers():
+    providers = [
+        provider.config.to_dict() for provider in current_app.extensions["providers"]
+    ]
+    current_app.logger.debug(providers)
+    return respond(ApiResponse(
+        message="OK",
+        data=providers
+    ))

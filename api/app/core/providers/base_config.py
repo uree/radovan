@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 
 @dataclass
@@ -13,6 +13,9 @@ class ProviderConfig():
     selected: bool = True
     enabled: bool = True
     supported_params: list[int] = field(default_factory=list)  # not checking for sources, request_timeout or hit_limit
+
+    def to_dict(self):
+        return asdict(self)
 
 
 DEFAULT_SUPPORTED_PARAMETES = ["author", "title", "year", "doi", "isbn"]
