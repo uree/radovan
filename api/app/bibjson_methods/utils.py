@@ -29,7 +29,6 @@ def convert_to_bibjson_key(slovar, alias):
 
 
 def gen_dict_extract(key, var):
-    all_paths = []
     if hasattr(var,'iteritems'):
         for k, v in var.items():
             if k == key:
@@ -87,19 +86,6 @@ def dict_path(path, my_dict, out):
             out.append(struct)
 
 
-def parse_keys(all_paths, search_key):
-    output = []
-
-    if all_paths:
-        for i in all_paths:
-            op = i.split('/')
-            mar = [n for n in op if op[-1] == search_key]
-            if mar:
-                output.append(mar)
-
-    return output
-
-
 def return_data_type(data_value):
     if isinstance(data_value, dict):
         return "dict"
@@ -128,7 +114,7 @@ def extract_isbns(strng):
 
     return isbns
 
-
+# TO DO: duplicate see api request validations
 def extract_dois(text):
     """Extract DOIs from the string."""
     doi_regex = re.compile(
@@ -167,14 +153,3 @@ def extract_original_type(value):
             return value[next(iter(value))]
     else:
         return value.lower()
-
-
-def resolve_nesting(data, source, bibjson_key, resolving_nesting):
-    """ This is supposed to handle strangely nested data from aaaaarg. """
-    if not isinstance(data, "string"):
-        for s in resolving_nesting:
-            if source in s:
-                pf = s[source]['problem_fields']
-                for f in pf:
-                    if f['field_name'] == bibjson_key:
-                        return data[f['depth_and_keys']]

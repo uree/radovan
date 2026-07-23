@@ -17,7 +17,7 @@ def url_constructor(name, type, link):
     except IndexError:
         pass
 
-
+# TO DO: this has a bad name and is used in bibjson_methods ... so it should live there
 # tying links to probable function (open, download, landing) based on experience with pages
 def standardize_links(source, data, keep=False):
     # keep = keep information contained in type

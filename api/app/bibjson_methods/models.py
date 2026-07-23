@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import Optional, List
+# from typing import Optional, List
 
 from .methods import process_hit
 from .settings import bibjson_aliases, extra_aliases, types

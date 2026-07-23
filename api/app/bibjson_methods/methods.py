@@ -19,7 +19,7 @@ def process_hit(
     source,
     extra_aliases_flat,
     bibjson_aliases_flat,
-    types
+    types=types
 ):
     hit = {"bibjson": [], "extra": []}
     bibjson_output = {}
@@ -120,45 +120,3 @@ def process_hit(
 #     process_journal(hit)
 
 #     return hit
-
-
-
-def mein_main(data):
-    hits = {'hits': [], 'meta': {'hits_per_source': []}}  # move this logic to API
-
-    if "entries" not in data:
-        return hits
-
-    # TO DO: move this loop inside the provider model
-    # this is a for each provider loop
-    for entry in data["entries"]:
-        new_hits = []
-        try:
-            source = list(entry.keys())[0]
-        except Exception as e:
-            logger.error(f"Error getting source info: {e}")
-
-        hit_count = {'source': source, 'count': len(entry[source]['hits'])}
-        hits['meta']['hits_per_source'].append(hit_count)
-
-        # some sort of cleanup
-        try:
-            new_hits = entry[source]["hits"]
-        except TypeError:
-            pass
-
-        extra_aliases_flat = flatten_dict_values(extra_aliases)
-        bibjson_aliases_flat = flatten_dict_values(bibjson_aliases)
-
-        # this is a for each hit in provider loop
-        for hit_data in new_hits:
-            hit = process_hit(
-                hit_data,
-                source,
-                extra_aliases_flat,
-                bibjson_aliases_flat,
-                types
-            )
-            hits['hits'].append(hit)
-
-    return hits
