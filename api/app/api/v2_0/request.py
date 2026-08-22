@@ -69,20 +69,26 @@ class SearchRequest(BaseModel):
     @classmethod
     def normalize_sources(cls, value):
         if value is None:
-            return []
+            raise ValueError("At least one source must be provided")
 
         if isinstance(value, str):
-            return [
+            sources = [
                 int(x)
                 for x in value.split()
                 if x.isdigit()
             ]
+            if not sources:
+                raise ValueError("At least one source must be provided")
+            return sources
 
         if isinstance(value, list):
-            return [
+            sources = [
                 int(x)
                 for x in value
             ]
+            if not sources:
+                raise ValueError("At least one source must be provided")
+            return sources
 
         return value
 
@@ -99,4 +105,25 @@ class SearchRequest(BaseModel):
                 "At least one search parameter must be provided"
             )
 
+        if not self.sources:
+            raise ValueError("At least one source must be provided")
+
         return self
+
+    def select_providers(self, providers: list[str]) -> tuple:
+        """From a list of specified provider ids return Providers with matching ids which are enabled in the settings.
+
+        In a separate list it returns list of provider ids which were requested but are currently disabled.
+        """
+        providers_ready = []
+        requested_but_disabled = self.sources
+
+        for p in providers:
+            if p.config.id not in self.sources:
+                continue            
+
+            if p.enabled is True:
+                providers_ready.append(p)
+                requested_but_disabled.remove(p.config.id)
+
+        return providers_ready, requested_but_disabled

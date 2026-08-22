@@ -11,16 +11,6 @@ from app.core.search import search as search
 api_2_0 = Blueprint("api_2_0", __name__)
 
 
-def select_providers(providers, request: SearchRequest):
-    if not request.sources:
-        return [p for p in providers if p.enabled]
-
-    return [
-        p for p in providers
-        if p.enabled and p.config.id in request.sources
-    ]
-
-
 @api_2_0.route("/", methods=["GET"])
 def hello_world():
     current_app.logger.debug("Debug logger works.")
@@ -35,13 +25,13 @@ def search_page():
     return respond(response, page_template=SEARCH_PAGE_HTML)
 
 
-# SEARCH
 @api_2_0.route("/search", methods=["GET"])
 def search_endpoint():
     response = ApiResponse()
     redis = current_app.extensions["redis"]
-    providers = current_app.extensions["providers"]
+    providers = current_app.extensions["providers"]  # this only includes enabled providers
 
+    # check if the request is valid
     try:
         req = SearchRequest.from_args(request.args)
     except ValidationError as e:
@@ -49,22 +39,30 @@ def search_endpoint():
         response.message = "Invalid request"
         response.error = [err["msg"] for err in e.errors()]
         return respond(response)
-    
-    # TO DO: check if the validator function in SearchRequest already valdates this
-    selected_providers = select_providers(providers, req)
+
+    current_app.logger.debug(req.sources)
+
+    # check which of the requested providers are enabled and work with those
+    selected_providers, unavailable = req.select_providers(providers)
     current_app.logger.debug(f"Selected providers {[n.code_name for n in selected_providers]}")
+
     if not selected_providers:
         response.message = "Invalid request"
         response.error = "None of the providers selected are enabled"
         return respond(response)
     
+    # start search job
     current_app.logger.debug("Starting job ...")
     job_id = start_search_job(redis, selected_providers, req)
+    response.message = "OK"
     response.data = {
         "job_id": job_id,
         "providers": [p.code_name for p in selected_providers],
     }
-    current_app.logger.debug(response.data)
+    # make requested unavailable providers explicit
+    if unavailable:
+        response.message = f"Some of the providers you selected are disabled at the moment: {unavailable}. The search was executed with those from you selection which are enabled."
+    current_app.logger.debug(response.to_dict())
 
     return respond(
         data=response,
