@@ -1,26 +1,25 @@
 import logging
-from typing import Iterable, List  # noqa: UP035
+from typing import Iterable  # noqa: UP035
 from urllib.parse import quote_plus
 
 from bs4 import BeautifulSoup
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
 
-from .base_provider import Provider
+from .base_provider import Provider, ProviderResults
 from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)
 
 
 class LibgenProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from Libgen ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
             
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
 
         results = [
             self.to_bibrecord(item).to_dict()
@@ -28,9 +27,9 @@ class LibgenProvider(Provider):
         ]
 
         logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> tuple:
         api_urls = []
         results = []
         query_url = self._build_query(request)
@@ -67,7 +66,7 @@ class LibgenProvider(Provider):
             if normalized:
                 results.append(normalized)
 
-        return results
+        return results, query_url
 
     def _build_query(self, request: SearchRequest) -> str:
         if request.doi:

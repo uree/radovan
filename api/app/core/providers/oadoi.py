@@ -1,14 +1,12 @@
 import json
 import logging
-from typing import Iterable, List
+from typing import Iterable, List  # noqa: UP035
 from urllib.parse import urlencode
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
 
-from .base_provider import Provider
+from .base_provider import Provider, ProviderResults
 from .utils import fetch_provider
-
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +16,13 @@ class UnpaywallProvider(Provider):
         super().__init__(cfg)
         self.email = secrets["OADOI_EMAIL"]
 
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from Unpaywall (oadoi) ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
             
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
         results = []
         logger.debug(type(raw_items))
         # a bit safer if issues
@@ -37,7 +35,7 @@ class UnpaywallProvider(Provider):
         logger.debug(
             json.dumps(results, indent=2, default=str)
         )
-        return results
+        return ProviderResults(items=results, query=query)
 
     def _fetch(self, request: SearchRequest) -> List[dict]:
         query = self._build_query(request)
@@ -57,7 +55,7 @@ class UnpaywallProvider(Provider):
         if not results:
             return []
         
-        return [results] # no hit limit implemented as it only returns one article
+        return [results], query # no hit limit implemented as it only returns one article
 
     def _build_query(self, request: SearchRequest) -> str:
         params = urlencode({"email": self.email})

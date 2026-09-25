@@ -22,12 +22,12 @@ def search(providers, request: SearchRequest) -> dict:
             provider = future_to_provider[future]
 
             try:
-                results = list(future.result())
+                results = future.result()
 
                 yield {
                     "provider": provider.code_name,
                     "status": "ok",
-                    "results": results,
+                    "results": results.to_dict(),
                 }
 
             except Exception as e:

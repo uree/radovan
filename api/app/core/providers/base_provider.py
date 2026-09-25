@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, asdict
 import logging
 from typing import Iterable
 
@@ -8,6 +9,18 @@ from app.core.providers.base_config import ProviderConfig
 
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ProviderResults:
+    items: Iterable[BibRecord]
+    query: str
+
+    def to_dict(self) -> dict:
+        return {
+            "query": self.query,
+            "items": self.items,
+        }
 
 
 class Provider(ABC):
@@ -32,7 +45,7 @@ class Provider(ABC):
         return self.config.supported_params
 
     @abstractmethod
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> ProviderResults:
         """
         Full pipeline:
         - fetch data

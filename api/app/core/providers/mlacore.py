@@ -1,33 +1,33 @@
 import logging
-import requests
-from typing import Iterable, List
+from typing import Iterable  # noqa: UP035
 from urllib.parse import urlencode
 
-from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
-from .base_provider import Provider
+import requests
 
+from app.api.v2_0.request import SearchRequest
+
+from .base_provider import Provider, ProviderResults
 
 logger = logging.getLogger(__name__)
 
 
 class MLACOREProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from MLACORE ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
             
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
 
         results = [
             self.to_bibrecord(item).to_dict()
             for item in raw_items
         ]
         logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> tuple:
         query = self._build_query(request)
         logger.debug(query)
         try:
@@ -42,8 +42,8 @@ class MLACOREProvider(Provider):
         if not results:
             return []
 
-        # return results["hits"]["hits"]
-        return [self._normalize_item(item) for item in results["hits"]["hits"]]
+        normalized = [self._normalize_item(item) for item in results["hits"]["hits"]]
+        return normalized, query
 
     def _build_query(self, request: SearchRequest) -> tuple:
         clauses = []

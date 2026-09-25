@@ -1,11 +1,10 @@
 import logging
-from typing import Iterable, List  # noqa: UP035
+from typing import Iterable  # noqa: UP035
 from urllib.parse import quote_plus
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
 
-from .base_provider import Provider
+from .base_provider import Provider, ProviderResults
 from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)
@@ -14,23 +13,22 @@ DOAB_BITSTREAM_BASE = "https://directory.doabooks.org/bitstream/handle"
 
 
 class DOABProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from DOAB ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
-            return []
+            return [], None
 
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
 
         results = [
             self.to_bibrecord(item).to_dict()
             for item in raw_items
         ]
 
-        logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> tuple:
         logger.debug("Fetch called.")
         query = self._build_query(request)
 
@@ -43,15 +41,15 @@ class DOABProvider(Provider):
             request_timeout=request.request_timeout,
             format="json"
         )
-        logger.debug(results)
 
         if not results:
             return []
-
-        return [
+        
+        normalized = [
             self._normalize_item(item)
             for item in results[:request.hit_limit]
         ]
+        return normalized, query
 
     def _build_query(self, request: SearchRequest) -> str:
         if request.isbn:

@@ -1,27 +1,25 @@
 import logging
-from typing import Iterable, List
-from urllib.parse import urlencode, urljoin, parse_qs
-
+from typing import Iterable, List  # noqa
+from urllib.parse import parse_qs, urlencode, urljoin
 
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
 
-from .base_provider import Provider
+from .base_provider import Provider, ProviderResults
 
 logger = logging.getLogger(__name__)
 
 
 class FIDMediaProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from FIDMedia ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
         
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
         results = []
         # a bit safer if issues
         for item in raw_items:
@@ -32,9 +30,9 @@ class FIDMediaProvider(Provider):
                 logger.exception("Failed processing item: %r", item)
 
         logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> tuple:
         query = self._build_query(request)
         logger.debug(query)
 
@@ -54,7 +52,7 @@ class FIDMediaProvider(Provider):
                 logger.debug(e)
         
         logger.debug(html)
-        return self._parse_results(html, request.hit_limit)
+        return self._parse_results(html, request.hit_limit), query
 
 
     def _build_query(self, request: SearchRequest) -> str:

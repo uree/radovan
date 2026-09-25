@@ -2,7 +2,7 @@ from dataclasses import dataclass, field, asdict
 
 
 @dataclass
-class ProviderConfig():
+class ProviderConfig:
     id: int
     code_name: str
     full_name: str

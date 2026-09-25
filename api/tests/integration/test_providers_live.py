@@ -2,15 +2,15 @@ from app.api.v2_0.request import SearchRequest
 from app.config import Config
 from app.core.providers.base_config import ProviderConfig
 from app.core.providers.doab import DOABProvider
-from app.core.providers.oapen import OAPENProvider
-from app.core.providers.monoskop import MonoskopProvider
-from app.core.providers.libgen import LibgenProvider
-from app.core.providers.mlacore import MLACOREProvider
-from app.core.providers.scielo import ScieloProvider
-from app.core.providers.memoryoftheworld import MOTWProvider
 from app.core.providers.doaj import DOAJProvider
-from app.core.providers.osf import OSFProvider
+from app.core.providers.libgen import LibgenProvider
+from app.core.providers.memoryoftheworld import MOTWProvider
+from app.core.providers.mlacore import MLACOREProvider
+from app.core.providers.monoskop import MonoskopProvider
 from app.core.providers.oadoi import UnpaywallProvider
+from app.core.providers.oapen import OAPENProvider
+from app.core.providers.osf import OSFProvider
+from app.core.providers.scielo import ScieloProvider
 
 
 def test_doab_live():
@@ -29,13 +29,12 @@ def test_doab_live():
         title="memory",
         hit_limit=3,
         request_timeout=10,
+        sources=[0],
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -64,13 +63,12 @@ def test_oapen_live():
         title="memory",
         hit_limit=3,
         request_timeout=10,
+        sources=[1]
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -97,13 +95,12 @@ def test_monoskop_live():
     request = SearchRequest(
         author="tomislav medak",
         hit_limit=3,
+        sources=[2]
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -130,13 +127,12 @@ def test_libgen_live():
     request = SearchRequest(
         author="donna haraway",
         hit_limit=3,
+        sources=[3],
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -164,13 +160,12 @@ def test_mlacore_live():
         title="money",
         year="2017",
         hit_limit=3,
+        sources=[5]
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -200,13 +195,12 @@ def test_scielo_live():
         author="jesus",
         title="mapuche",
         hit_limit=3,
+        sources=[6],
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -235,13 +229,12 @@ def test_memoryoftheworld_live():
     request = SearchRequest(
         author="adorno",
         hit_limit=3,
+        sources=[7],
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -255,6 +248,7 @@ def test_memoryoftheworld_live():
     request = SearchRequest(
         title="playing the whore",
         hit_limit=3,
+        sources=[7],
     )
 
     results = provider.search(request)
@@ -290,13 +284,12 @@ def test_doaj_live():
         author="appelt",
         year="2017",
         hit_limit=3,
+        sources=[8],
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -310,13 +303,12 @@ def test_doaj_live():
     request = SearchRequest(
         doi="10.18096/TMP.2017.01.01",
         hit_limit=3,
+        sources=[8],
     )
     
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -344,13 +336,12 @@ def test_osf_live():
         title="inequality",
         author="boyd",
         hit_limit=3,
+        sources=[9],
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 
@@ -382,13 +373,12 @@ def test_oadoi_live():
     request = SearchRequest(
         doi="10.1038/nature12373",
         hit_limit=3,
+        sources=[10],
     )
 
-    results = list(provider.search(request))
+    results = provider.search(request)
 
-    assert len(results) > 0
-
-    record = results[0]
+    record = results.items[0]
     assert "bibjson" in record
     assert "extra" in record
 

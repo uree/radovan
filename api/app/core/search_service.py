@@ -8,6 +8,7 @@ from typing import List
 
 from app.api.v2_0.request import SearchRequest
 from app.core.search import search
+from app.core.providers.base_provider import ProviderResults
 
 
 logger = logging.getLogger(__name__)
@@ -19,19 +20,21 @@ class SearchJob:
     status: str = "running"
     providers_total: int = 0
     providers_completed: List[str] = field(default_factory=list)
-    hits: List[dict] = field(default_factory=list)
+    # hits: List[dict] = field(default_factory=list)
+    results: list[dict] = field(default_factory=list)
 
     def to_dict(self):
         return asdict(self)
     
     @staticmethod
     def from_redis(job_id: str, data: dict):
+        # logger.debug(data)
         return SearchJob(
             id=job_id,
             status=data.get("status", "running"),
             providers_total=int(data.get("providers_total", 0)),
             providers_completed=json.loads(data.get("providers_completed", "[]")),
-            hits=json.loads(data.get("results", "[]")),
+            results=json.loads(data.get("results", "[]")),
         )
 
 
@@ -41,7 +44,7 @@ def get_search_job(redis, job_id: str) -> SearchJob | None:
 
     if not data:
         return None
-
+    
     return SearchJob.from_redis(job_id, data)
 
 
@@ -49,7 +52,7 @@ def run_search_job(redis, providers, job_id: str, request: SearchRequest):
 
     key = f"search:{job_id}"
     providers_completed = []
-    hits = {}
+    results = {}
 
     try:
         for event in search(providers, request):
@@ -57,7 +60,9 @@ def run_search_job(redis, providers, job_id: str, request: SearchRequest):
             if provider_name not in providers_completed:
                 providers_completed.append(provider_name)
 
-            hits[provider_name] = event["results"]
+            logger.debug(event)
+            results[provider_name] = event["results"]
+            logger.debug(results)
             redis.hset(key, mapping={
                 "providers_completed": json.dumps(providers_completed),
                 "status": "running",
@@ -65,7 +70,7 @@ def run_search_job(redis, providers, job_id: str, request: SearchRequest):
         redis.hset(key, mapping={
             "status": "done",
             "providers_completed": json.dumps(providers_completed),
-            "results": json.dumps(hits),
+            "results": json.dumps(results),
         })
     except Exception as e:
         logger.debug(str(e))

@@ -1,24 +1,23 @@
 import logging
-from typing import Iterable, List
+from typing import Iterable, List  # noqa: UP035
 from urllib.parse import urlencode
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
 
-from .base_provider import Provider
+from .base_provider import Provider, ProviderResults
 from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)
 
 
 class OSFProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from OSF ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
         
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
         results = []
         # a bit safer if issues
         for item in raw_items:
@@ -29,7 +28,7 @@ class OSFProvider(Provider):
                 logger.exception("Failed processing item: %r", item)
 
         logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
     def _fetch(self, request: SearchRequest) -> List[dict]:
         query = self._build_query(request)
@@ -51,10 +50,10 @@ class OSFProvider(Provider):
             return [
                 self._normalize_item(item)
                 for item in results["hits"]["hits"][:request.hit_limit]
-            ]
+            ], query
         except Exception as e:
             logger.debug(e)
-            return []
+            return [], query
 
     def _build_query(self, request: SearchRequest) -> str:
         search_query = " ".join(

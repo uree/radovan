@@ -1,23 +1,23 @@
 import logging
+from typing import Iterable, List  # noqa: UP035
+
 import requests
-from typing import Iterable, List
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
 
-from .base_provider import Provider
+from .base_provider import Provider, ProviderResults
 
 logger = logging.getLogger(__name__)
 
 
 class MOTWProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from memoryoftheworld ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
         
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
         # consider this: return results meta like count
 
         results = [
@@ -26,7 +26,7 @@ class MOTWProvider(Provider):
         ]
 
         logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
     def _fetch(self, request: SearchRequest) -> List[dict]:
         query = self._build_query(request)
@@ -41,10 +41,11 @@ class MOTWProvider(Provider):
             logger.debug(e)
             return []
 
-        return [
+        normalized = [
             self._normalize_item(item)
             for item in results[:request.hit_limit]
         ]
+        return normalized, query
 
     def _build_query(self, request: SearchRequest) -> str:
         url_authors = "https://library.memoryoftheworld.org/search/authors/"

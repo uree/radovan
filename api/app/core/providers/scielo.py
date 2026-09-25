@@ -1,14 +1,13 @@
 import logging
-from typing import Iterable, List
+from typing import Iterable, List  # noqa
 from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
-from .base_provider import Provider
 
+from .base_provider import Provider, ProviderResults
 
 logger = logging.getLogger(__name__)
 
@@ -23,22 +22,22 @@ logger = logging.getLogger(__name__)
 # turns out it's probably easiest to just parse html data, once you fetch the search results with playwright
 
 class ScieloProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from Scielo ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
-        raw_items = self._fetch(request)
+        raw_items, query = self._fetch(request)
 
         results = [
             self.to_bibrecord(item).to_dict()
             for item in raw_items
         ]
         logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
     # TO DO: figure out a different way. scielo now has bot protection
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> tuple:
         query = self._build_query(request)
         logger.debug(query)
 
@@ -59,7 +58,7 @@ class ScieloProvider(Provider):
                 logger.debug(e)
         
         # parse results
-        return self._parse_results(html, request.hit_limit)
+        return self._parse_results(html, request.hit_limit), query
 
 
     def _build_query(self, request: SearchRequest) -> str:

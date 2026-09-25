@@ -1,29 +1,27 @@
 import logging
-import re
-from typing import Iterable, List
+import urllib.request
+from typing import Iterable  # noqa: UP035
 from urllib.parse import quote_plus
 
 import isbnlib
-import urllib.request
 from bs4 import BeautifulSoup
 
 from app.api.v2_0.request import SearchRequest
-from app.bibjson_methods.models import BibRecord
 from app.core.fixing_links import url_constructor
-from .base_provider import Provider
 
+from .base_provider import Provider, ProviderResults
 
 logger = logging.getLogger(__name__)
 MONOSKOP_BASE = 'https://monoskop.org/log/?cat=17&s='
 
 
 class MonoskopProvider(Provider):
-    def search(self, request: SearchRequest) -> Iterable[BibRecord]:
+    def search(self, request: SearchRequest) -> Iterable[ProviderResults]:
         logger.debug("Fetching from Monoskop ...")
         if not self.has_supported_params(request):
             logger.debug("No supported parameters")
             return []
-        raw_items = self._fetch(request)
+        raw_items,query = self._fetch(request)
 
         results = [
             self.to_bibrecord(item).to_dict()
@@ -31,9 +29,9 @@ class MonoskopProvider(Provider):
         ]
 
         logger.debug(results)
-        return results
+        return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> tuple:
         monoskop_url = self.config.query_url + self._build_query(request)
         logger.debug(f"Making request {monoskop_url}")
 
@@ -60,7 +58,7 @@ class MonoskopProvider(Provider):
             if normalized:
                 results.append(normalized)
 
-        return results
+        return results, monoskop_url
 
     def _build_query(self, request: SearchRequest) -> str:
         if request.isbn:
