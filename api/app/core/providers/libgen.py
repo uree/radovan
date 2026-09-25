@@ -1,15 +1,14 @@
 import logging
-import requests
-from typing import Iterable, List
+from typing import Iterable, List  # noqa: UP035
 from urllib.parse import quote_plus
 
 from bs4 import BeautifulSoup
 
 from app.api.v2_0.request import SearchRequest
 from app.bibjson_methods.models import BibRecord
+
 from .base_provider import Provider
 from .utils import fetch_provider
-
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,6 @@ class LibgenProvider(Provider):
         if request.doi or request.isbn:
             api_urls.append(query_url)
         else:
-
             html = fetch_provider(
                 self.config.code_name,  # TO DO: why keep using this name?
                 query_url,

@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, List
+from typing import Iterable, List  # noqa: UP035
 from urllib.parse import quote_plus
 
 from app.api.v2_0.request import SearchRequest

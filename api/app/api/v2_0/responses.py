@@ -1,4 +1,5 @@
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+
 from flask import jsonify, render_template_string, request
 
 

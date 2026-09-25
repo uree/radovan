@@ -1,12 +1,14 @@
-from flask import current_app, request, Blueprint
+from flask import Blueprint, current_app, request
 from pydantic import ValidationError
 
-from app.api.v2_0.responses import ApiResponse, respond
 from app.api.v2_0.request import SearchRequest
-from app.api.v2_0.test_htmx_templates import SEARCH_PAGE_HTML, SEARCH_JOB_HTML, SEARCH_STARTED_HTML
+from app.api.v2_0.responses import ApiResponse, respond
+from app.api.v2_0.test_htmx_templates import (
+    SEARCH_JOB_HTML,
+    SEARCH_PAGE_HTML,
+    SEARCH_STARTED_HTML,
+)
 from app.core.search_service import get_search_job, start_search_job
-from app.core.search import search as search
-
 
 api_2_0 = Blueprint("api_2_0", __name__)
 
