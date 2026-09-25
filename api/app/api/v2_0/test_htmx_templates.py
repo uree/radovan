@@ -82,12 +82,12 @@ SEARCH_JOB_HTML = """
 {% elif job.status == "done" %}
 <div class="panel">
   <h2>Search complete</h2>
-  {% if job.hits %}
-    {% for provider_name, provider_hits in job.hits.items() %}
+  {% if job.results %}
+    {% for provider_name, provider_results in job.results.items() %}
       <h3>{{ provider_name }}</h3>
-      {% for result in provider_hits %}
-        {% set meta = result.bibjson[0] if result.bibjson else {} %}
-        {% set extra = result.extra[0] if result.extra else {} %}
+      {% for result in provider_results["items"] %}
+        {% set meta = result["bibjson"][0] if result["bibjson"] else {} %}
+        {% set extra = result["extra"][0] if result["extra"] else {} %}
         <div style="margin: 0 0 1rem 0; padding: 0.75rem; border-top: 1px solid #e5e5e5;">
           <div><strong>{{ meta.title or "Untitled" }}</strong></div>
           <div>
