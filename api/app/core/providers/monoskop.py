@@ -3,6 +3,7 @@ import re
 from typing import Iterable, List
 from urllib.parse import quote_plus
 
+import isbnlib
 import urllib.request
 from bs4 import BeautifulSoup
 
@@ -88,6 +89,7 @@ class MonoskopProvider(Provider):
 
         img_href = self._absolute_url(image.get('src', ''))
         links, description_parts = self._extract_links_and_description(image)
+        logger.debug(item)
 
         if landing:
             links.append(
@@ -143,18 +145,7 @@ class MonoskopProvider(Provider):
 
     # TO DO: is this func reusable elsewhere?
     def _extract_isbns(self, item) -> list[str]:
-        isbn = re.search('(ISBN)(.*)', str(item))
-        if not isbn:
-            return []
-
-        isbns = []
-        for value in isbn.group(2).split(','):
-            value = value.strip()
-            value = re.sub('[^0-9]', '', value)
-            if value:
-                isbns.append(value)
-
-        return isbns
+        return isbnlib.get_canonical_isbn(str(item))
 
     def _absolute_url(self, url: str) -> str:
         if url.startswith('../'):

@@ -8,6 +8,7 @@ from .utils import flatten_dict_values, convert_to_bibjson_key, resolve_depth, r
 
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 pp = pprint.PrettyPrinter(indent=4)
 
 # TO DO: this module should create BibRecords, which can be translated into any format (implement that), but they need to be able to carry multiple urls

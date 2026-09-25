@@ -1,5 +1,6 @@
 import logging
 import re
+import isbnlib 
 
 from app.core.fixing_links import standardize_links
 from .settings import bibjson_aliases, fields
@@ -8,13 +9,13 @@ from .utils import (
     return_data_type,
     get_all_keys,
     gen_dict_extract,
-    extract_isbns,
     extract_dois,
     convert_to_bibjson_key
 )
 
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 
 def process_authors(fielddata, source):
@@ -81,7 +82,7 @@ def process_identifiers(fielddata, original_key):
 
     fielddata_str = ' '.join(fielddata) if isinstance(fielddata, list) else fielddata   # noqa:501
 
-    isbns = extract_isbns(fielddata)
+    isbns = isbnlib.get_canonical_isbn(fielddata)
     dois = extract_dois(fielddata)
 
     _append_identifier(isbns, "isbn", output)

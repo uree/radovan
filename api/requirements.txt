@@ -17,6 +17,7 @@ greenlet==3.5.1
 gunicorn==26.0.0
 idna==3.16
 iniconfig==2.3.0
+isbnlib==3.10.14
 itsdangerous==2.2.0
 jinja2==3.1.6
 lxml==6.1.1

@@ -105,15 +105,6 @@ def resolve_depth(settings, level):
     return None
 
 
-def extract_isbns(strng):
-    """Extract ISBNs from string."""
-    isbns = re.findall(r"\b\d{10,13}\b", strng)
-
-    if not isbns and strng.startswith('978'):
-        isbns = [strng]
-
-    return isbns
-
 # TO DO: duplicate see api request validations
 def extract_dois(text):
     """Extract DOIs from the string."""
