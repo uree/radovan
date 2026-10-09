@@ -103,7 +103,6 @@ class MonoskopProvider(Provider):
             'desc': '\n'.join(description_parts),
             'href': links,
             'title': title,
-            'query': query,
             'isbn': self._extract_isbns(item),
             'type': 'book',
         }
