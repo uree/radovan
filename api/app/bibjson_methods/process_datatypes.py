@@ -100,7 +100,7 @@ def process_links(fielddata, source):
                 output.append(standardized_link)
         else:
             for item in fielddata:
-                link = {'name': '', 'type': '', 'href': ''}
+                link = {'name': 'unknown', 'type': 'unknown', 'href': ''}
                 try:
                     for key, value in item.items():
                         link['href'] = value
@@ -131,18 +131,25 @@ def process_links(fielddata, source):
     else:  # if it's not list or dict then it is a string (most likely)
         link = {'name': '', 'type': '', 'href': ''}
         if source == 'scielo':
-            link['type'] = 'open_url'
-            link['name'] = 'open'
+            link['type'] = 'landing_url'
+            link['name'] = 'landing page'
             link['href'] = fielddata
             output.append(link)
         elif source in ['doab', 'oapen']:
-            if fielddata.endswith('.pdf') or fielddata.endswith('.epub'):
+            if fielddata.endswith(('.pdf', '.epub')):
                 link['type'] = 'download_url'
-                link['name'] = 'download'
+                link['name'] = 'direct download'
             else:
                 link['type'] = 'landing_url'
                 link['name'] = 'landing page'
             link['href'] = fielddata
+            output.append(link)
+        else:
+            link = {
+                "name": "unknown",
+                "type": "unknown",
+                "href": fielddata,
+            }
             output.append(link)
     return output
 
