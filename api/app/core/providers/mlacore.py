@@ -33,7 +33,7 @@ class MLACOREProvider(Provider):
         try:
             r = requests.get(query)
             logger.debug(r.status_code)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(e)
             return [], query
 
@@ -80,7 +80,7 @@ class MLACOREProvider(Provider):
                 for entry in r.json()["entries"] 
                 if "links" in entry
             ]
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(e)
         return []
 
@@ -119,6 +119,6 @@ class MLACOREProvider(Provider):
             normalized["creators"] = self._extract_authors(item["metadata"])
             logger.debug(normalized)
             return normalized
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(e)
             return {}

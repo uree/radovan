@@ -1,18 +1,10 @@
-import pprint
-
-pp = pprint.PrettyPrinter(indent=4)
-
-
-# FORMATTING LINKS
 def url_constructor(name, type, link):
-    names = ['landing_url', 'download_url', 'open_url']
-    one_link = {'name': '', 'href': '', 'type': ''}
     try:
         if link.startswith('/b/?'):
             uplink = link.replace('/b/?', '')
         else:
             uplink = link
-        link_dict = dict({'name': name, 'type': type, 'href': uplink})
+        link_dict = {"name": name, "type": type, "href": uplink}
         return link_dict
     except IndexError:
         pass
@@ -21,7 +13,7 @@ def url_constructor(name, type, link):
 # tying links to probable function (open, download, landing) based on experience with pages
 def standardize_links(source, data, keep=False):
     # keep = keep information contained in type
-    standard_type = {'doab': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'monoskop': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url', 'PDF']}, 'libgen': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'doaj': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url', 'fulltext'], 'href_alias': 'url'}, 'osf': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'scielo': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'memoryoftheworld': {'test': 'format', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'mlacore': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['self_html'], 'open_aliases': ['open_url', 'View in browser']}, 'aaaaarg': {'test': 'url', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url'], 'href_alias': 'url'}, 'aaaaarg': {'test': 'url', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url'], 'href_alias': 'url'}}
+    standard_type = {'doab': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'monoskop': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url', 'PDF']}, 'libgen': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'doaj': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url', 'fulltext'], 'href_alias': 'url'}, 'osf': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'scielo': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'memoryoftheworld': {'test': 'format', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url']}, 'mlacore': {'test': 'type', 'download_aliases': ['download_url'], 'landing_aliases': ['self_html'], 'open_aliases': ['open_url', 'View in browser']}, 'aaaaarg': {'test': 'url', 'download_aliases': ['download_url'], 'landing_aliases': ['landing_url'], 'open_aliases': ['open_url'], 'href_alias': 'url'}}
 
     try:
         test_src = standard_type[source]

@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, List  # noqa: UP035
+from collections.abc import Iterable
 
 import requests
 
@@ -37,7 +37,7 @@ class MOTWProvider(Provider):
             results = r.json()["_items"]
         except requests.exceptions.SSLError:
             return [], query
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(e)
             return [], query
 
@@ -76,7 +76,7 @@ class MOTWProvider(Provider):
                     "format": text.lower()
                 })
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(e)
                 continue
 

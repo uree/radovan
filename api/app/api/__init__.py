@@ -1,7 +1,3 @@
-from flask import Blueprint
-
-
-# Import blueprints
 from app.api.v2_0.routes import api_2_0
 
 

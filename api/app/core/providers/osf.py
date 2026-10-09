@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, List  # noqa: UP035
+from collections.abc import Iterable
 from urllib.parse import urlencode
 
 from app.api.v2_0.request import SearchRequest
@@ -30,7 +30,7 @@ class OSFProvider(Provider):
         logger.debug(results)
         return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> list[dict]:
         query = self._build_query(request)
         logger.debug(query)
 
@@ -51,7 +51,7 @@ class OSFProvider(Provider):
                 self._normalize_item(item)
                 for item in results["hits"]["hits"][:request.hit_limit]
             ], query
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(e)
             return [], query
 

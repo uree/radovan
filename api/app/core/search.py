@@ -30,7 +30,7 @@ def search(providers, request: SearchRequest) -> dict:
                     "results": results.to_dict(),
                 }
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 yield {
                     "provider": provider.code_name,
                     "status": "error",

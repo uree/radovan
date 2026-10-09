@@ -1,12 +1,11 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, asdict
 import logging
-from typing import Iterable
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from dataclasses import dataclass
 
 from app.api.v2_0.request import SearchRequest
 from app.bibjson_methods.models import BibRecord
 from app.core.providers.base_config import ProviderConfig
-
 
 logger = logging.getLogger(__name__)
 

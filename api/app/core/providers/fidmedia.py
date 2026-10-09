@@ -48,7 +48,7 @@ class FIDMediaProvider(Provider):
                 page.goto(query, wait_until="networkidle")
                 html = page.content()
                 browser.close()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(e)
         
         logger.debug(html)

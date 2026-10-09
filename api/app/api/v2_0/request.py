@@ -1,15 +1,19 @@
 import logging
-from typing import Any
 import re
+from typing import Any
 
-from pydantic import BaseModel, Field, field_validator, model_validator  # using pydantic here because of validation functionalities
+from pydantic import (  # using pydantic here because of validation functionalities
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+)
 from stdnum import isbn as isbnlib
-
 
 logger = logging.getLogger(__name__)
 DOI_RE = re.compile(
     r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$",
-    re.I,
+    re.IGNORECASE,
 )
 
 

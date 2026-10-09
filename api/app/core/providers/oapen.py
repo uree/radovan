@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, List  # noqa: UP035
+from collections.abc import Iterable
 from urllib.parse import quote_plus
 
 from app.api.v2_0.request import SearchRequest
@@ -29,7 +29,7 @@ class OAPENProvider(Provider):
         logger.debug(results)
         return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> list[dict]:
         query = self._build_query(request)
 
         headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"}  # noqa:501

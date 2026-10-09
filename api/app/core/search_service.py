@@ -4,7 +4,6 @@ import logging
 import uuid
 from dataclasses import asdict, dataclass, field
 from threading import Thread
-from typing import List  # noqa: UP035
 
 from app.api.v2_0.request import SearchRequest
 from app.core.search import search
@@ -19,7 +18,7 @@ class SearchJob:
     id: str
     status: str = "running"
     providers_total: int = 0
-    providers_completed: List[str] = field(default_factory=list)
+    providers_completed: list[str] = field(default_factory=list)
     # hits: List[dict] = field(default_factory=list)
     results: list[dict] = field(default_factory=list)
 
@@ -72,7 +71,7 @@ def run_search_job(redis, providers, job_id: str, request: SearchRequest):
             "providers_completed": json.dumps(providers_completed),
             "results": json.dumps(results),
         })
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.debug(str(e))
         redis.hset(key, mapping={
             "status": "error",

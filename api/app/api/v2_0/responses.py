@@ -14,7 +14,7 @@ class ApiResponse:
 
 
 # TO DO: if need be implement partial template suport
-def respond(data: ApiResponse, page_template: str = None, **kwargs):
+def respond(data: ApiResponse, page_template: str | None = None, **kwargs):
     """ Resolve what to return based on request, html or json. 
 
     Kwargs for other variables needed for rendering the template (potentially).

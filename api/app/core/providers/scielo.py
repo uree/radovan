@@ -54,7 +54,7 @@ class ScieloProvider(Provider):
                 page.goto(query, wait_until="networkidle")
                 html = page.content()
                 browser.close()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(e)
         
         # parse results
@@ -97,7 +97,7 @@ class ScieloProvider(Provider):
                 if div.has_attr("id")
             ]
             logger.debug(results)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(e)
         
         return results

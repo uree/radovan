@@ -45,7 +45,7 @@ class MonoskopProvider(Provider):
                 provider_request,
                 timeout=request.request_timeout
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(e)
             return []
 

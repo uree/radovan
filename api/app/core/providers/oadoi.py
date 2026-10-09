@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Iterable, List  # noqa: UP035
+from collections.abc import Iterable
 from urllib.parse import urlencode
 
 from app.api.v2_0.request import SearchRequest
@@ -37,7 +37,7 @@ class UnpaywallProvider(Provider):
         )
         return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> list[dict]:
         query = self._build_query(request)
         logger.debug(query)
 
