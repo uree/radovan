@@ -1,12 +1,10 @@
 import redis
-
 from flask import Flask
 
 from app.config import Config
-from app.logs.setup import setup_logging
-# from app.core.providers.aaaaarg import arglogin
-from app.core.providers.base_registry import PROVIDERS
 from app.core.providers.base_config import load_configs
+from app.core.providers.base_registry import PROVIDERS
+from app.logs.setup import setup_logging
 
 
 def create_app(config_class=Config):
@@ -26,7 +24,7 @@ def create_app(config_class=Config):
     ]
     try:
         app.logger.debug([n.supported_params for n in app.extensions["providers"]])
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         app.logger.debug(e)
     app.logger.info("Providers loaded.")
     app.logger.debug([n.code_name for n in app.extensions["providers"]])
@@ -35,13 +33,5 @@ def create_app(config_class=Config):
         port=6379,
         decode_responses=True,
     )
-
-    # arglogin
-    # if app.config["AAAARAG_ON"]:
-    #     try:
-    #         app.logger.debug("Creating arg browser ...")
-    #         app.aaaaarg_browser = arglogin(app.config["AAAAARG_USER"], app.config["AAAAARG_PASS"])
-    #     except AttributeError:
-    #         app.aaaaarg_browser = None
 
     return app
