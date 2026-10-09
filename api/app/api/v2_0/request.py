@@ -21,7 +21,7 @@ class SearchRequest(BaseModel):
     doi: str = ""
     format: str = ""
     hit_limit: int = Field(default=10, ge=1, le=20)
-    request_timeout: int= Field(default=5, ge=1, le=20)
+    request_timeout: int= Field(default=10, ge=1, le=20)
 
     sources: list[int] = Field(default_factory=list)
 
