@@ -8,8 +8,6 @@ class ProviderConfig:
     full_name: str
     url: str
     query_url: str
-    books: bool = True
-    articles: bool = False
     selected: bool = True
     enabled: bool = True
     supported_params: list[int] = field(default_factory=list)  # not checking for sources, request_timeout or hit_limit
@@ -20,7 +18,6 @@ class ProviderConfig:
 
 DEFAULT_SUPPORTED_PARAMETES = ["author", "title", "year", "doi", "isbn"]
 # TO DO: selected should probably be a problem for the interface?
-# TO DO: books vs articles = pointless selection
 provider_dict = [
     {
         "full_name": "Directory of Open Access Books",
@@ -152,8 +149,6 @@ def load_configs() -> list[ProviderConfig]:
             full_name=r["full_name"],
             url=r["url"],
             query_url=r["query_url"],
-            books=bool(r.get("books", True)),
-            articles=bool(r.get("articles", False)),
             selected=bool(r.get("selected", True)),
             enabled=bool(r.get("enabled", True)),
             supported_params=r.get("supported_params", DEFAULT_SUPPORTED_PARAMETES),
