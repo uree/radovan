@@ -129,7 +129,7 @@ def process_links(fielddata, source):
         else:
             output.append(fielddata)
     else:  # if it's not list or dict then it is a string (most likely)
-        link = {'name': '', 'type': '', 'href': ''}
+        link = {'name': 'unknown', 'type': 'unknown', 'href': ''}
         if source == 'scielo':
             link['type'] = 'landing_url'
             link['name'] = 'landing page'
