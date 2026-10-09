@@ -134,7 +134,10 @@ bibjson_aliases = {
         "best_oa_location",
         "links",
         "link",
-        "standard_oapen_url"
+        "standard_oapen_url",
+        "landing_url",
+        "download_url",
+        "latest_html",
     ],
     "subject": [
         "subject",
@@ -189,12 +192,6 @@ extra_aliases = {
     ],
     "md5": [
         "md5"
-    ],
-    "landing_url": [
-        "landing_url"
-    ],
-    "download_url": [
-        "download_url"
     ],
     "query": [
         "query"
