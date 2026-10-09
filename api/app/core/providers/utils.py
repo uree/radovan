@@ -20,7 +20,7 @@ def fetch_provider(provider, url, headers, request_timeout=5, format="json"):
     except requests.exceptions.RequestException as e:
         logger.debug(e)
         return None
-
+        
     if format == "json":
         return request.json()
 

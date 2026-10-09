@@ -82,28 +82,43 @@ class LibgenProvider(Provider):
         
         # First row contains pagination
         for row in soup.select("#tablelibgen tbody tr"):
-            cells = row.find_all("td", recursive=False)
+            # When making a DOI query ...the first cell is in the way
+            cells = [
+                cell
+                for cell in row.find_all("td", recursive=False)
+                if not cell.has_attr("bgcolor")
+            ]
+            logger.debug(cells)
 
-            # Hmm doi queries have "shorter" tables
-            # Skip malformed rows
-            if len(cells) < 9:
-                continue
+            def get_cell(index):
+                return cells[index] if index < len(cells) else None  # noqa: B023
+
+            def cell_text(index):
+                cell = get_cell(index)
+                return cell.get_text(" ", strip=True) if cell else ""
 
             # Extract the title from the edition link.
             title = ""
-            first_cell = cells[0]
+            edition_link = None
+            first_cell = get_cell(0)
 
             # The first cell is a bit messy
-            for link in first_cell.find_all("a", href=True):
-                if "edition.php" in link["href"]:
-                    text = link.get_text(" ", strip=True)
+            if first_cell:
+                for link in first_cell.find_all("a", href=True):
+                    if "edition.php" in link["href"]:
+                        text = link.get_text(" ", strip=True)
+                        edition_link = link.get("href")
 
-                    if text and not text.startswith("DOI:"):
-                        title = text
-                        if not any(char.isdigit() for char in text) or len(text) > 20:
-                            break
+                        if text and not text.startswith("DOI:"):
+                            title = text
+                            if not any(char.isdigit() for char in text) or len(text) > 20:
+                                break
 
-            edition_links = first_cell.select('a[href*="edition.php"]')
+            edition_links = (
+                first_cell.select('a[href*="edition.php"]')
+                if first_cell
+                else []
+            )
             candidates = [
                 a.get_text(" ", strip=True)
                 for a in edition_links
@@ -114,35 +129,42 @@ class LibgenProvider(Provider):
             if candidates:
                 title = candidates[1] if len(candidates) > 1 else candidates[0]
 
-            author = cells[1].get_text(" ", strip=True)
-            publisher = cells[2].get_text(" ", strip=True)
+            author = cell_text(1)
+            publisher = cell_text(2)
 
-            year_text = cells[3].get_text(" ", strip=True)
+            year_text = cell_text(3)
             year = year_text[:4] if year_text[:4].isdigit() else ""
 
-            language = cells[4].get_text(" ", strip=True)
-            ext = cells[7].get_text(" ", strip=True)
+            language = cell_text(4)
+            ext = cell_text(7)
+            size = cell_text(6)
 
-            size_cell = cells[6]
-            size = size_cell.get_text(" ", strip=True)
-
-            mirrors_cell = cells[8]
+            mirrors_cell = get_cell(8)
             mirrors = []
 
+            if mirrors_cell:
+                for link in mirrors_cell.find_all("a", href=True):
+                    name = link.get_text(" ", strip=True)
+                    href = link["href"]
+                    if href.startswith("/"):
+                        logger.debug(href)
+                    if href.startswith(("/ads.php", "/index.php", "/get.php")):
+                        href = urljoin(base_url, href)
 
-            for link in mirrors_cell.find_all("a", href=True):
-                name = link.get_text(" ", strip=True)
-                href = link["href"]
-                if href.startswith("/"):
-                    logger.debug(href)
-                if href.startswith(("/ads.php", "/index.php")):
-                    href = urljoin(base_url, href)
+                    mirrors.append({
+                        "name": name,
+                        "type": "landing_url",
+                        "href": href,
+                    })
 
+            if edition_link:
+                edition_link = urljoin(base_url, edition_link)
                 mirrors.append({
-                    "name": name,
+                    "name": "",
                     "type": "landing_url",
-                    "href": href,
+                    "href": edition_link,
                 })
+
 
             records.append({
                 "title": title,
