@@ -1,17 +1,17 @@
+import hashlib
 import json
 import logging
 import uuid
-
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from threading import Thread
-from typing import List
+from typing import List  # noqa: UP035
 
 from app.api.v2_0.request import SearchRequest
 from app.core.search import search
-from app.core.providers.base_provider import ProviderResults
-
 
 logger = logging.getLogger(__name__)
+
+SEARCH_CACHE_TTL = 3600
 
 
 @dataclass
@@ -82,6 +82,24 @@ def run_search_job(redis, providers, job_id: str, request: SearchRequest):
 
 def start_search_job(redis, providers, request: SearchRequest) -> str:
 
+    query_data = request.model_dump(mode="json")
+    query_data["providers"] = sorted(provider.code_name for provider in providers)
+    # caching query key
+    query_key = "search:query:" + hashlib.sha256(
+        json.dumps(
+            query_data,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+
+    # check if job exists
+    existing_job_id = redis.get(query_key)
+    if existing_job_id:
+        existing_job = get_search_job(redis, existing_job_id)
+        if existing_job and existing_job.status in {"running", "done"}:
+            return existing_job_id
+
     job_id = str(uuid.uuid4())
     key = f"search:{job_id}"
 
@@ -90,6 +108,7 @@ def start_search_job(redis, providers, request: SearchRequest) -> str:
         "providers_total": len(providers),
         "providers_completed": json.dumps([]),
     })
+    redis.set(query_key, job_id, ex=SEARCH_CACHE_TTL)
 
     Thread(
         target=run_search_job,
