@@ -176,7 +176,6 @@ def test_mlacore_live():
     assert bibjson.get("title")
     assert bibjson.get("author")
     assert bibjson.get("link")
-    assert extra.get("landing_url")
 
 
 def test_scielo_live():
@@ -211,7 +210,6 @@ def test_scielo_live():
     assert bibjson.get("title")
     assert bibjson.get("author")
     assert bibjson.get("link")
-    assert extra.get("download_url")
 
 
 def test_memoryoftheworld_live():

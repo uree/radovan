@@ -1,10 +1,10 @@
 import logging
-import requests
 
+import requests
 
 logger = logging.getLogger(__name__)
 
-# TO DO: do i need this?
+
 def fetch_provider(provider, url, headers, request_timeout=5, format="json"):
     """General fetch function. The provider parameter is just for logging.
     """
