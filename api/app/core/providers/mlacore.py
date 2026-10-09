@@ -35,12 +35,12 @@ class MLACOREProvider(Provider):
             logger.debug(r.status_code)
         except Exception as e:
             logger.debug(e)
-            return []
+            return [], query
 
         results = r.json()
         logger.debug(results)
         if not results:
-            return []
+            return [], query
 
         normalized = [self._normalize_item(item) for item in results["hits"]["hits"]]
         return normalized, query
