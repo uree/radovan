@@ -3,14 +3,9 @@ from pydantic import ValidationError
 
 from app.api.v2_0.request import SearchRequest
 from app.api.v2_0.responses import ApiResponse, respond
-from app.api.v2_0.test_htmx_templates import (
-    SEARCH_JOB_HTML,
-    SEARCH_PAGE_HTML,
-    SEARCH_STARTED_HTML,
-)
 from app.core.search_service import get_search_job, start_search_job
 
-api_2_0 = Blueprint("api_2_0", __name__)
+api_2_0 = Blueprint("api_2_0", __name__, template_folder="templates")
 
 
 @api_2_0.route("/", methods=["GET"])
@@ -24,7 +19,7 @@ def hello_world():
 @api_2_0.route("/search-page", methods=["GET"])
 def search_page():
     response = ApiResponse()
-    return respond(response, page_template=SEARCH_PAGE_HTML)
+    return respond(response, page_template="search_page.html")
 
 
 @api_2_0.route("/search", methods=["GET"])
@@ -68,7 +63,7 @@ def search_endpoint():
 
     return respond(
         data=response,
-        page_template=SEARCH_STARTED_HTML,
+        page_template="search_started.html",
         job_id=job_id,
         providers=response.data["providers"],
     )
@@ -86,11 +81,11 @@ def search_status(job_id):
             error="",
             data=None
         )
-        return respond(response, page_template=SEARCH_JOB_HTML, job=None), 404
+        return respond(response, page_template="search_job.html", job=None), 404
 
     return respond(
         ApiResponse(message="OK", data=job),
-        page_template=SEARCH_JOB_HTML,
+        page_template="search_job.html",
         job=job
     )
 

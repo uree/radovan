@@ -1,0 +1,33 @@
+{% if not job %}
+<div class="panel"><p>Job not found.</p></div>
+{% elif job.status == "done" %}
+<div class="panel">
+  <h2>Search complete</h2>
+  {% if job.results %}
+    {% for provider_name, provider_results in job.results.items() %}
+      <h3>{{ provider_name }}</h3>
+      {% for result in provider_results["items"] %}
+        {% set meta = result["bibjson"][0] if result["bibjson"] else {} %}
+        {% set extra = result["extra"][0] if result["extra"] else {} %}
+        <div style="margin: 0 0 1rem 0; padding: 0.75rem; border-top: 1px solid #e5e5e5;">
+          <div><strong>{{ meta.title or "Untitled" }}</strong></div>
+          <div>{% if meta.author %}{% for author in meta.author %}{{ author.name }}{{ ", " if not loop.last }}{% endfor %}{% else %}<span class="muted">No authors listed</span>{% endif %}</div>
+          <div>{{ meta.year or "" }}</div>
+          <div>{{ extra.source or provider_name }}</div>
+          {% if meta.link %}<div>{% for link in meta.link %}<a href="{{ link.href }}" target="_blank" rel="noopener">{{ link.name or link.href }}</a>{{ " " if not loop.last }}{% endfor %}</div>{% endif %}
+        </div>
+      {% endfor %}
+    {% endfor %}
+  {% else %}<p>No results found.</p>{% endif %}
+</div>
+<div class="panel"><pre>{{ job | tojson(indent=2) }}</pre></div>
+{% elif job.status == "error" %}
+<div class="panel"><h2>Search error</h2><p>The search job failed.</p></div>
+{% else %}
+<div class="panel" hx-get="/api/v2.0/search-job/{{ job.id }}" hx-trigger="load, every 2s" hx-swap="outerHTML">
+  <h2>Search running</h2>
+  <p>Job id: <code>{{ job.id }}</code></p>
+  <p>Providers completed: {{ job.providers_completed|length }} / {{ job.providers_total }}</p>
+  <p class="muted">Polling for updates...</p>
+</div>
+{% endif %}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Radovan API search</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+      label { display: block; margin-top: 0.75rem; }
+      input { width: 100%; padding: 0.5rem; box-sizing: border-box; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .actions { margin-top: 1rem; }
+      .panel { margin-top: 1.5rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; }
+      .muted { color: #666; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+    </style>
+  </head>
+  <body>
+    <h1>Radovan search</h1>
+    <p class="muted">This page uses htmx to call <code>/api/v2.0/search</code> and then polls <code>/api/v2.0/search-job/&lt;job_id&gt;</code>.</p>
+    <form hx-get="/api/v2.0/search" hx-target="#search-response" hx-swap="innerHTML">
+      <div class="row">
+        <label>Author<input type="text" name="author"></label>
+        <label>Title<input type="text" name="title"></label>
+      </div>
+      <div class="row">
+        <label>Year<input type="text" name="year"></label>
+        <label>ISBN<input type="text" name="isbn"></label>
+      </div>
+      <div class="row">
+        <label>DOI<input type="text" name="doi"></label>
+        <label>Sources<input type="text" name="sources" placeholder="e.g. 1 2 3"></label>
+      </div>
+      <div class="actions"><button type="submit">Search</button></div>
+    </form>
+    <div id="search-response" class="panel"><p class="muted">Submit a query to start a search job.</p></div>
+  </body>
+</html>
