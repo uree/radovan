@@ -36,10 +36,10 @@ class MOTWProvider(Provider):
             r = requests.get(query, verify=False, timeout=request.request_timeout) # ssl
             results = r.json()["_items"]
         except requests.exceptions.SSLError:
-            return []
+            return [], query
         except Exception as e:
             logger.debug(e)
-            return []
+            return [], query
 
         normalized = [
             self._normalize_item(item)
