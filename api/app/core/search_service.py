@@ -22,6 +22,17 @@ class SearchJob:
     # hits: List[dict] = field(default_factory=list)
     results: list[dict] = field(default_factory=list)
 
+    @property
+    def total_results(self) -> int:
+        """Return the number of individual results across all providers."""
+        if not isinstance(self.results, dict):
+            return 0
+
+        return sum(
+            len(provider_results.get("items", []))
+            for provider_results in self.results.values()
+        )
+
     def to_dict(self):
         return asdict(self)
     

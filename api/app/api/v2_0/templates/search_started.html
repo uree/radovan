@@ -1,6 +1,5 @@
-<div class="panel" hx-get="/api/v2.0/search-job/{{ job_id }}" hx-trigger="load" hx-swap="outerHTML">
+<section data-search-status="started" data-job-id="{{ job_id }}">
   <h2>Search started</h2>
   <p>Job id: <code>{{ job_id }}</code></p>
-  <p>Providers: {{ providers|join(', ') }}</p>
-  <p class="muted">Loading job status...</p>
-</div>
+  <p data-providers>{{ providers|join(', ') }}</p>
+</section>

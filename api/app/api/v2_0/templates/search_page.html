@@ -35,5 +35,32 @@
       <div class="actions"><button type="submit">Search</button></div>
     </form>
     <div id="search-response" class="panel"><p class="muted">Submit a query to start a search job.</p></div>
+    <script>
+      document.body.addEventListener('htmx:afterSwap', (event) => {
+        const response = event.target.closest('#search-response');
+        if (!response) return;
+
+        const status = response.querySelector('[data-search-status]');
+        if (!status || !['started', 'running'].includes(status.dataset.searchStatus)) return;
+
+        const jobUrl = `/api/v2.0/search-job/${status.dataset.jobId}`;
+        if (response.getAttribute('hx-get') !== jobUrl) {
+          response.setAttribute('hx-get', jobUrl);
+          response.setAttribute('hx-trigger', 'load, every 2s');
+          response.setAttribute('hx-target', '#search-response');
+          response.setAttribute('hx-swap', 'innerHTML');
+          htmx.process(response);
+        }
+      });
+
+      document.body.addEventListener('htmx:beforeRequest', (event) => {
+        if (event.target.id !== 'search-response') return;
+
+        const status = event.target.querySelector('[data-search-status]');
+        if (status && !['started', 'running'].includes(status.dataset.searchStatus)) {
+          event.preventDefault();
+        }
+      });
+    </script>
   </body>
 </html>
