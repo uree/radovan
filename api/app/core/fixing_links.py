@@ -81,8 +81,4 @@ def standardize_links(source, data, keep=False):
     else:
         pass
 
-    if keep == True:
-        # tell them to save info in name?
-        print("keep")
-
     return data

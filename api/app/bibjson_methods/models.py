@@ -1,3 +1,5 @@
+import json
+import logging
 from dataclasses import dataclass, asdict
 # from typing import Optional, List
 
@@ -5,6 +7,8 @@ from .methods import process_hit
 from .settings import bibjson_aliases, extra_aliases, types
 from .utils import flatten_dict_values
 
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class BibRecord:
@@ -14,8 +18,7 @@ class BibRecord:
     # TO DO (in the future)
     # better = cannonical representation (much more refactoring)
     # sketch at the bottom of the file
-    # & then when converting to bibjson
-    # split into bibjson & extra
+    # & then offer lossy conversion to bib formats
 
 
     @classmethod
@@ -27,6 +30,13 @@ class BibRecord:
         bibjson_aliases=bibjson_aliases,
         types=types,
     ):
+        # use this do debug incoming data
+        # logger.debug(json.dumps(hit_data))
+        # return cls(
+        #     bibjson = {},
+        #     extra = {}
+
+        # )
         extra_aliases_flat = flatten_dict_values(extra_aliases)
         bibjson_aliases_flat = flatten_dict_values(bibjson_aliases)
         hit = process_hit(
