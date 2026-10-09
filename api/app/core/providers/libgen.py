@@ -1,13 +1,13 @@
 import logging
 from typing import Iterable  # noqa: UP035
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urljoin
 
 from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
 from app.api.v2_0.request import SearchRequest
 
 from .base_provider import Provider, ProviderResults
-from .utils import fetch_provider
 
 logger = logging.getLogger(__name__)
 
@@ -30,49 +30,36 @@ class LibgenProvider(Provider):
         return ProviderResults(items=results, query=query)
 
     def _fetch(self, request: SearchRequest) -> tuple:
-        api_urls = []
         results = []
         query_url = self._build_query(request)
         logger.debug(query_url)
 
-        if request.doi or request.isbn:
-            api_urls.append(query_url)
-        else:
-            html = fetch_provider(
-                self.config.code_name,  # TO DO: why keep using this name?
-                query_url,
-                None,
-                request_timeout=request.request_timeout,
-                format="text"
-            )
+        with sync_playwright() as p:
+            try:
+                browser = p.firefox.launch(headless=True)
+                page = browser.new_page(
+                    user_agent=(
+                        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:151.0) "
+                        "Gecko/20100101 Firefox/151.0"
+                    )
+                )
+                page.goto(query_url, wait_until="networkidle")
+                html = page.content()
+                # logger.debug(html)
+                browser.close()
+            except Exception as e:  # noqa: BLE001
+                logger.debug(e)
         
-            # list of urls to fetch json from 
-            api_urls = self._parse_html(html)
-
-        logger.debug("This is what we're calling next.")
-        logger.debug(api_urls)
-
-        for url in api_urls[:request.hit_limit]:
-            item = fetch_provider(
-                self.config.code_name,
-                url,
-                {"Connection": "close"},
-                request_timeout=request.request_timeout,
-                format="json"
-            )
-            logger.debug(item)
-            normalized = self._normalize_item(item)
-            logger.debug(normalized)
-            if normalized:
-                results.append(normalized)
+        results = self._parse_html(html, self.config.url)
+        # logger.debug(json.dumps(results, indent=2))
 
         return results, query_url
 
     def _build_query(self, request: SearchRequest) -> str:
         if request.doi:
-            return f"{self.config.url}/json.php?object=e&doi={request.doi}"
+            search_terms = request.doi
         elif request.isbn:
-            return f"{self.config.url}/json.php?object=e&isbn={request.isbn}"
+            search_terms = request.isbn
         else:   
             search_terms = " ".join(
                 part
@@ -83,46 +70,89 @@ class LibgenProvider(Provider):
                 ]
                 if part
             )
-            return f"{self.config.query_url}?req={quote_plus(search_terms)}&res={request.hit_limit}"
+        
+        return f"{self.config.query_url}?req={quote_plus(search_terms)}&res={request.hit_limit}"
 
-    def _normalize_item(self, result) -> dict | None:
-        """In this case add some information to the json object."""
-        item = next(iter(result.values()), {})
-        file_info = next(iter(item.get("files", {}).values()), {})
-        logger.debug(file_info)  # there are multiple files available, sometimes
-        md5 = file_info.get("md5", "")
-        logger.debug(md5)
+    def _normalize_item(self, result):
+        ...
 
-        # questionable https://libgen.vg/covers/2427000/e9eb910558caac2cd58a6cad4dcb9cb9.jpg
-        libgen_id = item.get("libgen_id", "")
-        logger.debug(libgen_id)
-        if not item["cover_url"]:
-            item["cover_url"] = f"{self.config.url}/covers/{libgen_id[:4] + "000"}.jpg" if libgen_id else ""
-        # TO DO: download url does not end up in api response and is not really a download link (= landing url libgen download)
-        item["download_url"] = f"{self.config.url}/ads.php?md5={md5}" if md5 else ""
-        item["landing_url"] = f"{self.config.url}/file.php?md5={md5}" if md5 else ""
+    def _parse_html(self, html: str, base_url: str = "") -> list[dict]:
+        soup = BeautifulSoup(html, "html.parser")
+        records = []
+        
+        # First row contains pagination
+        for row in soup.select("#tablelibgen tbody tr"):
+            cells = row.find_all("td", recursive=False)
 
-        return item
-    
-    def _parse_html(self, html: str) -> list:
-        """Extract ids from html and return API compatible urls based on said ids."""
-        api_urls = []
-        soup = BeautifulSoup(html, "lxml")
+            # Hmm doi queries have "shorter" tables
+            # Skip malformed rows
+            if len(cells) < 9:
+                continue
 
-        get_tags = soup.select('a[href*="edition.php?id"]')
+            # Extract the title from the edition link.
+            title = ""
+            first_cell = cells[0]
 
-        ids = {
-            href.split("id=")[-1]
-            for tag in get_tags
-            if (href := tag.get("href"))
-        }
-        # walrtus operator does this
-        # href = tag.get("href")
-        # if href is not None and href != "":
+            # The first cell is a bit messy
+            for link in first_cell.find_all("a", href=True):
+                if "edition.php" in link["href"]:
+                    text = link.get_text(" ", strip=True)
 
-        api_urls = [
-            f"{self.config.url}/json.php?object=e&ids={id_}&fields=*&addkeys=*"
-            for id_ in ids
-        ]
+                    if text and not text.startswith("DOI:"):
+                        title = text
+                        if not any(char.isdigit() for char in text) or len(text) > 20:
+                            break
 
-        return api_urls
+            edition_links = first_cell.select('a[href*="edition.php"]')
+            candidates = [
+                a.get_text(" ", strip=True)
+                for a in edition_links
+                if a.get_text(" ", strip=True)
+                and not a.get_text(" ", strip=True).startswith("DOI:")
+            ]
+
+            if candidates:
+                title = candidates[1] if len(candidates) > 1 else candidates[0]
+
+            author = cells[1].get_text(" ", strip=True)
+            publisher = cells[2].get_text(" ", strip=True)
+
+            year_text = cells[3].get_text(" ", strip=True)
+            year = year_text[:4] if year_text[:4].isdigit() else ""
+
+            language = cells[4].get_text(" ", strip=True)
+            ext = cells[7].get_text(" ", strip=True)
+
+            size_cell = cells[6]
+            size = size_cell.get_text(" ", strip=True)
+
+            mirrors_cell = cells[8]
+            mirrors = []
+
+
+            for link in mirrors_cell.find_all("a", href=True):
+                name = link.get_text(" ", strip=True)
+                href = link["href"]
+                if href.startswith("/"):
+                    logger.debug(href)
+                if href.startswith(("/ads.php", "/index.php")):
+                    href = urljoin(base_url, href)
+
+                mirrors.append({
+                    "name": name,
+                    "type": "landing_url",
+                    "href": href,
+                })
+
+            records.append({
+                "title": title,
+                "author": author,
+                "publisher": publisher,
+                "year": year,
+                "language": language,
+                "ext": ext,
+                "size": size,
+                "links": mirrors,
+            })
+
+        return records

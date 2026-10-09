@@ -118,8 +118,8 @@ def test_libgen_live():
             id=1,
             code_name="libgen",
             full_name="Library Genesis",
-            url="https://libgen.vg",
-            query_url="https://libgen.vg/index.php",
+            url="https://libgen.li",
+            query_url="https://libgen.li/index.php",
             supported_params=["author", "title", "year", "doi", "isbn"],
         )
     )
