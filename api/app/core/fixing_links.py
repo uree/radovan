@@ -30,15 +30,17 @@ def standardize_links(source, data, keep=False):
 
     if standard_type[source]['test'] == 'type':
         if data['type'] in standard_type[source]['download_aliases']:
-            data['type'] = "download_url"
-            data['name'] = "download"
+            data['type'] = "direct_download"
+            data['name'] = "direct download"
         elif data['type'] in standard_type[source]['landing_aliases']:
-            data['type'] = "landing_url"
+            data['type'] = "landing_page"
+            data['name'] = "landing page"
         elif data['type'] in standard_type[source]['open_aliases']:
-            data['type'] = "open_url"
-            data['name'] = "open"
+            data['type'] = "full_text"
+            data['name'] = "full text"
         else:
-            data['type'] = "other_url"
+            data['type'] = "unknown"
+            data['name'] = "unknown"
 
         # not all links are hrefs
         try:
@@ -51,24 +53,24 @@ def standardize_links(source, data, keep=False):
 
     elif standard_type[source]['test'] == 'format':
         if data['format'] == 'pdf':
-            data['type'] = 'open_url'
-            data['name'] = 'open'
+            data['type'] = 'full_text'
+            data['name'] = 'full text'
         else:
-            data['type'] = 'download_url'
-            data['name'] = 'download'
+            data['type'] = 'direct_download'
+            data['name'] = 'direct download'
 
     elif standard_type[source]['test'] == 'url':
         try:
             if data['type'] == 'landing_url':
-                data['type'] = "landing_url"
-                data['name'] = "landing"
+                data['type'] = "landing_page"
+                data['name'] = "landing page"
         except:
             if data['url'].endswith('pdf'):
-                data['type'] = "open_url"
-                data['name'] = "open"
+                data['type'] = "full_text"
+                data['name'] = "full text"
             else:
-                data['type'] = "download_url"
-                data['name'] = "download"
+                data['type'] = "direct_download"
+                data['name'] = "direct download"
 
         # not all links are hrefs
         try:

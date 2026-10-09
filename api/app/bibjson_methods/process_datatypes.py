@@ -113,17 +113,17 @@ def process_links(fielddata, source):
             for k, v in fielddata.items():
                 tmp = {}
                 if k == 'url_for_pdf':
-                    tmp['type'] = 'open_url'
+                    tmp['type'] = 'full_text'
                     tmp['href'] = v
-                    tmp['name'] = 'open'
+                    tmp['name'] = 'full text'
                 elif k == 'url_for_landing_page':
-                    tmp['type'] = 'landing_url'
+                    tmp['type'] = 'landing_page'
                     tmp['href'] = v
-                    tmp['name'] = 'landing'
+                    tmp['name'] = 'landing page'
                 elif k == 'url':
-                    tmp['type'] = 'open_url'
+                    tmp['type'] = 'full_text'
                     tmp['href'] = v
-                    tmp['name'] = 'open'
+                    tmp['name'] = 'full text'
                 if tmp:
                     output.append(tmp)
         else:
@@ -131,16 +131,16 @@ def process_links(fielddata, source):
     else:  # if it's not list or dict then it is a string (most likely)
         link = {'name': 'unknown', 'type': 'unknown', 'href': ''}
         if source == 'scielo':
-            link['type'] = 'landing_url'
+            link['type'] = 'landing_page'
             link['name'] = 'landing page'
             link['href'] = fielddata
             output.append(link)
         elif source in ['doab', 'oapen']:
             if fielddata.endswith(('.pdf', '.epub')):
-                link['type'] = 'download_url'
+                link['type'] = 'direct_download'
                 link['name'] = 'direct download'
             else:
-                link['type'] = 'landing_url'
+                link['type'] = 'landing_page'
                 link['name'] = 'landing page'
             link['href'] = fielddata
             output.append(link)
