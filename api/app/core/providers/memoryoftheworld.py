@@ -28,7 +28,7 @@ class MOTWProvider(Provider):
         logger.debug(results)
         return ProviderResults(items=results, query=query)
 
-    def _fetch(self, request: SearchRequest) -> List[dict]:
+    def _fetch(self, request: SearchRequest) -> tuple:
         query = self._build_query(request)
         logger.debug(query)
 
