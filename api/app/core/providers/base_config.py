@@ -26,7 +26,7 @@ provider_dict = [
         "id": 0,
         "query_url": "https://directory.doabooks.org/rest/search?query=",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
         "supported_params": DEFAULT_SUPPORTED_PARAMETES,
     },
     {
@@ -36,7 +36,7 @@ provider_dict = [
         "id": 1,
         "query_url": "https://library.oapen.org/rest/search?query=",
         "selected": 1,
-        "enabled": 1,
+        "enabled": 0,
         "supported_params": DEFAULT_SUPPORTED_PARAMETES,
     },
     {

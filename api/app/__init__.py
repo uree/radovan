@@ -18,6 +18,9 @@ def create_app(config_class=Config):
     from app.api import register_api_blueprints
     register_api_blueprints(app)
 
+    from app.web import web_bp
+    app.register_blueprint(web_bp, url_prefix="/")
+
     configs = load_configs()
     app.extensions["providers"] = [
         PROVIDERS[cfg.code_name](cfg, secrets=app.config) for cfg in configs if cfg.enabled

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-layout">
+  <aside class="search-panel" aria-labelledby="search-heading">
+    <p class="eyebrow">query</p>
+    <form class="search-form" action="{{ url_for('web.search_page') }}" method="get">
+      <label for="title">Title</label><input id="title" name="title" type="search" placeholder="e.g. Cyborg"
+        autocomplete="off">
+      <label for="author">Author</label><input id="author" name="author" type="text" placeholder="e.g. Donna Haraway"
+        autocomplete="off">
+      <div class="form-row">
+        <div><label for="year">Year</label><input id="year" name="year" type="text" inputmode="numeric"
+            placeholder="2024"></div>
+        <div><label for="doi">DOI</label><input id="doi" name="doi" type="text" placeholder="10.xxxx/..."></div>
+      </div>
+      <label for="isbn">ISBN</label><input id="isbn" name="isbn" type="text" placeholder="978...">
+      <fieldset class="source-options">
+        <legend>Sources</legend>
+        {% set all_selected = selected_sources|length == providers|length %}
+        <label class="check-row" for="all-sources"><input id="all-sources" type="checkbox" {% if all_selected
+            %}checked{% endif %}><span>All available sources</span></label>
+        <div class="source-list">
+          {% for provider in providers %}
+          <label class="check-row" for="source-{{ provider.id }}"><input id="source-{{ provider.id }}" name="sources"
+              value="{{ provider.id }}" type="checkbox" {% if provider.id in selected_sources %}checked{% endif
+              %}><span>{{ provider.name }}</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <button class="search-button" type="submit"><span>Submit query</span><span aria-hidden="true">→</span></button>
+    </form>
+  </aside>
+
+  <section class="results-panel" aria-labelledby="results-heading">
+    <div class="results-header">
+      <div>
+        <p class="eyebrow">Results</p>
+      </div><span class="result-count">0 hits</span>
+    </div>
+    <div class="empty-results">
+      <div class="empty-symbol" aria-hidden="true">?</div>
+      <p>Radovan searches across open-access sources. It usually takes them around 10s.</p>
+    </div>
+  </section>
+</div>
+<script>
+  const allSources = document.querySelector('#all-sources');
+  const sourceInputs = [...document.querySelectorAll('.source-list input[name="sources"]')];
+  allSources?.addEventListener('change', () => sourceInputs.forEach((input) => { input.checked = allSources.checked; }));
+  sourceInputs.forEach((input) => input.addEventListener('change', () => { allSources.checked = sourceInputs.every((source) => source.checked); }));
+</script>
+{% endblock %}
