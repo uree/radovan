@@ -20,18 +20,8 @@ class SearchJob:
     providers_total: int = 0
     providers_completed: list[str] = field(default_factory=list)
     # hits: List[dict] = field(default_factory=list)
-    results: list[dict] = field(default_factory=list)
-
-    @property
-    def total_results(self) -> int:
-        """Return the number of individual results across all providers."""
-        if not isinstance(self.results, dict):
-            return 0
-
-        return sum(
-            len(provider_results.get("items", []))
-            for provider_results in self.results.values()
-        )
+    results: dict = field(default_factory=dict)
+    total_results: int = 0
 
     def to_dict(self):
         return asdict(self)
@@ -39,12 +29,20 @@ class SearchJob:
     @staticmethod
     def from_redis(job_id: str, data: dict):
         # logger.debug(data)
+        results = json.loads(data.get("results", "{}"))
+        total_results = sum(
+            len(provider_results.get("items", []))
+            for provider_results in results.values()
+            if isinstance(provider_results, dict)
+        ) if isinstance(results, dict) else 0
+
         return SearchJob(
             id=job_id,
             status=data.get("status", "running"),
             providers_total=int(data.get("providers_total", 0)),
             providers_completed=json.loads(data.get("providers_completed", "[]")),
-            results=json.loads(data.get("results", "[]")),
+            results=results,
+            total_results=total_results,
         )
 
 

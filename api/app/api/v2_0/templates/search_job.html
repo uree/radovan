@@ -4,8 +4,7 @@
 </section>
 {% elif job.status == "done" %}
 <section data-search-status="complete">
-  <h2>Search complete</h2>
-  <p data-result-count>{{ job.total_results }} results</p>
+  <span id="result-count" hx-swap-oob="true">{{ total_results }} hits</span>
   {% if job.results %}
     <nav data-provider-filters aria-label="Filter results by provider">
       <button type="button" data-provider-filter="all" aria-pressed="true">All</button>

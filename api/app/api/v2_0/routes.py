@@ -86,7 +86,8 @@ def search_status(job_id):
     return respond(
         ApiResponse(message="OK", data=job),
         page_template="search_job.html",
-        job=job
+        job=job,
+        total_results=job.total_results,
     )
 
 
