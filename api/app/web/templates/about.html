@@ -1,3 +1,80 @@
 {% extends "base.html" %}
 
-{% block content %}{% endblock %}
+{% block content %}
+<section class="about-panel">
+      <article class="about-content">
+          <h2>? radovan</h2>
+          <p>Radovan is a meta search engine for books and articles, focused on open-access scientific literature.</p>
+          <p>The results inherit the order in which they are displayed at the source (original page or api) and are grouped per provider.</p>
+          <p>Ideally, as much metadata as possible is preserved from the origins, but that is not always possible. Not all sources provide the same quantity/quality of metadata. In the end the priority is to get links, get texts, get reading.</p>
+
+          <p>Link classification is only somewhat reliable atm. In theory
+            <ul>
+              <li><u>full text</u> links should trigger a direct download of a pdf, epub file or take you to a website with a full accessible html version;</li>
+              <li><u>landing page</u> links should take you to a page where you can find links to the source, along with a metadata;</li>
+              <li><u>unknowns</u> are known to be unknown.</li>
+            </ul>
+          </p>
+
+          <p>In the top right corner of each provider block there is a userful url, which you can use to inspect the results of your query directly on a providers website.</p>
+
+          <h2>? api</h2>
+          <p>Radovan has a simple api, now at version 2.0. Better documentation is still on the way.</p>
+
+          <p>Search is executed in two steps. A <code>GET</code> request to the search endpoint starts a search job and returns the job id. You can then use this <code>job_id</code> to poll the search_status endpoint, which either returns the current status of the job or the aggregated results in <code>json</code> or <code>html</code> (default).</p>
+
+          <h3>trigger search</h3>
+          <div class="about-subsection">
+              <p>endpoint: <br> <code>/api/search</code></p>
+
+              <p>query parameters: <br> <code>author, title, year, isbn, doi, sources, format, request_timeout</code></p>
+              <p>sample query: <br> <code>/api/search?author=haraway&title=cyborg&year=&isbn=&doi=&sources=0&sources=1&sources=3&format=json&request_timeout=15</code></p>
+          </div>
+          <h3>pool results</h3>
+          <div class="about-subsection">
+              <p>endpoint: <br> <code>/api/search-job</code></p>
+
+              <p>path parameters: <br> <code>job_id</code></p>
+              <p>query parameters: <br> <code>format</code></p>
+              <p>sample query: <br> <code>/api/search_job/<job_id>?format=html</code></p>
+          </div>
+          <h3>get providers</h3>
+          <div class="about-subsection">
+            <p>You can query the api to get a dictionary of current sources and their ids: <br> <code>/api/sources</code></p>
+          </div>
+
+          <h2>? code</h2>
+          <p>The code is hosted on <a href="#">codeberg</a>.</p>
+          <p>It's easy to get your own instance up and running with docker compose. It's licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a>.</p>
+
+          <h2>? issues</h2>
+          <p>Radovan is a relatively stable individual, but they've been through a lot of changes recently, so issues are to be expected. Report them <a href="#">here</a>.</p>
+          <p>The queries should take no longer than 10 seconds. If they do something has gone wrong. Some providers are much slower than others.</p>
+
+          <h2>? more sources</h2>
+          <p>Suggest more sources to be added <a href="#" target="_blank">here</a>. The more diverse the better.</p>
+
+          <h2>? roadmap</h2>
+          <p>Further development is planned, aside from adding more providers:
+            <ul>
+              <li>improve link classification;</li>
+              <li>improve metadata parsing and add export options;</li>
+              <li>possibly return results as they come in;</li>
+              <li>provider uptime motintoring.</li>
+            </ul>
+          </p>
+
+          <h2>? privacy</h2>
+          <p>The server logs anonymised IPs to count trafic. Errors are logged without using and identifiable information.</p>
+
+          <h2>? attribution</h2>
+          <p>Radovan is a character from a <a href="http://www.ljudmila.org/stripcore/minimundus/obisk/obisk.htm">comic book</a> created by <a href="https://en.wikipedia.org/wiki/Matja%C5%BE_Schmidt">Matjaž Schmidt</a> in the 1980s. In that story Radovan from planet <i>Beta</i> is a researcher from outer space interested in - out of all things and creatures - Earthlings.</p>
+          <p>On his visit back in the day he was appaled by our attitude towards the environment, which he desparately tried to adjust. You can see how that is going.</p>
+          <p>His first thought was that maybe we just lack the right information. So he tried to have a look at out research outputs, but couldn't even get access to it. Everything was paywalled or in a bzillion different places.</p>
+          <p>So he called on his distant cousin Radovan from planet <i>Meta</i> to sort this mess out. It only took him 40 years to come over. Distant cousin indeed.</p>
+
+          <p>The project was made possible by Coventry University, in particular the <a href="https://www.coventry.ac.uk/research/areas-of-research/postdigital-cultures/about-us/">Centre for Post-Digital Cultures</a>.</p>
+          <p>It is now supported and hosted by <a href="https://mirovni-institut.si">The Peace Institute</a>.</p>
+      </article>
+</section>
+{% endblock %}

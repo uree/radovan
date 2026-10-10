@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app, make_response, request, url_for
 from pydantic import ValidationError
 
 from app.api.v2_0.request import SearchRequest
@@ -61,12 +61,21 @@ def search_endpoint():
         response.message = f"Some of the providers you selected are disabled at the moment: {unavailable}. The search was executed with those from you selection which are enabled."
     current_app.logger.debug(response.to_dict())
 
-    return respond(
+    # i don't like how convoluted this is
+    result = make_response(respond(
         data=response,
         page_template="search_started.html",
         job_id=job_id,
         providers=response.data["providers"],
-    )
+    ))
+
+    if request.headers.get("HX-Request") and request.args.get("format") != "json":
+        push_url = url_for("web.search_page")
+        if request.query_string:
+            push_url = f"{push_url}?{request.query_string.decode()}"
+        result.headers["HX-Push-Url"] = push_url
+
+    return result
 
 
 @api_2_0.route("/search-job/<job_id>", methods=["GET"])
@@ -82,7 +91,7 @@ def search_status(job_id):
             data=None
         )
         return respond(response, page_template="search_job.html", job=None), 404
-
+    # reads format arg from flask's current request
     return respond(
         ApiResponse(message="OK", data=job),
         page_template="search_job.html",
