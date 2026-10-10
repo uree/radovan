@@ -1,26 +1,30 @@
-<article data-result data-provider="{{ provider_name }}">
-  <header>
-    <h4>{{ meta.title or "Untitled" }}</h4>
-  </header>
+<article data-result data-provider="{{ provider_name }}"{% if extra.coverurl %} data-has-cover{% endif %}>
   {% if extra.coverurl %}
-    <img data-cover src="{{ extra.coverurl }}" alt="{{ meta.title or '' }}" loading="lazy">
+    <div data-cover-container>
+      <img data-cover src="{{ extra.coverurl }}" alt="{{ meta.title or '' }}" loading="lazy">
+    </div>
   {% endif %}
-  <div data-authors>
-    {% if meta.author %}
-      {% for author in meta.author %}
-        {{ author.name }}{{ ", " if not loop.last }}
-      {% endfor %}
-    {% else %}
-      <span data-empty="authors">No authors listed</span>
+  <div data-result-content>
+    <header>
+      <h4>{{ meta.title or "Untitled" }}</h4>
+    </header>
+    <div data-authors>
+      {% if meta.author %}
+        {% for author in meta.author %}
+          {{ author.name }}{{ ", " if not loop.last }}
+        {% endfor %}
+      {% else %}
+        <span data-empty="authors">No authors listed</span>
+      {% endif %}
+    </div>
+    {% if meta.year %}<div data-year>{{ meta.year }}</div>{% endif %}
+    <div data-source>{{ extra.source or provider_name }}</div>
+    {% if meta.link %}
+      <nav data-links aria-label="Result links">
+        {% for link in meta.link %}
+          <a href="{{ link.href }}" target="_blank" rel="noopener">{{ link.name or link.href }}</a>{{ " " if not loop.last }}
+        {% endfor %}
+      </nav>
     {% endif %}
   </div>
-  {% if meta.year %}<div data-year>{{ meta.year }}</div>{% endif %}
-  <div data-source>{{ extra.source or provider_name }}</div>
-  {% if meta.link %}
-    <nav data-links aria-label="Result links">
-      {% for link in meta.link %}
-        <a href="{{ link.href }}" target="_blank" rel="noopener">{{ link.name or link.href }}</a>{{ " " if not loop.last }}
-      {% endfor %}
-    </nav>
-  {% endif %}
 </article>
