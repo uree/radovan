@@ -54,5 +54,22 @@
   allSources?.addEventListener('change', () => sourceInputs.forEach((input) => { input.checked = allSources.checked; }));
   sourceInputs.forEach((input) => input.addEventListener('change', () => { allSources.checked = sourceInputs.every((source) => source.checked); }));
 
+  document.body.addEventListener('click', (event) => {
+    const filter = event.target.closest('[data-provider-filter]');
+    if (!filter) return;
+
+    const results = filter.closest('#results');
+    if (!results) return;
+
+    const selectedProvider = filter.dataset.providerFilter;
+    results.querySelectorAll('[data-provider-filter]').forEach((button) => {
+      button.setAttribute('aria-pressed', button === filter ? 'true' : 'false');
+    });
+
+    results.querySelectorAll('[data-provider]').forEach((provider) => {
+      provider.hidden = selectedProvider !== 'all' && provider.dataset.provider !== selectedProvider;
+    });
+  });
+
 </script>
 {% endblock %}

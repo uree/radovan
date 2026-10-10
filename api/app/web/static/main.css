@@ -272,6 +272,30 @@ input:focus {
   white-space: nowrap;
 }
 
+[data-provider-filters] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+[data-provider-filter] {
+  padding: .45rem .7rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  font: .7rem var(--mono);
+  cursor: pointer;
+}
+
+[data-provider-filter]:hover,
+[data-provider-filter]:focus,
+[data-provider-filter][aria-pressed="true"] {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
 .empty-results {
   display: grid;
   justify-items: start;
