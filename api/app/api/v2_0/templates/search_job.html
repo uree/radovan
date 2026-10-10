@@ -8,17 +8,26 @@
   {% if job.results %}
     <nav data-provider-filters aria-label="Filter results by provider">
       <button type="button" data-provider-filter="all" aria-pressed="true">All</button>
-      {% for provider_name in job.results %}
-        <button type="button" data-provider-filter="{{ provider_name }}" aria-pressed="false">{{ provider_name }}</button>
+      {% for provider_name, provider_results in job.results.items() %}
+        {% if provider_results["items"] %}
+          <button
+            type="button"
+            data-provider-filter="{{ provider_name }}"
+            aria-pressed="false"
+          >
+            {{ provider_name }} ({{ provider_results["items"]|length }})
+          </button>
+        {% endif %}
       {% endfor %}
     </nav>
 
     {% for provider_name, provider_results in job.results.items() %}
       <section data-provider="{{ provider_name }}">
         <header data-provider-header>
-          <h3>{{ provider_name }}</h3>
-          {% if provider_results["query"] %}
-            <a data-provider-query href="{{ provider_results['query'] }}" target="_blank" rel="noopener">View source results</a>
+          {% if provider_results["items"] %}
+            <h3>
+              <a data-provider-query href="{{ provider_results['query'] }}" target="_blank" rel="noopener">[{{ provider_name }}]</a>
+            </h3>
           {% endif %}
         </header>
         {% for result in provider_results["items"] %}
