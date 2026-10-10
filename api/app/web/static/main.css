@@ -343,6 +343,31 @@ input:focus {
 
 [data-provider-header] h3 { margin: 0; }
 
+[data-status-message] {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  color: var(--muted);
+}
+
+[data-status-indicator] {
+  display: inline-block;
+  width: .65rem;
+  height: .65rem;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: status-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: .35; transform: scale(.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-status-indicator] { animation: none; }
+}
+
 .empty-results {
   display: grid;
   justify-items: start;

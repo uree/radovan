@@ -55,8 +55,7 @@
   hx-target="this"
   hx-swap="outerHTML"
 >
-  <h2>Search running</h2>
-  <p>Job id: <code>{{ job.id }}</code></p>
+  <p data-status-message><span data-status-indicator aria-hidden="true"></span>Searching sources...</p>
   <p data-progress>Providers completed: {{ job.providers_completed|length }} / {{ job.providers_total }}</p>
 </section>
 {% endif %}
