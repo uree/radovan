@@ -1,9 +1,14 @@
 {% extends "base.html" %}
+{% block head %}
+{{ super() }}
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+{% endblock %}
 {% block content %}
 <div class="content-layout">
   <aside class="search-panel" aria-labelledby="search-heading">
     <p class="eyebrow">query</p>
-    <form class="search-form" action="{{ url_for('web.search_page') }}" method="get">
+    <form class="search-form" action="{{ url_for('web.search_page') }}" method="get"
+      hx-get="/api/v2.0/search" hx-target="#results" hx-swap="innerHTML">
       <label for="title">Title</label><input id="title" name="title" type="search" placeholder="e.g. Cyborg"
         autocomplete="off">
       <label for="author">Author</label><input id="author" name="author" type="text" placeholder="e.g. Donna Haraway"
@@ -31,7 +36,7 @@
     </form>
   </aside>
 
-  <section class="results-panel" aria-labelledby="results-heading">
+  <section id="results" class="results-panel" aria-labelledby="results-heading">
     <div class="results-header">
       <div>
         <p class="eyebrow">Results</p>
@@ -48,5 +53,6 @@
   const sourceInputs = [...document.querySelectorAll('.source-list input[name="sources"]')];
   allSources?.addEventListener('change', () => sourceInputs.forEach((input) => { input.checked = allSources.checked; }));
   sourceInputs.forEach((input) => input.addEventListener('change', () => { allSources.checked = sourceInputs.every((source) => source.checked); }));
+
 </script>
 {% endblock %}

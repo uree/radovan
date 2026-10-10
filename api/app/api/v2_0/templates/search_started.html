@@ -1,5 +1,11 @@
-<section data-search-status="started" data-job-id="{{ job_id }}">
+<section
+  data-search-status="started"
+  data-job-id="{{ job_id }}"
+  hx-get="/api/v2.0/search-job/{{ job_id }}"
+  hx-trigger="load, every 2s"
+  hx-target="this"
+  hx-swap="outerHTML"
+>
   <h2>Search started</h2>
-  <p>Job id: <code>{{ job_id }}</code></p>
   <p data-providers>{{ providers|join(', ') }}</p>
 </section>

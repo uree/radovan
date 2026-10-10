@@ -32,7 +32,14 @@
   <p>The search job failed.</p>
 </section>
 {% else %}
-<section data-search-status="{{ job.status }}" data-job-id="{{ job.id }}">
+<section
+  data-search-status="{{ job.status }}"
+  data-job-id="{{ job.id }}"
+  hx-get="/api/v2.0/search-job/{{ job.id }}"
+  hx-trigger="load, every 2s"
+  hx-target="this"
+  hx-swap="outerHTML"
+>
   <h2>Search running</h2>
   <p>Job id: <code>{{ job.id }}</code></p>
   <p data-progress>Providers completed: {{ job.providers_completed|length }} / {{ job.providers_total }}</p>
