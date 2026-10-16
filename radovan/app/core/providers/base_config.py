@@ -76,7 +76,7 @@ provider_dict = [
         "query_url": "https://works.hcommons.org/api/records",
         "selected": 1,
         "enabled": 1,
-        "suported_params": ["author", "title", "year"],
+        "supported_params": ["author", "title", "year"],
     },
     {
         "full_name": "SciELO",
