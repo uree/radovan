@@ -8,9 +8,15 @@ sync.sh
 *.pyc
 .pytest_cache
 .env*
+!.env.example
 DEVNOTES.md
 *.log
 api/app/logs/output/*
 main.log
 .agents/
 .codex/
+.env
+*.env
+deploy/*.env
+__pycache__/
+.pytest_cache/

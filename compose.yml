@@ -1,0 +1,26 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - radovan
+
+  radovan:
+    build:
+      context: ./radovan
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONIOENCODING: UTF-8
+      LOGGING_LEVEL: "${LOGGING_LEVEL:-INFO}"
+      YARR_USER: "${YARR_USER:-}"
+      YARR_PASS: "${YARR_PASS:-}"
+      OADOI_EMAIL: "${OADOI_EMAIL:-}"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - radovan
+
+networks:
+  radovan:

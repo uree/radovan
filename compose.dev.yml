@@ -1,0 +1,19 @@
+services:
+  redis:
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  radovan:
+    build:
+      context: ./radovan
+    environment:
+      LOGGING_LEVEL: DEBUG
+      FLASK_DEBUG: "1"
+    volumes:
+      - ./radovan:/app
+    ports:
+      - "9003:9003"
+    command: ["flask", "--app", "app:create_app", "run", "--host=0.0.0.0", "--port=9003", "--reload"]
