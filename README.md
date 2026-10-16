@@ -50,5 +50,3 @@ Staging and production use Gunicorn and include configurable CPU and memory limi
 - [ ] more useful and reliable url classification
 - [ ] uptime monitor for services
 - [ ] group results per rank, not provider
-
-* Roadmap includes big ticket items only.
