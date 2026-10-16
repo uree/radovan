@@ -1,13 +1,12 @@
 # Radovan from planet Meta
 a meta search engine for the commons
 
-Radovan is a meta search engine aggregating 12 open access sources of (mostly academic) texts:
+Radovan is a meta search engine aggregating a number of open access sources of (mostly academic) texts:
 
-- [Directory of Open Access Books](https://www.doabooks.org/)
-- [OAPEN](http://www.oapen.org/home)
+- [Directory of Open Access Books](https://www.doabooks.org/) (not working)
+- [OAPEN](http://www.oapen.org/home) (not working)
 - [Monoskop](https://monoskop.org/Monoskop)
 - [Library Genesis](http://gen.lib.rus.ec/)
-- [Library Genesis Scimag](http://gen.lib.rus.ec/scimag/index.php)
 - [AAAAARG](http://aaaaarg.fail)
 - [MLA Commons CORE](https://mla.hcommons.org/deposits)
 - [SciELO](http://www.scielo.org/)
@@ -15,34 +14,41 @@ Radovan is a meta search engine aggregating 12 open access sources of (mostly ac
 - [Directory of Open Access Journals](https://doaj.org/)
 - [Open Science Framework Preprints](https://osf.io/search/)
 - [Unpaywall](https://unpaywall.org/data)
+- [FID Media](https://search.fid-media.de)
 
 There is a of sources waiting to be added in PROVIDERS.md. Open an issue to suggest more.
 
-A live version is available [here](https://yurisearch.postdigitalcultures.org/radovan/). Along with [additional information](https://yurisearch.postdigitalcultures.org/radovan/about), including on how to use the API.
+A live version is not available atm. 
 
-The results inherit the order in which they are displayed on the original page and are grouped accordingly. This instance of Radovan currently harvests 10 hits per source. This can be changed in the settings section on top of radovan_core_flexi.py.
+The results inherit the order in which they are displayed on the original page and are grouped accordingly. 
 
 ## Deployment
 
-The easiest way to run your own instance is to use docker(-compose).
+The easiest way to run your own instance is with Docker Compose.
 
+For local development:
+
+```bash
+docker compose -f compose.yml -f compose.dev.yml up --build
 ```
-cd api
-docker-compose up -d
-cd iface
-docker-compose up -d
+
+The development server is available at <http://localhost:9003> and reloads when source files change.
+
+For staging or production, specify the env file. Check `.env.example` for reference.
+
+```bash
+docker compose --env-file production.env \
+  -f compose.yml -f compose.prod.yml up -d --build
 ```
 
-This will start the API at port 9003 and the interface at port 9090.
-
-To be able to search [aaaaarg](https://aaaaarg.fail/), create a file called keys.py in api/app/ and save your login info as yarr_user and yarr_pass.
-To be able to search [oadoi/unpaywall](https://api.unpaywall.org/v2/), you need to enter your email address in the same file under oadoi_email.
+Staging and production use Gunicorn and include configurable CPU and memory limits.
 
 
-## Development
+## Roadmap (excluding adding more providers)
 
-To use the profiler in `radovan_core_flexi.py`, place `@profile` in front of the function you want to analyse.
+- [ ] refactor bibjson_methods and offer metadata imports to zotero
+- [ ] more useful and reliable url classification
+- [ ] uptime monitor for services
+- [ ] group results per rank, not provider
 
-### Testing the API
-
-Spin up the docker containers and use the `Makefile` to run tests.
+* Roadmap includes big ticket items only.
